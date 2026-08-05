@@ -21,4 +21,8 @@ next-env.d.ts
 
 # generated previews (regenerate with `npm run fragments:check`)
 /public/preview/
+
+# local ambient listen/select pack (not for commit)
+/public/audio/candidates/
+
 node_modules/

@@ -417,6 +417,13 @@ export function pathPose(t: number): CameraPose {
 }
 
 /**
+ * How much the look target leads the camera's own easing, as an exponent on
+ * the segment's smoothstep. Exported because the track has to undo it — see
+ * `trackMixAt`.
+ */
+export const LOOK_LEAD = 0.7;
+
+/**
  * Where the camera looks at storyT. Room centres, eased to lead slightly
  * toward the next room so the gathering dust is already in frame.
  */
@@ -425,10 +432,64 @@ export function pathLook(t: number): CameraPose {
   const a = ROOMS[from]!.center;
   const b = ROOMS[to]!.center;
   const s0 = mix * mix * (3 - 2 * mix);
-  const s = Math.pow(s0, 0.7);
+  const s = Math.pow(s0, LOOK_LEAD);
   return {
     x: a[0] + (b[0] - a[0]) * s,
     y: a[1] + (b[1] - a[1]) * s,
     z: a[2] + (b[2] - a[2]) * s,
   };
+}
+
+/* ------------------------------------------------------------------ */
+/* The track — the walk made visible.                                  */
+/*                                                                     */
+/* The corridor is real but it was invisible: the camera moved through */
+/* eleven rooms and nothing on screen said the rooms were connected,   */
+/* or which way was forward. The track is a thread of dust running     */
+/* under the artifacts from the gate to the wordmark, with a bead      */
+/* where each chapter sits. It is drawn in components/lab-path.tsx;    */
+/* only the geometry lives here, with the layout it derives from.      */
+/* ------------------------------------------------------------------ */
+
+/**
+ * How far below a room's centre the track passes.
+ *
+ * Set by the camera, not by the room. Every beat is viewed from 10–12 units
+ * out at 8–16 degrees of elevation, so what decides where the line lands in
+ * frame is the drop against that fixed distance — and two units puts it
+ * around two thirds of the way down, under the artifact and well clear of
+ * the bottom edge. Scaling with the room radius (which grows sixfold) was
+ * the first instinct and it was wrong: it sank the line out of frame in
+ * exactly the late rooms where the walk is longest and needs it most.
+ *
+ * The faint growth term is only so the line clears the denser dust shells
+ * of the later rooms.
+ */
+export function trackDrop(radius: number): number {
+  return 2.0 + radius * 0.012;
+}
+
+/** World-space point where the track passes under room k. */
+export function trackNode(k: number): CameraPose {
+  const room = ROOMS[Math.min(Math.max(k, 0), BEAT_COUNT - 1)]!;
+  return {
+    x: room.center[0],
+    y: room.center[1] - trackDrop(room.radius),
+    z: room.center[2],
+  };
+}
+
+/**
+ * Undo the easing pathLook applies inside a segment.
+ *
+ * A point on the track needs to know the storyT at which the camera draws
+ * level with it, so the lit head of the path can sit exactly under the
+ * viewer. Position within a segment is `pow(smoothstep(mix), LOOK_LEAD)`;
+ * this inverts both halves — the power, then smoothstep's closed-form
+ * inverse — and returns the mix that produced `local`.
+ */
+export function trackMixAt(local: number): number {
+  const clamped = Math.min(Math.max(local, 0), 1);
+  const y = Math.min(Math.max(Math.pow(clamped, 1 / LOOK_LEAD), 0), 1);
+  return 0.5 - Math.sin(Math.asin(1 - 2 * y) / 3);
 }

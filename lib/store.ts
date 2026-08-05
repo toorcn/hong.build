@@ -22,7 +22,7 @@ interface LabState {
 }
 
 export const useLabStore = create<LabState>()((set) => ({
-  muted: true,
+  muted: false,
   webglChecked: false,
   webglAvailable: false,
   reducedMotion: false,

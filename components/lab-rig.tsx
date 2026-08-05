@@ -22,6 +22,13 @@ import { sound } from "@/lib/sound";
 interface LabRigProps {
   /** Continuous journey position 0..1, written per frame for the shader. */
   storyTRef: { current: number };
+  /**
+   * The journey position the camera is actually at this frame — undamped,
+   * and held at a chapter while a content route is open. storyTRef lags it
+   * on purpose (the cloud wants the lag); the track does not, because its
+   * lit head has to sit exactly under the viewer.
+   */
+  walkTRef: { current: number };
   /** Proximity resolve 0..1 (1 at a waypoint), written per frame. Drives
    *  the caption crossfade timing and the chromatic aberration. */
   resolveRef: { current: number };
@@ -71,6 +78,7 @@ const JOURNEY_PARALLAX = 0.075;
  */
 export function LabRig({
   storyTRef,
+  walkTRef,
   resolveRef,
   overrideRef,
   dimRef,
@@ -83,7 +91,6 @@ export function LabRig({
 
   const storyT = useStoryStore((s) => s.storyT);
   const setBeat = useStoryStore((s) => s.setBeat);
-  const setOriginT = useStoryStore((s) => s.setOriginT);
 
   /** Which beat a content route holds, or null on the journey. */
   const panelBeat = beatForRoute(pathname);
@@ -108,11 +115,14 @@ export function LabRig({
   });
   const lastBeat = useRef(-1);
 
-  // Opening a content route pauses the journey — remember where, so the
-  // path can put us back on the way out.
+  // Opening a content route pauses the journey — remember the chapter's
+  // beat position (not raw storyT), so returning lands on that silhouette
+  // even if the visitor opened the panel from a mid-dissolve scroll.
   useEffect(() => {
-    if (onPanel) setOriginT(useStoryStore.getState().storyT);
-  }, [onPanel, setOriginT]);
+    if (onPanel && panelBeat !== null) {
+      useStoryStore.getState().markReturnBeat(panelBeat);
+    }
+  }, [onPanel, panelBeat]);
 
   // Park the camera at the first room on mount.
   useEffect(() => {
@@ -215,6 +225,7 @@ export function LabRig({
       // Written straight through — LabCloud reads the signal itself for the
       // shader, so these only keep the refs coherent for the handover.
       storyTRef.current = 0;
+      walkTRef.current = 0;
       resolveRef.current = entranceSignal.resolve;
       dimRef.current = 0;
       motionScaleRef.current = reducedMotion ? 0 : 1;
@@ -226,6 +237,7 @@ export function LabRig({
     // On a content route the journey holds: the camera flies to that room's
     // approach pose and its artifact stays fully resolved behind the panel.
     const heldT = panelBeat !== null ? beatT(panelBeat) : storyT;
+    walkTRef.current = heldT;
     const pose = pathPose(heldT);
     const look = pathLook(heldT);
     const { from, to, mix } = storyPosition(heldT);

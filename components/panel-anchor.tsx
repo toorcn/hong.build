@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BEATS, beatForRoute } from "@/lib/story";
+import { useStoryStore } from "@/lib/story-store";
 
 /**
  * Panel chrome derived from the route, not retyped per page.
@@ -38,11 +39,13 @@ export function PanelEyebrow({ sub, beat: given }: { sub?: string; beat?: number
 export function PanelAnchor({ beat: given }: { beat?: number } = {}) {
   const fromRoute = beatForRoute(usePathname());
   const held = given ?? fromRoute;
+  const markReturnBeat = useStoryStore((s) => s.markReturnBeat);
   if (held === null || held === undefined) return null;
 
   return (
     <Link
       href="/"
+      onClick={() => markReturnBeat(held)}
       aria-label={`Return to the journey at chapter ${BEATS[held]!.code} — ${BEATS[held]!.label}`}
       className="focus-ring group fixed bottom-5 left-5 z-20 hidden sm:block"
     >

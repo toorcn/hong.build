@@ -29,6 +29,13 @@ const MAGNET_MS_MAX = 1800;
 const MAGNET_DIST_FOR_MAX = 0.08;
 
 /**
+ * PageTransition remounts the home tree ~160ms after the route swap (key
+ * flip). Keep the return bookmark alive past that so a second mount can
+ * re-apply it instead of reading scrollY=0 and parking on 2017.
+ */
+const ORIGIN_HOLD_MS = 450;
+
+/**
  * The scroll spine — a tall, invisible region whose scrollY drives storyT.
  * Rendered as a sibling of the canvas so the page actually scrolls while
  * the 3D canvas stays fixed. N = BEAT_COUNT viewport-heights of scroll.
@@ -54,6 +61,8 @@ export function StorySpine({ children }: { children: React.ReactNode }) {
 
     let raf = 0;
     let settleTimer = 0;
+    let retryRaf = 0;
+    let releaseTimer = 0;
     // Beat we're already smooth-scrolling toward — skip re-arming the same
     // magnet if a settle fires mid-animation, but allow a new target if the
     // visitor keeps going and stops nearer a different chapter.
@@ -67,7 +76,47 @@ export function StorySpine({ children }: { children: React.ReactNode }) {
       return total > 0 ? y / total : 0;
     };
 
+    /**
+     * Apply a pending return-from-panel origin. Parks storyT immediately so
+     * the camera stays on the chapter even when the spacer hasn't laid out
+     * yet. Only releases the bookmark after the scroll has real height AND
+     * the page-transition remount window has passed.
+     */
+    const tryRestore = () => {
+      const { originT } = useStoryStore.getState();
+      if (originT === null) return true;
+
+      // Always park the camera on the chapter — never let a zero-height
+      // frame write storyT back to ORIGIN over this.
+      setStoryT(originT);
+
+      const total = el.offsetHeight - window.innerHeight;
+      if (total <= 0) return false;
+
+      suppressSettle = true;
+      pendingSnap = null;
+      window.scrollTo(0, el.offsetTop + originT * total);
+
+      if (!releaseTimer) {
+        releaseTimer = window.setTimeout(() => {
+          releaseTimer = 0;
+          const still = useStoryStore.getState().originT;
+          // Only clear if nothing newer was stamped meanwhile.
+          if (still === originT) {
+            useStoryStore.getState().setOriginT(null);
+          }
+        }, ORIGIN_HOLD_MS);
+      }
+      return true;
+    };
+
     const update = () => {
+      const { originT } = useStoryStore.getState();
+      if (originT !== null) {
+        tryRestore();
+        raf = 0;
+        return;
+      }
       setStoryT(storyTFromScroll());
       raf = 0;
     };
@@ -78,6 +127,7 @@ export function StorySpine({ children }: { children: React.ReactNode }) {
         suppressSettle = false;
         return;
       }
+      if (useStoryStore.getState().originT !== null) return;
       // Entrance still owns the frame; a content plane owns scroll; reduced
       // motion keeps every beat resolved so there's nothing to clarify.
       if (useEntranceStore.getState().phase !== "done") return;
@@ -113,25 +163,34 @@ export function StorySpine({ children }: { children: React.ReactNode }) {
       settleTimer = window.setTimeout(tryMagnet, SETTLE_MS);
     };
 
-    // Returning from a content route: land back at the beat we left from,
-    // before the first update reads scrollY and reports ORIGIN.
-    const { originT, setOriginT } = useStoryStore.getState();
-    if (originT > 0) {
-      const total = el.offsetHeight - window.innerHeight;
-      suppressSettle = true;
-      pendingSnap = null;
-      window.scrollTo(0, el.offsetTop + originT * total);
-      setOriginT(0);
+    const onResize = () => {
+      tryRestore();
+      onScroll();
+    };
+
+    if (!tryRestore()) {
+      const retry = () => {
+        if (tryRestore()) {
+          retryRaf = 0;
+          return;
+        }
+        retryRaf = requestAnimationFrame(retry);
+      };
+      retryRaf = requestAnimationFrame(retry);
+    } else if (useStoryStore.getState().originT === null) {
+      update();
     }
 
-    update();
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
+    window.addEventListener("resize", onResize);
     return () => {
       window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
+      window.removeEventListener("resize", onResize);
       if (raf) cancelAnimationFrame(raf);
+      if (retryRaf) cancelAnimationFrame(retryRaf);
       if (settleTimer) window.clearTimeout(settleTimer);
+      // Don't clear releaseTimer's originT on unmount — the remount needs it.
+      if (releaseTimer) window.clearTimeout(releaseTimer);
     };
   }, [setStoryT, active]);
 

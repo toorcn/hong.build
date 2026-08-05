@@ -2,26 +2,52 @@
 
 import { useEffect } from "react";
 import { useLabStore } from "@/lib/store";
+import { useEntranceStore } from "@/lib/entrance";
 import { sound } from "@/lib/sound";
 
 const STORAGE_KEY = "lab.muted";
 
 /**
- * Always-visible sound control. Default muted; the choice persists.
- * Sound only ever starts after this gesture.
+ * Sound control. Defaults to on; the choice persists.
+ * Ambient only begins after the cold start releases it (or immediately on
+ * returning visits). Browsers still need a gesture before audio can play.
  */
 export function SoundToggle() {
   const muted = useLabStore((s) => s.muted);
   const setMuted = useLabStore((s) => s.setMuted);
+  const phase = useEntranceStore((s) => s.phase);
 
   useEffect(() => {
     const saved = window.localStorage.getItem(STORAGE_KEY);
-    if (saved !== null) {
-      setMuted(saved === "1");
-      sound.setMuted(saved === "1");
+    if (saved === null) {
+      setMuted(false);
+      sound.setMuted(false);
+      return;
     }
+    const next = saved === "1";
+    setMuted(next);
+    sound.setMuted(next);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // After the entrance (or when it was skipped), start the bed on the first
+  // gesture if sound is preferred on. ColdStart also calls beginAmbient on
+  // finish — this covers returning visits and autoplay-blocked finishes.
+  useEffect(() => {
+    if (muted || phase !== "done") return;
+
+    const start = () => {
+      sound.beginAmbient();
+    };
+
+    start();
+    window.addEventListener("pointerdown", start, { passive: true });
+    window.addEventListener("keydown", start);
+    return () => {
+      window.removeEventListener("pointerdown", start);
+      window.removeEventListener("keydown", start);
+    };
+  }, [muted, phase]);
 
   const toggle = () => {
     const next = !muted;
@@ -29,8 +55,10 @@ export function SoundToggle() {
     sound.setMuted(next);
     window.localStorage.setItem(STORAGE_KEY, next ? "1" : "0");
     if (!next) {
-      void sound.unlock();
-      sound.tick();
+      void sound.unlock().then(() => {
+        sound.beginAmbient();
+        sound.tick();
+      });
     }
   };
 

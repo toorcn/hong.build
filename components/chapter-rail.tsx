@@ -33,11 +33,18 @@ export function ChapterRail() {
           against the viewport so short screens don't push rows off-screen. */}
       <div className="relative h-[min(440px,58vh)] w-px">
         <div aria-hidden className="absolute inset-y-0 right-0 w-px bg-line" />
+        {/* Fuse burn — glowing trail + breathing ember at the leading edge.
+            storyT is the burn progress; the head sits at the tip. */}
         <div
           aria-hidden
-          className="absolute right-0 top-0 w-px bg-accent transition-[height] duration-150"
+          className="rail-fuse rail-fuse--y absolute right-0 top-0"
+          data-lit={storyT > 0.002 ? "1" : "0"}
           style={{ height: `${storyT * 100}%` }}
-        />
+        >
+          <span className="rail-fuse-trail" />
+          <span className="rail-fuse-heat" />
+          <span className="rail-fuse-head" />
+        </div>
 
         {BEATS.map((beat) => {
           const active = beat.id === activeBeat;

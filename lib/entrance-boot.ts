@@ -4,8 +4,11 @@
  * storage key, so both come from here and can't drift apart.
  */
 
-/** Set once the entrance has been claimed, so it plays at most once a session. */
+/** Set once the entrance has finished (or been skipped) this session. */
 export const ENTRANCE_SEEN_KEY = "lab.entrance.seen";
+
+/** `/?entrance=1` forces the cold start to play again. */
+export const ENTRANCE_FORCE_PARAM = "entrance";
 
 /**
  * Runs synchronously while the browser parses <head>, before first paint.
@@ -23,4 +26,4 @@ export const ENTRANCE_SEEN_KEY = "lab.entrance.seen";
  * Note: blocked by a Content-Security-Policy without 'unsafe-inline'. If a
  * CSP is added later this needs a nonce.
  */
-export const ENTRANCE_BOOT_SCRIPT = `(function(){try{if(location.pathname==="/"&&sessionStorage.getItem("${ENTRANCE_SEEN_KEY}")!=="1"){document.documentElement.dataset.entrance="boot"}}catch(e){}})()`;
+export const ENTRANCE_BOOT_SCRIPT = `(function(){try{var k="${ENTRANCE_SEEN_KEY}";var force=/(?:^|[?&])${ENTRANCE_FORCE_PARAM}=1(?:&|$)/.test(location.search);if(force){try{sessionStorage.removeItem(k)}catch(e){}}if(location.pathname==="/"&&(force||sessionStorage.getItem(k)!=="1")){document.documentElement.dataset.entrance="boot"}}catch(e){}})()`;

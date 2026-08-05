@@ -10,14 +10,21 @@ interface StoryState {
   /** The beat the camera is currently nearest to (for chrome). */
   activeBeat: number;
   /**
-   * Journey position at the moment a content route was opened, so returning
-   * puts you back where you left instead of at ORIGIN. Consumed (reset to 0)
-   * by the spine once restored.
+   * Journey position to restore when leaving a content route. `null` means
+   * nothing pending — must not use `0` as empty, or returning from beat 0
+   * would look identical to "no restore" and dump you at the origin by luck.
+   * Consumed (cleared to null) by the spine once applied.
    */
-  originT: number;
+  originT: number | null;
   setStoryT: (t: number) => void;
   setBeat: (beat: number) => void;
-  setOriginT: (t: number) => void;
+  setOriginT: (t: number | null) => void;
+  /**
+   * Remember a chapter as the return point, and park storyT there so the
+   * camera is already on that beat when "/" remounts — not at ORIGIN while
+   * the spine catches up.
+   */
+  markReturnBeat: (beat: number) => void;
   /**
    * Scroll to a beat's position on the spine.
    * `duration` overrides the default eased settle (ms) — magnets pass a
@@ -36,10 +43,14 @@ const GOTO_MS = 900;
 export const useStoryStore = create<StoryState>()((set) => ({
   storyT: 0,
   activeBeat: 0,
-  originT: 0,
+  originT: null,
   setStoryT: (storyT) => set({ storyT }),
   setBeat: (activeBeat) => set({ activeBeat }),
   setOriginT: (originT) => set({ originT }),
+  markReturnBeat: (beat) => {
+    const t = beatT(Math.min(Math.max(beat, 0), BEAT_COUNT - 1));
+    set({ originT: t, storyT: t, activeBeat: beat });
+  },
   goToBeat: (beat, opts) => {
     const clamped = Math.min(Math.max(beat, 0), BEAT_COUNT - 1);
     // Beats are unevenly spaced along storyT (see lib/story.ts) — ask for

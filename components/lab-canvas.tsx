@@ -8,6 +8,7 @@ import { useEntranceStore } from "@/lib/entrance";
 import { FRAGMENT_TOTAL, BEAT_TARGET_COUNT } from "@/lib/generated/fragments-meta";
 import { CAMERA_FOV } from "@/lib/vantages";
 import { LabCloud } from "@/components/lab-cloud";
+import { LabPath } from "@/components/lab-path";
 import { LabRig } from "@/components/lab-rig";
 import { LabEffects } from "@/components/lab-effects";
 import { PanelSurface } from "@/components/panel-surface";
@@ -35,6 +36,7 @@ export function LabCanvas() {
   const [data, setData] = useState<FragmentData | null>(null);
 
   const storyTRef = useRef(0);
+  const walkTRef = useRef(0);
   const resolveRef = useRef(1);
   const overrideRef = useRef<number[]>(new Array(BEAT_TARGET_COUNT).fill(-1));
   const dimRef = useRef(0);
@@ -110,8 +112,12 @@ export function LabCanvas() {
             maxCount={maxCount}
           />
         ) : null}
+        {/* The route through the rooms, under the artifacts. Drawn before the
+            rig so it exists on the first frame the journey owns the camera. */}
+        <LabPath walkTRef={walkTRef} dimRef={dimRef} motionScaleRef={motionScaleRef} />
         <LabRig
           storyTRef={storyTRef}
+          walkTRef={walkTRef}
           resolveRef={resolveRef}
           overrideRef={overrideRef}
           dimRef={dimRef}

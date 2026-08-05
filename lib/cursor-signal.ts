@@ -48,6 +48,12 @@ export const cursorSignal = {
    * A slow hover parts the dust gently; a flick throws a wake through it.
    */
   energy: 0,
+  /**
+   * 0..1 — sustained interest while the pointer rests on a tablet gate.
+   * Eased in stepCursor. Keeps the cloud awake under a still hover and lets
+   * the rig lean the camera a touch closer — the dormant tablet waking.
+   */
+  focus: 0,
 };
 
 /** NDC distance accumulated since the last frame, drained by stepCursor. */
@@ -57,6 +63,8 @@ let lastY = 0;
 let seen = false;
 /** Target presence, so leaving the window eases out instead of snapping. */
 let presenceTarget = 0;
+/** Target focus from tablet-gate hover handlers. */
+let focusTarget = 0;
 
 /** How much a unit of NDC travel per frame is worth in energy. */
 const IMPULSE_GAIN = 6;
@@ -64,6 +72,18 @@ const IMPULSE_GAIN = 6;
 const ENERGY_RETENTION = 0.02;
 /** Presence remaining after one second of easing. */
 const PRESENCE_RETENTION = 0.001;
+/** Focus remaining after one second of easing — snappier than presence. */
+const FOCUS_RETENTION = 0.0001;
+/** Floor on cursor energy while a gate is held, so still hover still stirs. */
+const FOCUS_ENERGY_FLOOR = 0.55;
+
+/**
+ * Tablet gates call this on enter/leave. Not React state — the cloud and rig
+ * read `cursorSignal.focus` from useFrame.
+ */
+export function setCursorFocus(on: boolean): void {
+  focusTarget = on ? 1 : 0;
+}
 
 function track(e: PointerEvent): void {
   // Touch is excluded on purpose — see `presence` above.
@@ -122,11 +142,23 @@ export function stepCursor(delta: number, enabled: boolean): void {
 
   const target = enabled ? presenceTarget : 0;
   cursorSignal.presence += (target - cursorSignal.presence) * (1 - Math.pow(PRESENCE_RETENTION, dt));
+
+  const focusWant = enabled ? focusTarget : 0;
+  cursorSignal.focus += (focusWant - cursorSignal.focus) * (1 - Math.pow(FOCUS_RETENTION, dt));
+  // A still hover on a gate has no impulse — floor energy so the wake stays lit.
+  if (cursorSignal.focus > 0.02) {
+    cursorSignal.energy = Math.max(
+      cursorSignal.energy,
+      cursorSignal.focus * FOCUS_ENERGY_FLOOR,
+    );
+  }
 }
 
 /** Drop all authority immediately — used when the entrance takes the camera. */
 export function clearCursor(): void {
   cursorSignal.presence = 0;
   cursorSignal.energy = 0;
+  cursorSignal.focus = 0;
+  focusTarget = 0;
   impulse = 0;
 }

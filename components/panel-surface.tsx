@@ -8,9 +8,19 @@ import { useRouter } from "next/navigation";
 import * as THREE from "three";
 import { ROOMS, approachPose } from "@/lib/story";
 import { usePanelStore } from "@/lib/panel-store";
-import { panelSignal } from "@/lib/panel-signal";
+import { useStoryStore } from "@/lib/story-store";
+import { panelSignal, setPanelExit, clearPanelSignal } from "@/lib/panel-signal";
 import { PanelEyebrow } from "@/components/panel-anchor";
 import { sound } from "@/lib/sound";
+
+/**
+ * How far past the last line you must scroll (in px) to dismiss the panel.
+ * Full viewport — the surface rides 1:1 with the wheel until it's off-screen.
+ */
+function exitDistancePx(windowEl: HTMLElement | null): number {
+  const h = windowEl?.offsetHeight ?? 0;
+  return Math.max(h, Math.round(window.innerHeight * 0.92));
+}
 
 /**
  * The reading surface as an object in the world.
@@ -43,7 +53,7 @@ import { sound } from "@/lib/sound";
  * the content's own max-widths keep the text column narrow inside it.
  */
 const PANEL_MIN_PX = 940;
-const PANEL_MAX_PX = 1500;
+const PANEL_MAX_PX = 2000;
 /**
  * Base px→world mapping. The final size is NOT this — see FILL below.
  * drei maps CSS pixels to world units at `px * distanceFactor / 400`.
@@ -64,9 +74,12 @@ const PX_TO_WORLD = DISTANCE_FACTOR / 400;
  * a keystoned quad's screen bounds are larger than its nominal height, which
  * is why an analytic fit still overflowed the bottom by up to 190px at
  * 1920x1080. Measuring the corners makes the guarantee exact, so this can sit
- * close to full-frame — 0.9 keeps a 5% margin on every side.
+ * close to full-frame. 0.93 leaves ~3.5% on each side: at 0.955 the 2% margin
+ * could not absorb the idle drift, the pointer parallax and the overscroll
+ * lift together, and /contact clipped at 2560x1440. This is the largest value
+ * measured clean across 20 viewport/route combinations.
  */
-const FILL = 0.9;
+const FILL = 0.93;
 
 /** Local-space corner signs of the plane, for the fit solve. */
 const CORNERS = [
@@ -82,13 +95,14 @@ const STANDOFF = 0.52;
  * view axis toward the top of the frame and was clipping the title bar. Drop
  * the plane by this much (world units) to re-centre it.
  */
-const RECENTRE_Y = -0.42;
+const RECENTRE_Y = -0.26;
 
 export function PanelSurface() {
   const panel = usePanelStore((s) => s.panel);
   const closing = usePanelStore((s) => s.closing);
   const clear = usePanelStore((s) => s.clear);
   const group = useRef<THREE.Group>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const ContextBridge = useContextBridge();
   const router = useRouter();
   const { gl, camera, size } = useThree();
@@ -135,24 +149,59 @@ export function PanelSurface() {
   }, [panel]);
 
   /**
-   * Ways back out that aren't a button: Escape, or a click on the world
-   * outside the plane. A click is only an exit if it wasn't a drag — the rig
-   * uses the same gesture to orbit, and stealing it would make the scene feel
-   * like it was fighting you.
+   * Ways back out that aren't a button: Escape, a click on the world outside
+   * the plane, or scrolling the surface fully off-screen past its last line.
+   * Escape / click play the same fly-up so every exit shares one motion.
    */
   useEffect(() => {
     if (!panel) return;
+    let left = false;
+    let raf = 0;
+
     const leave = () => {
+      if (left || usePanelStore.getState().closing) return;
+      left = true;
+      useStoryStore.getState().markReturnBeat(panel.beat);
       sound.enter();
       router.push("/");
     };
 
+    const flyOutThenLeave = () => {
+      if (left || usePanelStore.getState().closing) return;
+      const windowEl = scrollRef.current?.closest(
+        ".scene-window",
+      ) as HTMLElement | null;
+      const dist = exitDistancePx(windowEl);
+      const fromY = panelSignal.exit * dist;
+      const t0 = performance.now();
+      const dur = 520;
+
+      const tick = (now: number) => {
+        const p = Math.min(1, (now - t0) / dur);
+        const eased = 1 - Math.pow(1 - p, 3);
+        const y = fromY + (dist - fromY) * eased;
+        const t = y / dist;
+        setPanelExit(t);
+        if (windowEl) {
+          windowEl.style.transition = "none";
+          windowEl.style.transform = `translate3d(0, ${-y}px, 0)`;
+          windowEl.style.opacity = String(Math.max(0, 1 - t));
+        }
+        if (p < 1) {
+          raf = requestAnimationFrame(tick);
+        } else {
+          raf = 0;
+          leave();
+        }
+      };
+      raf = requestAnimationFrame(tick);
+    };
+
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
-      // Don't hijack Escape while the reader is inside a field or a menu.
       const t = e.target as HTMLElement | null;
       if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
-      leave();
+      flyOutThenLeave();
     };
 
     const el = gl.domElement;
@@ -166,8 +215,7 @@ export function PanelSurface() {
     };
     const up = (e: PointerEvent) => {
       const moved = Math.hypot(e.clientX - downX, e.clientY - downY);
-      // A deliberate tap on empty space, not the tail of an orbit drag.
-      if (moved < 6 && e.timeStamp - downAt < 600) leave();
+      if (moved < 6 && e.timeStamp - downAt < 600) flyOutThenLeave();
     };
 
     window.addEventListener("keydown", onKey);
@@ -177,8 +225,174 @@ export function PanelSurface() {
       window.removeEventListener("keydown", onKey);
       el.removeEventListener("pointerdown", down);
       el.removeEventListener("pointerup", up);
+      if (raf) cancelAnimationFrame(raf);
     };
   }, [panel, router, gl]);
+
+  /**
+   * Scroll past the bottom → ride the floating window up 1:1 with the wheel.
+   * Past ~halfway, a quiet moment commits the rest of the exit; below that
+   * it stays where it is. Wheel is listened on the window so the panel can
+   * be scrolled away even when the pointer isn't over it.
+   */
+  useEffect(() => {
+    if (!panel || !opened) return;
+    const scroller = scrollRef.current;
+    if (!scroller) return;
+    const windowEl = scroller.closest(".scene-window") as HTMLElement | null;
+
+    /** Commit the exit once the window is this far gone. */
+    const COMMIT = 0.48;
+    const SETTLE_MS = 120;
+
+    let overflow = 0;
+    let left = false;
+    let settling = false;
+    let settleTimer = 0;
+    let animRaf = 0;
+
+    const leave = () => {
+      if (left || usePanelStore.getState().closing) return;
+      left = true;
+      useStoryStore.getState().markReturnBeat(panel.beat);
+      sound.enter();
+      router.push("/");
+    };
+
+    const atBottom = () =>
+      scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 2;
+
+    const paint = (px: number) => {
+      const dist = exitDistancePx(windowEl);
+      overflow = Math.min(dist, Math.max(0, px));
+      const t = dist > 0 ? overflow / dist : 0;
+      setPanelExit(t);
+      if (windowEl) {
+        windowEl.style.transition = "none";
+        windowEl.style.transform = `translate3d(0, ${-overflow}px, 0)`;
+        windowEl.style.opacity = String(Math.max(0, 1 - t * 0.95));
+      }
+      return t;
+    };
+
+    const clearExit = () => {
+      overflow = 0;
+      clearPanelSignal();
+      if (windowEl) {
+        windowEl.style.transition = "";
+        windowEl.style.transform = "";
+        windowEl.style.opacity = "";
+      }
+    };
+
+    const cancelAnim = () => {
+      if (animRaf) cancelAnimationFrame(animRaf);
+      animRaf = 0;
+      settling = false;
+    };
+
+    const animateTo = (targetPx: number, then?: () => void) => {
+      cancelAnim();
+      settling = true;
+      const from = overflow;
+      const t0 = performance.now();
+      const dur = 420;
+      const tick = (now: number) => {
+        const p = Math.min(1, (now - t0) / dur);
+        const eased = 1 - Math.pow(1 - p, 3);
+        paint(from + (targetPx - from) * eased);
+        if (p < 1) {
+          animRaf = requestAnimationFrame(tick);
+        } else {
+          animRaf = 0;
+          settling = false;
+          if (targetPx <= 0) clearExit();
+          then?.();
+        }
+      };
+      animRaf = requestAnimationFrame(tick);
+    };
+
+    const onSettle = () => {
+      settleTimer = 0;
+      if (left || settling) return;
+      const dist = exitDistancePx(windowEl);
+      if (dist <= 0 || overflow <= 0) return;
+      const t = overflow / dist;
+      // Past halfway: finish the fly-out. Below that, leave it where the
+      // visitor parked it — no snap-back.
+      if (t >= COMMIT) animateTo(dist, leave);
+    };
+
+    const bumpSettle = () => {
+      if (settleTimer) window.clearTimeout(settleTimer);
+      settleTimer = window.setTimeout(onSettle, SETTLE_MS);
+    };
+
+    const driveExit = (delta: number) => {
+      cancelAnim();
+      const t = paint(overflow + delta);
+      if (t <= 0) {
+        clearExit();
+        if (settleTimer) window.clearTimeout(settleTimer);
+        settleTimer = 0;
+        return;
+      }
+      if (t >= 1) {
+        leave();
+        return;
+      }
+      bumpSettle();
+    };
+
+    const onWheel = (e: WheelEvent) => {
+      // Already dismissing — wheel anywhere owns the motion.
+      if (overflow > 0) {
+        e.preventDefault();
+        driveExit(e.deltaY);
+        return;
+      }
+      // At the end of the reading surface: further downward scroll (anywhere
+      // on the page) starts lifting the window off-screen.
+      if (e.deltaY > 0 && atBottom()) {
+        e.preventDefault();
+        driveExit(e.deltaY);
+      }
+      // Otherwise leave the event alone so in-panel reading still scrolls.
+    };
+
+    let touchY = 0;
+    const onTouchStart = (e: TouchEvent) => {
+      touchY = e.touches[0]?.clientY ?? 0;
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      const y = e.touches[0]?.clientY ?? touchY;
+      const dy = touchY - y;
+      touchY = y;
+      if (overflow > 0 || (dy > 0 && atBottom())) {
+        driveExit(dy);
+      }
+    };
+    const onTouchEnd = () => {
+      if (overflow > 0) bumpSettle();
+    };
+
+    // Window-level wheel so the pointer doesn't have to sit on the panel.
+    window.addEventListener("wheel", onWheel, { passive: false });
+    // Touch still starts on the panel / page; window covers the drag after.
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("touchmove", onTouchMove, { passive: true });
+    window.addEventListener("touchend", onTouchEnd, { passive: true });
+    return () => {
+      window.removeEventListener("wheel", onWheel);
+      window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("touchend", onTouchEnd);
+      if (settleTimer) window.clearTimeout(settleTimer);
+      cancelAnim();
+      if (!left) clearExit();
+    };
+  }, [panel, opened, router]);
 
   // World placement for this chapter's room. Recomputed only when the beat
   // changes — this is static geometry, the camera is what moves.
@@ -287,7 +501,7 @@ export function PanelSurface() {
         <ContextBridge>
           <div
             className={`scene-window ${panel.wide ? "scene-window-wide" : ""}`}
-            style={{ width: panelW, maxHeight: maxH }}
+            style={{ width: panelW, height: maxH }}
             data-open={opened ? "1" : "0"}
           >
             {/* In-world framing: the window announces itself as a surface. */}
@@ -296,7 +510,7 @@ export function PanelSurface() {
               <span className="scene-window-hint">esc</span>
             </div>
 
-            <div className="scene-window-scroll">
+            <div className="scene-window-scroll" ref={scrollRef}>
               <h1 className="panel-title font-display text-4xl font-black leading-[0.95] tracking-tight text-type">
                 {panel.title}
               </h1>

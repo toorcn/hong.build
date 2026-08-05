@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SITE } from "@/content/site";
-import { BEATS, BEAT_T } from "@/lib/story";
+import { BEATS, BEAT_T, beatForRoute } from "@/lib/story";
 import { useStoryStore } from "@/lib/story-store";
 import { SoundToggle } from "@/components/sound-toggle";
 
@@ -19,13 +19,20 @@ export function Chrome() {
   const activeBeat = useStoryStore((s) => s.activeBeat);
   const storyT = useStoryStore((s) => s.storyT);
   const goToBeat = useStoryStore((s) => s.goToBeat);
+  const markReturnBeat = useStoryStore((s) => s.markReturnBeat);
   const active = BEATS[activeBeat];
+  const heldBeat = beatForRoute(pathname);
+
+  const returnToJourney = () => {
+    if (heldBeat !== null) markReturnBeat(heldBeat);
+  };
 
   return (
     <header className="lab-chrome pointer-events-none fixed inset-x-0 top-0 z-20">
       <div className="flex items-start justify-between px-5 py-4 sm:px-8 sm:py-6">
         <Link
           href="/"
+          onClick={returnToJourney}
           className="focus-ring entrance-hide pointer-events-auto group"
           aria-label={`${SITE.name} — home`}
         >
@@ -37,21 +44,21 @@ export function Chrome() {
           </span>
         </Link>
 
-        {/* The sound toggle is deliberately outside `entrance-hide`: sound must
-            be controllable before anything is ever played, including during
-            the entrance — click it there and the mark's lock chord sounds. */}
-        <div className="pointer-events-auto flex items-center gap-4">
+        {/* Whole chrome cluster stays behind entrance-hide so the cold start
+            owns the frame — sound arrives with the rest of the app. */}
+        <div className="entrance-hide pointer-events-auto flex items-center gap-4">
           {onHome ? (
             <Link
               href="/contact"
-              className="focus-ring entrance-hide hidden border border-line px-3.5 py-2 font-mono text-[11px] uppercase tracking-[0.18em] text-type-dim transition-colors hover:border-accent hover:text-type sm:block"
+              className="focus-ring hidden border border-line px-3.5 py-2 font-mono text-[11px] uppercase tracking-[0.18em] text-type-dim transition-colors hover:border-accent hover:text-type sm:block"
             >
               Contact
             </Link>
           ) : (
             <Link
               href="/"
-              className="focus-ring entrance-hide hidden border border-line px-3.5 py-2 font-mono text-[11px] uppercase tracking-[0.18em] text-type-dim transition-colors hover:border-accent hover:text-type sm:block"
+              onClick={returnToJourney}
+              className="focus-ring hidden border border-line px-3.5 py-2 font-mono text-[11px] uppercase tracking-[0.18em] text-type-dim transition-colors hover:border-accent hover:text-type sm:block"
             >
               ← Journey
             </Link>
@@ -80,9 +87,14 @@ export function Chrome() {
             <div aria-hidden className="absolute inset-x-0 top-1/2 h-px bg-line" />
             <div
               aria-hidden
-              className="absolute left-0 top-1/2 h-px bg-accent transition-[width] duration-150"
+              className="rail-fuse rail-fuse--x absolute left-0 top-1/2"
+              data-lit={storyT > 0.002 ? "1" : "0"}
               style={{ width: `${storyT * 100}%` }}
-            />
+            >
+              <span className="rail-fuse-trail" />
+              <span className="rail-fuse-heat" />
+              <span className="rail-fuse-head" />
+            </div>
             {BEATS.map((beat) => {
               const on = beat.id === activeBeat;
               return (

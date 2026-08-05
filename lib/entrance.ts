@@ -46,7 +46,8 @@ export const ENTRANCE_TIMING = {
   arrival: 680,
   wrong: 460,
   snap: 920,
-  hold: 240,
+  /** Resolved mark alone — chrome stays hidden through this beat. */
+  hold: 1100,
   /** No-WebGL path: the SVG wordmark wipes in over this instead of snapping. */
   wipe: 760,
 } as const;

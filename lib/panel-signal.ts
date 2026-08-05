@@ -23,6 +23,11 @@ export const panelSignal = {
   /** Pointer position over the panel, normalised -1..1 from centre. */
   px: 0,
   py: 0,
+  /**
+   * Scroll-out exit, 0..1. Driven by overscroll past the panel bottom (or an
+   * authored fly-out on Escape). Only the floating window moves — chrome stays.
+   */
+  exit: 0,
 };
 
 /** Reset between routes so a stale hover can't hold the cloud bright. */
@@ -30,4 +35,10 @@ export function clearPanelSignal(): void {
   panelSignal.energy = 0;
   panelSignal.px = 0;
   panelSignal.py = 0;
+  panelSignal.exit = 0;
+}
+
+/** Push exit progress onto the signal (0..1). */
+export function setPanelExit(progress: number): void {
+  panelSignal.exit = Math.min(1, Math.max(0, progress));
 }

@@ -460,6 +460,21 @@ html[data-entrance]:not([data-entrance="done"]) .entrance-hide {
   transition-delay: 0ms;
 }
 
+/* Full-bleed cold start: no scroll chrome, the sequence owns the viewport. */
+html[data-entrance]:not([data-entrance="done"]) {
+  overflow: hidden;
+}
+
+html[data-entrance]:not([data-entrance="done"]) body {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+/* When the mark locks, give the chrome a beat longer before it lands. */
+html[data-entrance="done"] .entrance-hide {
+  --reveal-delay: 180ms;
+}
+
 /* Returning visitors get a short crossfade instead of the full entrance. */
 html[data-entrance-quick="1"] .lab-canvas-root {
   animation: entrance-quick 400ms var(--ease-signal) both;
@@ -625,5 +640,175 @@ html[data-entrance="snap"] [data-lab-fallback] svg {
 @media (prefers-reduced-motion: reduce) {
   .run-frequency-bar {
     transition: none;
+  }
+}
+
+
+/* ---------- Chapter-rail fuse ---------- */
+
+/*
+ * Progress as a quiet fuse: a hairline that warms toward the tip, a soft
+ * bloom at the leading edge, and a slow breath. Shared by the desktop
+ * vertical rail and the mobile strip via --y / --x.
+ */
+.rail-fuse {
+  pointer-events: none;
+  overflow: visible;
+  z-index: 1;
+}
+
+.rail-fuse--y {
+  width: 1px;
+  transition: height 280ms var(--ease-signal);
+}
+
+.rail-fuse--x {
+  height: 1px;
+  transform: translateY(-50%);
+  transition: width 280ms var(--ease-signal);
+}
+
+.rail-fuse-trail {
+  position: absolute;
+  inset: 0;
+  background: var(--color-accent);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--color-accent) 28%, transparent);
+}
+
+.rail-fuse--y .rail-fuse-trail {
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--color-accent) 45%, transparent),
+    var(--color-accent)
+  );
+}
+
+.rail-fuse--x .rail-fuse-trail {
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--color-accent) 45%, transparent),
+    var(--color-accent)
+  );
+}
+
+/* Soft veil near the tip — barely moves, more atmosphere than spark. */
+.rail-fuse-heat {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  background: color-mix(in srgb, var(--color-accent) 40%, transparent);
+  filter: blur(2px);
+}
+
+.rail-fuse--y .rail-fuse-heat {
+  left: 50%;
+  bottom: 0;
+  width: 5px;
+  height: 28px;
+  transform: translate(-50%, 40%);
+}
+
+.rail-fuse--x .rail-fuse-heat {
+  top: 50%;
+  right: 0;
+  height: 5px;
+  width: 28px;
+  transform: translate(40%, -50%);
+}
+
+.rail-fuse[data-lit="1"] .rail-fuse-heat {
+  animation: fuse-heat 4.8s ease-in-out infinite;
+}
+
+@keyframes fuse-heat {
+  0%,
+  100% {
+    opacity: 0.12;
+  }
+  50% {
+    opacity: 0.28;
+  }
+}
+
+/* Quiet ember at the tip. */
+.rail-fuse-head {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  opacity: 0;
+  box-shadow:
+    0 0 5px 1px color-mix(in srgb, var(--color-accent) 55%, transparent),
+    0 0 12px 2px color-mix(in srgb, var(--color-accent) 18%, transparent);
+}
+
+.rail-fuse--y .rail-fuse-head {
+  left: 50%;
+  bottom: 0;
+  transform: translate(-50%, 50%);
+}
+
+.rail-fuse--x .rail-fuse-head {
+  top: 50%;
+  right: 0;
+  transform: translate(50%, -50%);
+}
+
+.rail-fuse[data-lit="1"] .rail-fuse-head {
+  opacity: 1;
+  animation: fuse-ember-y 3.6s ease-in-out infinite;
+}
+
+.rail-fuse--x[data-lit="1"] .rail-fuse-head {
+  animation-name: fuse-ember-x;
+}
+
+@keyframes fuse-ember-y {
+  0%,
+  100% {
+    transform: translate(-50%, 50%) scale(0.94);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translate(-50%, 50%) scale(1.06);
+    opacity: 1;
+  }
+}
+
+@keyframes fuse-ember-x {
+  0%,
+  100% {
+    transform: translate(50%, -50%) scale(0.94);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translate(50%, -50%) scale(1.06);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rail-fuse--y,
+  .rail-fuse--x {
+    transition: none;
+  }
+
+  .rail-fuse-heat {
+    animation: none !important;
+    opacity: 0.18;
+  }
+
+  .rail-fuse[data-lit="1"] .rail-fuse-head {
+    animation: none !important;
+    opacity: 0.9;
+  }
+
+  .rail-fuse--y .rail-fuse-head {
+    transform: translate(-50%, 50%);
+  }
+
+  .rail-fuse--x .rail-fuse-head {
+    transform: translate(50%, -50%);
   }
 }

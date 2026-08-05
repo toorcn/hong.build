@@ -4,7 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { SITE } from "@/content/site";
 import { BEAT_TARGET_COUNT, FRAGMENT_TOTAL } from "@/lib/generated/fragments-meta";
-import { ENTRANCE_SEEN_KEY as SEEN_KEY } from "@/lib/entrance-boot";
+import {
+  ENTRANCE_FORCE_PARAM,
+  ENTRANCE_SEEN_KEY as SEEN_KEY,
+} from "@/lib/entrance-boot";
 import { useLabStore } from "@/lib/store";
 import { sound } from "@/lib/sound";
 import {
@@ -33,8 +36,9 @@ const FLASH_AT = 0.92;
  * the skip affordance and the accent flash; everything else on screen is
  * hidden by the `.entrance-hide` CSS until the phase reaches "done".
  *
- * Every phase is skippable by any input. The entrance only runs on a first
- * landing at "/" — deep links and in-session returns skip it entirely.
+ * Immersive by default: chrome stays hidden until hold ends. Skip is Escape
+ * or the explicit skip control — not every click. Ambient music starts only
+ * once the reveal finishes. Force with `/?entrance=1`.
  */
 export function ColdStart() {
   const pathname = usePathname();
@@ -52,6 +56,7 @@ export function ColdStart() {
 
   const [flash, setFlash] = useState(false);
   const [skipVisible, setSkipVisible] = useState(false);
+  const skipRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     const store = useEntranceStore.getState();
@@ -60,7 +65,17 @@ export function ColdStart() {
     // Returning visitor, or a deep link: no entrance. Resolve the scene and
     // let the journey take over immediately. Nothing needs hiding, so
     // data-entrance is never set — only the short canvas crossfade.
-    const seen = window.sessionStorage.getItem(SEEN_KEY) === "1";
+    // `/?entrance=1` forces a replay (handy while iterating).
+    const params = new URLSearchParams(window.location.search);
+    const force = params.get(ENTRANCE_FORCE_PARAM) === "1";
+    if (force) {
+      window.sessionStorage.removeItem(SEEN_KEY);
+      params.delete(ENTRANCE_FORCE_PARAM);
+      const next = `${window.location.pathname}${params.toString() ? `?${params}` : ""}${window.location.hash}`;
+      window.history.replaceState({}, "", next);
+    }
+
+    const seen = !force && window.sessionStorage.getItem(SEEN_KEY) === "1";
     if (!eligible.current || seen) {
       resolveSignal();
       store.setPhase("done");
@@ -72,10 +87,6 @@ export function ColdStart() {
         delete root.dataset.entranceQuick;
       };
     }
-
-    // Claimed up front rather than on completion, so the entrance plays at
-    // most once per session even if the visitor reloads part-way through it.
-    window.sessionStorage.setItem(SEEN_KEY, "1");
 
     // The entrance owns the frame, so hold scroll at the top for its
     // duration. Any scroll attempt is a skip gesture, so this never traps.
@@ -101,6 +112,8 @@ export function ColdStart() {
     const finish = () => {
       if (finished) return;
       finished = true;
+      // Mark seen on completion/skip — a hard reload mid-sequence can replay.
+      window.sessionStorage.setItem(SEEN_KEY, "1");
       resolveSignal();
       current = "done";
       root.dataset.entrance = "done";
@@ -108,6 +121,8 @@ export function ColdStart() {
       document.body.style.overflow = priorOverflow;
       if (raf) cancelAnimationFrame(raf);
       raf = 0;
+      // Bed starts with the chrome reveal — not during the cold start.
+      sound.beginAmbient();
       // Once the staggered reveal has played, drop the attribute so the
       // entrance CSS stops matching and the overlays own their own motion.
       detach = window.setTimeout(() => {
@@ -218,35 +233,39 @@ export function ColdStart() {
 
     raf = requestAnimationFrame(tick);
 
-    // Any input skips straight to the resolved state — never a speed-up, and
-    // never a wait. Clicks on real controls (the sound toggle) are exempt so
-    // turning sound on during the entrance doesn't end it.
+    // Prime the audio context on first gesture so beginAmbient() can fade in
+    // immediately when the reveal ends — without audibly starting the bed yet.
+    const prime = () => {
+      void sound.unlock();
+    };
+    window.addEventListener("pointerdown", prime, { passive: true, once: true });
+    window.addEventListener("keydown", prime, { once: true });
+
+    const skip = () => {
+      prime();
+      finish();
+    };
+    skipRef.current = skip;
+
+    // Immersive: only Escape (or the skip control) ends early.
     const onKey = (e: KeyboardEvent) => {
-      if (e.metaKey || e.ctrlKey || e.altKey) return;
-      finish();
+      if (e.key !== "Escape") return;
+      e.preventDefault();
+      skip();
     };
-    const onPointer = (e: PointerEvent) => {
-      const el = e.target as HTMLElement | null;
-      if (el?.closest("button, a, [data-no-skip]")) return;
-      finish();
-    };
-    const onWheel = () => finish();
     window.addEventListener("keydown", onKey);
-    window.addEventListener("pointerdown", onPointer);
-    window.addEventListener("wheel", onWheel, { passive: true });
-    window.addEventListener("touchmove", onWheel, { passive: true });
 
     // Offer the skip in words once it's clear something is happening.
-    const skipTimer = window.setTimeout(() => setSkipVisible(true), 600);
+    const skipTimer = window.setTimeout(() => setSkipVisible(true), 900);
 
     return () => {
+      skipRef.current = null;
       if (raf) cancelAnimationFrame(raf);
       window.clearTimeout(skipTimer);
       window.clearTimeout(detach);
       window.removeEventListener("keydown", onKey);
-      window.removeEventListener("pointerdown", onPointer);
-      window.removeEventListener("wheel", onWheel);
-      window.removeEventListener("touchmove", onWheel);
+      window.removeEventListener("pointerdown", prime);
+      window.removeEventListener("keydown", prime);
       document.body.style.overflow = priorOverflow;
       delete root.dataset.entrance;
       // A remount must not leave the scene stuck mid-entrance.
@@ -309,20 +328,21 @@ export function ColdStart() {
         )}
       </div>
 
-      {/* Honest skip affordance, in the same voice. */}
-      <div
-        aria-hidden="true"
-        className="absolute bottom-7 right-6 font-mono text-[10px] uppercase tracking-[0.2em] text-type-faint transition-opacity duration-500 sm:bottom-9 sm:right-8"
+      {/* Explicit skip — not every click, so the sequence can stay immersive. */}
+      <button
+        type="button"
+        onClick={() => skipRef.current?.()}
+        className="pointer-events-auto absolute bottom-7 right-6 font-mono text-[10px] uppercase tracking-[0.2em] text-type-faint transition-opacity duration-500 hover:text-type-dim sm:bottom-9 sm:right-8"
         style={{ opacity: skipVisible && !logGone ? 1 : 0 }}
       >
-        [any key] skip
-      </div>
+        [esc] skip
+      </button>
 
       {/* What the log says, for screen readers, without the per-chunk noise. */}
       <p role="status" className="sr-only">
         {loadDone
-          ? "Scene loaded. Press any key to skip the introduction."
-          : "Loading the scene. Press any key to skip the introduction."}
+          ? "Scene loaded. Press Escape to skip the introduction."
+          : "Loading the scene. Press Escape to skip the introduction."}
       </p>
     </div>
   );
