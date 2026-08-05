@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { LiveRow } from "@/components/panel-motion";
 import { ContentPanel } from "@/components/content-panel";
 import { getAllProjects } from "@/lib/mdx";
 
@@ -19,11 +19,12 @@ export default function WorkPage() {
       </p>
 
       <ul className="panel-rows mt-12">
-        {projects.map((p) => (
+        {projects.map((p, i) => (
           <li key={p.frontmatter.slug}>
-            <Link
+            <LiveRow
               href={`/work/${p.frontmatter.slug}`}
-              className="focus-ring panel-row group flex items-baseline justify-between gap-6 px-5 py-6 sm:px-7"
+              delay={i * 80}
+              className="focus-ring group flex items-baseline justify-between gap-6 px-5 py-6 sm:px-7"
             >
               <div className="min-w-0">
                 <div className="flex items-baseline gap-4">
@@ -47,7 +48,7 @@ export default function WorkPage() {
               >
                 →
               </span>
-            </Link>
+            </LiveRow>
           </li>
         ))}
       </ul>

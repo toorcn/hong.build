@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ContentPanel } from "@/components/content-panel";
+import { LiveRow } from "@/components/panel-motion";
 
 export const metadata: Metadata = {
   title: "Process",
@@ -35,7 +36,7 @@ export default function ProcessPage() {
 
       <dl className="panel-rows mt-14">
         {PRINCIPLES.map((p, i) => (
-          <div key={p.k} className="panel-row px-5 py-6 sm:px-7">
+          <LiveRow key={p.k} delay={i * 90} className="px-5 py-6 sm:px-7">
             <dt className="flex items-baseline gap-4">
               <span className="font-mono text-[10px] tracking-[0.18em] text-type-faint">
                 {String(i).padStart(2, "0")}
@@ -45,7 +46,7 @@ export default function ProcessPage() {
               </span>
             </dt>
             <dd className="mt-3 max-w-xl text-base leading-relaxed text-type-dim">{p.v}</dd>
-          </div>
+          </LiveRow>
         ))}
       </dl>
 

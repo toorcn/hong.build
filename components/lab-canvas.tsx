@@ -10,6 +10,8 @@ import { CAMERA_FOV } from "@/lib/vantages";
 import { LabCloud } from "@/components/lab-cloud";
 import { LabRig } from "@/components/lab-rig";
 import { LabEffects } from "@/components/lab-effects";
+import { PanelSurface } from "@/components/panel-surface";
+import { TabletGate } from "@/components/tablet-gate";
 
 function useIsMobile(): boolean {
   const [mobile, setMobile] = useState(false);
@@ -32,8 +34,9 @@ export function LabCanvas() {
   const [webgl, setWebglOk] = useState<boolean | null>(null);
   const [data, setData] = useState<FragmentData | null>(null);
 
-  const mixRef = useRef(0);
+  const storyTRef = useRef(0);
   const resolveRef = useRef(1);
+  const overrideRef = useRef<number[]>(new Array(BEAT_TARGET_COUNT).fill(-1));
   const dimRef = useRef(0);
   const motionScaleRef = useRef(1);
 
@@ -91,7 +94,7 @@ export function LabCanvas() {
   return (
     <Canvas
       dpr={dpr}
-      camera={{ fov: CAMERA_FOV, near: 0.1, far: 400, position: [0, 2, 12] }}
+      camera={{ fov: CAMERA_FOV, near: 0.1, far: 600, position: [0, 2, 12] }}
       gl={{ antialias: false, alpha: true, powerPreference: "high-performance" }}
       frameloop="always"
     >
@@ -100,21 +103,27 @@ export function LabCanvas() {
         {data && data.beats === BEAT_TARGET_COUNT ? (
           <LabCloud
             data={data}
-            mixRef={mixRef}
-            resolveRef={resolveRef}
+            storyTRef={storyTRef}
+            overrideRef={overrideRef}
             dimRef={dimRef}
             motionScaleRef={motionScaleRef}
             maxCount={maxCount}
           />
         ) : null}
         <LabRig
-          mixRef={mixRef}
+          storyTRef={storyTRef}
           resolveRef={resolveRef}
+          overrideRef={overrideRef}
           dimRef={dimRef}
           motionScaleRef={motionScaleRef}
           reducedMotion={reducedMotion}
         />
         <LabEffects enabled={!mobile && !reducedMotion} resolveRef={resolveRef} />
+        {/* The way in: the chapter's own tablet, dormant in front of its
+            artifact until you click it open. */}
+        <TabletGate />
+        {/* The reading surface, standing in whichever room the route holds. */}
+        <PanelSurface />
       </Suspense>
     </Canvas>
   );

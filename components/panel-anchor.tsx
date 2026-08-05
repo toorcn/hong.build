@@ -13,9 +13,12 @@ import { BEATS, beatForRoute } from "@/lib/story";
  */
 
 /** `// chapter 01 — work` above the panel title. */
-export function PanelEyebrow({ sub }: { sub?: string }) {
-  const beat = beatForRoute(usePathname());
-  if (beat === null) return null;
+export function PanelEyebrow({ sub, beat: given }: { sub?: string; beat?: number }) {
+  // On the in-scene plane the beat is handed in — the pathname is authoritative
+  // only on the flat fallback.
+  const fromRoute = beatForRoute(usePathname());
+  const beat = given ?? fromRoute;
+  if (beat === null || beat === undefined) return null;
   const { code, label } = BEATS[beat]!;
 
   return (
@@ -32,9 +35,10 @@ export function PanelEyebrow({ sub }: { sub?: string }) {
  * one instrument, and doubles as the route back — the spine restores the
  * beat you left from.
  */
-export function PanelAnchor() {
-  const held = beatForRoute(usePathname());
-  if (held === null) return null;
+export function PanelAnchor({ beat: given }: { beat?: number } = {}) {
+  const fromRoute = beatForRoute(usePathname());
+  const held = given ?? fromRoute;
+  if (held === null || held === undefined) return null;
 
   return (
     <Link

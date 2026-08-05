@@ -110,10 +110,10 @@ export default async function ProjectPage({
 
       <div className="mt-10">
         <Link
-          href="/contact"
-          className="focus-ring inline-block border border-accent bg-accent px-5 py-3 font-mono text-[11px] uppercase tracking-[0.18em] text-void transition-colors hover:bg-transparent hover:text-accent"
+          href="/"
+          className="focus-ring inline-block font-mono text-[11px] uppercase tracking-[0.18em] text-type-dim underline decoration-line underline-offset-4 transition-colors hover:text-accent hover:decoration-accent"
         >
-          Build something like this →
+          ← back to the journey
         </Link>
       </div>
     </ContentPanel>

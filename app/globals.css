@@ -54,6 +54,27 @@ body {
   z-index: 10;
 }
 
+/*
+ * The journey's scroll spine is a multi-viewport spacer inside <main>, and
+ * <main> sits at z-index 10 over the scene's z-index 0. Left alone it is an
+ * invisible sheet across the whole world, swallowing every click aimed at
+ * something in the scene — the dormant tablets became visible but dead.
+ *
+ * So the journey's main is transparent to the pointer and its real controls
+ * opt back in. Scoped with :has() to the spine, so content routes — where the
+ * panel and its rows must stay interactive — are untouched.
+ */
+main:has(#story-spine) {
+  pointer-events: none;
+}
+
+main:has(#story-spine) a,
+main:has(#story-spine) button,
+main:has(#story-spine) nav,
+main:has(#story-spine) [data-interactive] {
+  pointer-events: auto;
+}
+
 /* Editorial content panels read above the dimmed scene.
 
    The reading surface is a pseudo-element anchored to the top of the panel,
@@ -134,14 +155,262 @@ body {
   transition: transform 260ms var(--ease-signal);
 }
 
-a.panel-row:hover,
-a.panel-row:focus-visible {
+/* Any row can be addressed, not just linked ones — LiveRow reports hover to
+   the scene, so the row has to acknowledge it too. */
+.panel-row:hover,
+.panel-row:focus-visible,
+.panel-row:focus-within {
   background: color-mix(in srgb, var(--color-accent) 5%, transparent);
 }
 
-a.panel-row:hover::before,
-a.panel-row:focus-visible::before {
+.panel-row:hover::before,
+.panel-row:focus-visible::before,
+.panel-row:focus-within::before {
   transform: scaleY(1);
+}
+
+/* ---------- The in-scene window ---------- */
+
+/*
+ * A surface standing in the room, not a sheet over the viewport. drei's
+ * transform mode hands us a matrix3d from the real camera, so everything here
+ * is about making the plane read as a physical object: a bezel, a lit top
+ * edge, a shadow it casts into the room, and a body dark enough to read
+ * against fragments drifting behind it.
+ */
+.scene-window-wrap {
+  /* drei sets the matrix; keep our own transforms off this node. */
+  will-change: transform;
+}
+
+.scene-window {
+  display: flex;
+  flex-direction: column;
+  /* max-height is set inline by PanelSurface, which needs the same number for
+     its fit solve — one source of truth, so the two can't disagree. */
+  /* Fades up with the plane's rise out of the artifact (see PanelSurface). */
+  opacity: 0;
+  transition: opacity 520ms var(--ease-signal);
+  border: 1px solid color-mix(in srgb, var(--color-accent) 22%, var(--color-line));
+  background: color-mix(in srgb, var(--color-void) 90%, transparent);
+  backdrop-filter: blur(14px);
+  box-shadow:
+    /* the bezel catching light from the artifact behind it */
+    inset 0 1px 0 color-mix(in srgb, var(--color-accent) 18%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--color-void) 60%, transparent),
+    /* thrown into the room */
+    0 30px 90px -20px rgb(0 0 0 / 0.85),
+    0 0 140px -40px color-mix(in srgb, var(--color-accent) 30%, transparent);
+}
+
+.scene-window[data-open="1"] {
+  opacity: 1;
+}
+
+/* Title bar — the honest "this is a surface" cue. */
+.scene-window-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex: none;
+  padding: 0.7rem 1.25rem;
+  border-bottom: 1px solid var(--color-line);
+  background: color-mix(in srgb, var(--color-void-raised) 70%, transparent);
+}
+
+/* Names the way out, since the way out is a gesture rather than a button. */
+.scene-window-hint {
+  flex: none;
+  padding: 0.15rem 0.4rem;
+  border: 1px solid var(--color-line);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-type-faint);
+}
+
+/* ---------- The dormant tablet (the way in) ---------- */
+
+/*
+ * The same object as .scene-window, asleep: same bezel, same edge-light, same
+ * shadow into the room — just small and mostly dark. Clicking it is what opens
+ * the full surface, so the two must be recognisably one thing.
+ */
+.tablet-gate {
+  width: 260px;
+  transition: opacity 420ms var(--ease-signal);
+}
+
+.tablet-gate-face {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.85rem 1rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--color-accent) 20%, var(--color-line));
+  background: color-mix(in srgb, var(--color-void) 88%, transparent);
+  backdrop-filter: blur(10px);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--color-accent) 16%, transparent),
+    0 18px 50px -14px rgb(0 0 0 / 0.8),
+    0 0 70px -30px color-mix(in srgb, var(--color-accent) 26%, transparent);
+  transition:
+    border-color 260ms var(--ease-signal),
+    transform 320ms var(--ease-signal),
+    box-shadow 320ms var(--ease-signal);
+}
+
+/* Waking under the cursor: it leans out of the room toward you. */
+.tablet-gate-face:hover,
+.tablet-gate-face:focus-visible {
+  border-color: color-mix(in srgb, var(--color-accent) 65%, transparent);
+  transform: translateY(-3px) scale(1.03);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--color-accent) 40%, transparent),
+    0 26px 60px -14px rgb(0 0 0 / 0.85),
+    0 0 110px -26px color-mix(in srgb, var(--color-accent) 55%, transparent);
+}
+
+.tablet-gate-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.55rem;
+  border-bottom: 1px solid var(--color-line);
+}
+
+.tablet-gate-code {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  color: var(--color-accent);
+}
+
+.tablet-gate-dot {
+  width: 0.3rem;
+  height: 0.3rem;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--color-accent) 60%, transparent);
+}
+
+.tablet-gate-label {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 1.05rem;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: var(--color-type);
+}
+
+.tablet-gate-open {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--color-type-faint);
+}
+
+.tablet-gate-face:hover .tablet-gate-open,
+.tablet-gate-face:focus-visible .tablet-gate-open {
+  color: var(--color-accent);
+}
+
+/* The document scrolls inside the plane — the page itself no longer does. */
+.scene-window-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 1.75rem 1.25rem 2rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line) transparent;
+}
+
+.scene-window-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.scene-window-scroll::-webkit-scrollbar-thumb {
+  background: var(--color-line);
+}
+
+/* No page scroll on a route the scene is presenting. */
+html[data-in-scene="1"],
+html[data-in-scene="1"] body {
+  overflow: hidden;
+}
+
+/* ---------- Reading-layer motion ---------- */
+
+/*
+ * Content resolves the way the cloud does: blurred and loose, settling
+ * sharp. Deliberately not a slide-in from an edge — that's the marketing-page
+ * idiom this site is trying not to be. Driven by a data attribute so the
+ * IntersectionObserver never has to touch inline styles per frame.
+ */
+.resolve-in {
+  --resolve-delay: 0ms;
+  opacity: 0;
+  transform: translate3d(0, 12px, 0);
+  filter: blur(6px);
+  transition:
+    opacity 620ms var(--ease-signal),
+    transform 620ms var(--ease-signal),
+    filter 620ms var(--ease-signal),
+    letter-spacing 620ms var(--ease-signal);
+  transition-delay: var(--resolve-delay);
+  will-change: opacity, transform, filter;
+}
+
+/* Tracking only opens on short display type — animating it on a paragraph
+   reflows every line. */
+.resolve-in-type {
+  letter-spacing: 0.16em;
+}
+
+.resolve-in[data-resolved="1"] {
+  opacity: 1;
+  transform: none;
+  filter: none;
+  letter-spacing: normal;
+}
+
+/* Settled: drop the compositor hint so long pages don't hold dozens of
+   promoted layers. */
+.resolve-in[data-resolved="1"] {
+  will-change: auto;
+}
+
+/*
+ * The reading light. Sits inside .content-scrim's stacking context at the
+ * same negative layer as the scrim, so DOM order puts it just above the
+ * scrim and still behind every glyph.
+ */
+.reading-light {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: var(--lo, 0);
+  background: radial-gradient(
+    26rem circle at var(--lx, 50%) var(--ly, 40%),
+    color-mix(in srgb, var(--color-accent) 9%, transparent),
+    color-mix(in srgb, var(--color-accent) 3%, transparent) 40%,
+    transparent 72%
+  );
+  transition: opacity 500ms var(--ease-signal);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .resolve-in {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    letter-spacing: normal;
+  }
+  .reading-light {
+    display: none;
+  }
 }
 
 .focus-ring {
@@ -243,4 +512,118 @@ html[data-entrance="snap"] [data-lab-fallback] svg {
 /* Case-study body column */
 .prose-lab {
   max-width: 44rem;
+}
+
+
+/* ---------- Run frequency chart ---------- */
+
+/*
+ * A stacked bar chart for /notes — entries per year, broken down by outcome.
+ * Stays in the reading layer's grammar: hairlines, mono labels, one accent
+ * for the part that placed. The bars grow from the baseline on scroll-in
+ * rather than sliding from an edge — the same resolve-not-slide idiom as
+ * .resolve-in. Reduced motion gets the final height immediately (the
+ * component sets progress to 1).
+ */
+.run-frequency {
+  max-width: 44rem;
+}
+
+.run-frequency-chart {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1.25rem 1fr;
+  gap: 0.75rem;
+  height: 14rem;
+}
+
+/* Tick column: faint horizontal hairlines at every integer up to the max. */
+.run-frequency-grid {
+  position: relative;
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: space-between;
+  align-self: stretch;
+  padding-block: 1.5rem; /* headroom for the count above each bar */
+}
+
+.run-frequency-gridline {
+  height: 1px;
+  background: var(--color-line);
+}
+
+.run-frequency-bars {
+  position: relative;
+  align-self: stretch;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-block: 1.5rem;
+}
+
+/* Each year column: the bar grows from the bottom, then its labels. */
+.run-frequency-bar-col {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.run-frequency-bar {
+  width: 100%;
+  max-width: 3.5rem;
+  display: flex;
+  flex-direction: column-reverse; /* first segment sits on the baseline */
+  border-radius: 2px 2px 0 0;
+  overflow: hidden;
+  /* The height is driven inline by progress; the transition smooths the
+     last frame so it doesn't snap when the rAF loop ends. */
+  transition: height 60ms linear;
+}
+
+.run-frequency-seg {
+  display: block;
+  width: 100%;
+}
+
+.run-frequency-count {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1;
+  color: var(--color-type);
+}
+
+.run-frequency-year {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: var(--color-type-faint);
+}
+
+/* Legend: swatch + label, inline. */
+.run-frequency-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+}
+
+.run-frequency-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.run-frequency-swatch {
+  display: inline-block;
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .run-frequency-bar {
+    transition: none;
+  }
 }

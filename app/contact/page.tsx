@@ -1,22 +1,24 @@
 import type { Metadata } from "next";
 import { ContentPanel } from "@/components/content-panel";
+import { LiveRow } from "@/components/panel-motion";
 import { SITE } from "@/content/site";
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: "Have an unusual interface in mind? Get in touch.",
+  description: "The end of the story. Say hi.",
 };
 
 export default function ContactPage() {
   return (
     <ContentPanel title="Say hi">
       <p className="max-w-xl font-display text-2xl font-bold leading-snug tracking-tight text-type">
-        Have an unusual interface in mind?
+        That's the whole story. Thanks for scrolling it.
       </p>
       <p className="mt-4 max-w-xl text-base leading-relaxed text-type-dim">
-        The weirder the better — a real-time AI surface, a spatial UI,
-        something that has to feel alive. If it sits between a hard technical
-        problem and a person, I'm interested.
+        I'm not selling anything here. But if any of it landed — if you're
+        building something strange, or you're five hackathons in with nothing
+        to show and wondering whether that's normal — I'd genuinely like to
+        hear about it.
       </p>
 
       <div className="mt-12">
@@ -29,19 +31,19 @@ export default function ContactPage() {
       </div>
 
       <dl className="panel-rows mt-14 max-w-xl">
-        <div className="panel-row grid gap-1 px-5 py-4 sm:grid-cols-[140px_1fr] sm:gap-6">
+        <LiveRow className="grid gap-1 px-5 py-4 sm:grid-cols-[140px_1fr] sm:gap-6">
           <dt className="font-mono text-[10px] uppercase tracking-[0.18em] text-type-faint">
             location
           </dt>
           <dd className="text-sm text-type-dim">{SITE.location}</dd>
-        </div>
-        <div className="panel-row grid gap-1 px-5 py-4 sm:grid-cols-[140px_1fr] sm:gap-6">
+        </LiveRow>
+        <LiveRow className="grid gap-1 px-5 py-4 sm:grid-cols-[140px_1fr] sm:gap-6">
           <dt className="font-mono text-[10px] uppercase tracking-[0.18em] text-type-faint">
-            availability
+            right now
           </dt>
-          <dd className="text-sm text-type-dim">{SITE.availability}</dd>
-        </div>
-        <div className="panel-row grid gap-1 px-5 py-4 sm:grid-cols-[140px_1fr] sm:gap-6">
+          <dd className="text-sm text-type-dim">{SITE.status}</dd>
+        </LiveRow>
+        <LiveRow className="grid gap-1 px-5 py-4 sm:grid-cols-[140px_1fr] sm:gap-6">
           <dt className="font-mono text-[10px] uppercase tracking-[0.18em] text-type-faint">
             elsewhere
           </dt>
@@ -58,7 +60,7 @@ export default function ContactPage() {
               </a>
             ))}
           </dd>
-        </div>
+        </LiveRow>
       </dl>
 
       <p className="mt-12 font-mono text-[11px] leading-relaxed tracking-[0.06em] text-type-faint">
