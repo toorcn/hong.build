@@ -5,18 +5,23 @@ import { useFrame } from "@react-three/fiber";
 import { EffectComposer } from "@react-three/postprocessing";
 import { ChromaticAberrationEffect } from "postprocessing";
 import { Vector2 } from "three";
-import { bestVantage, useLabStore } from "@/lib/store";
 
 /**
- * Postprocessing that IS the metaphor: misalignment splits the colour,
- * alignment resolves it to pure signal. The offset is driven imperatively
- * each frame from the best vantage weight — no ref serialization.
+ * Postprocessing that IS the metaphor: between beats the colour splits,
+ * at a resolved beat it converges to pure signal. Driven by resolveRef so
+ * the aberration swells exactly when the cloud is dissolved.
  */
-export function LabEffects({ enabled }: { enabled: boolean }) {
+export function LabEffects({
+  enabled,
+  resolveRef,
+}: {
+  enabled: boolean;
+  resolveRef: { current: number };
+}) {
   const aberration = useMemo(
     () =>
       new ChromaticAberrationEffect({
-        offset: new Vector2(0.0035, 0.0035),
+        offset: new Vector2(0, 0),
         radialModulation: false,
         modulationOffset: 0,
       }),
@@ -24,10 +29,9 @@ export function LabEffects({ enabled }: { enabled: boolean }) {
   );
 
   useFrame(() => {
-    const { weight } = bestVantage(useLabStore.getState().weights);
-    const target = (1 - Math.min(weight, 1)) * 0.0035;
-    aberration.offset.x += (target - aberration.offset.x) * 0.1;
-    aberration.offset.y += (target - aberration.offset.y) * 0.1;
+    const target = (1 - Math.min(resolveRef.current, 1)) * 0.0038;
+    aberration.offset.x += (target - aberration.offset.x) * 0.12;
+    aberration.offset.y += (target - aberration.offset.y) * 0.12;
   });
 
   if (!enabled) return null;

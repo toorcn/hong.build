@@ -54,15 +54,94 @@ body {
   z-index: 10;
 }
 
-/* Editorial content panels read above the dimmed scene. */
+/* Editorial content panels read above the dimmed scene.
+
+   The reading surface is a pseudo-element anchored to the top of the panel,
+   not the viewport — so the open zone is a threshold you cross once rather
+   than a permanently unreadable strip at the top of the screen. The held
+   silhouette stays visible above it: the panel rises out of the cloud
+   instead of walling it off. */
 .content-scrim {
-  background:
-    linear-gradient(
-      to bottom,
-      color-mix(in srgb, var(--color-void) 78%, transparent),
-      color-mix(in srgb, var(--color-void) 92%, transparent)
-    );
-  backdrop-filter: blur(6px);
+  position: relative;
+  isolation: isolate;
+}
+
+.content-scrim::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  /* Opens over the title, then reaches a hard floor by the time body copy
+     starts (~40vh). The cloud is additively blended, so a bright silhouette
+     still punches through 8% transmission — hence 97%, not 92%. */
+  background: linear-gradient(
+    to bottom,
+    transparent 0,
+    color-mix(in srgb, var(--color-void) 30%, transparent) 19vh,
+    color-mix(in srgb, var(--color-void) 90%, transparent) 34vh,
+    color-mix(in srgb, var(--color-void) 97%, transparent) 46vh,
+    var(--color-void) 68vh
+  );
+  backdrop-filter: blur(10px);
+  /* Ramps the blur in alongside the tint — backdrop-filter can't gradient. */
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 26vh);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 26vh);
+}
+
+/* Display type sits in the open zone, over the live cloud. The shadow buys
+   contrast without another slab of background. */
+.panel-title {
+  text-shadow:
+    0 2px 30px var(--color-void),
+    0 1px 4px color-mix(in srgb, var(--color-void) 80%, transparent);
+}
+
+/* The threshold: below this hairline the document begins. */
+.panel-threshold {
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    var(--color-accent),
+    color-mix(in srgb, var(--color-accent) 18%, transparent) 34%,
+    transparent 72%
+  );
+}
+
+/* Rows, not cards. The world's grammar is fragments resolving out of noise,
+   so a row is a hairline until you address it — then the accent resolves in
+   from the leading edge. Replaces the bordered bg-panel card. */
+/* Closes the stack. Lives on the container so it can't depend on how deeply
+   each row is wrapped (a list item, a dt/dd pair, a bare div). */
+.panel-rows {
+  border-bottom: 1px solid var(--color-line);
+}
+
+.panel-row {
+  position: relative;
+  border-top: 1px solid var(--color-line);
+  transition: background-color 200ms var(--ease-signal);
+}
+
+.panel-row::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 2px;
+  background: var(--color-accent);
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 260ms var(--ease-signal);
+}
+
+a.panel-row:hover,
+a.panel-row:focus-visible {
+  background: color-mix(in srgb, var(--color-accent) 5%, transparent);
+}
+
+a.panel-row:hover::before,
+a.panel-row:focus-visible::before {
+  transform: scaleY(1);
 }
 
 .focus-ring {
@@ -81,6 +160,78 @@ body {
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- COLD START entrance ---------- */
+
+/*
+ * Everything the journey normally shows is held back until the entrance
+ * reaches "done", then fades in staggered. Driven by a data attribute on
+ * <html> rather than React state, so the overlay components don't need to
+ * subscribe to the entrance clock.
+ *
+ * All of it is scoped under html[data-entrance], which ColdStart removes once
+ * the staggered reveal has played. After that these rules stop matching and
+ * the overlays keep their own transitions — otherwise the reveal delay would
+ * also lag ScrollCue's dissolve on first scroll.
+ */
+html[data-entrance] .entrance-hide {
+  transition:
+    opacity 600ms var(--ease-signal),
+    transform 600ms var(--ease-signal);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+html[data-entrance]:not([data-entrance="done"]) .entrance-hide {
+  opacity: 0;
+  /* `transform` rather than `translate`, which Tailwind's own utilities use. */
+  transform: translateY(6px);
+  pointer-events: none;
+  transition-delay: 0ms;
+}
+
+/* Returning visitors get a short crossfade instead of the full entrance. */
+html[data-entrance-quick="1"] .lab-canvas-root {
+  animation: entrance-quick 400ms var(--ease-signal) both;
+}
+
+@keyframes entrance-quick {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/*
+ * No-WebGL path: the static wordmark wipes in left-to-right, the same
+ * choreography the fragment sweep runs, in CSS only.
+ */
+html[data-entrance="boot"] [data-lab-fallback],
+html[data-entrance="load"] [data-lab-fallback] {
+  opacity: 0;
+}
+
+/* Full opacity with no fade of its own, so the clip wipe is the only reveal
+   — the container's own 700ms fade would otherwise blur the leading edge. */
+html[data-entrance="snap"] [data-lab-fallback],
+html[data-entrance="hold"] [data-lab-fallback] {
+  opacity: 1;
+  transition: none;
+}
+
+html[data-entrance="snap"] [data-lab-fallback] svg {
+  animation: mark-wipe 760ms var(--ease-signal) both;
+}
+
+@keyframes mark-wipe {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
   }
 }
 

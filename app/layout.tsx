@@ -2,11 +2,12 @@ import type { Metadata, Viewport } from "next";
 import { Archivo, Inter, JetBrains_Mono } from "next/font/google";
 import type { ReactNode } from "react";
 import { SITE } from "@/content/site";
+import { ENTRANCE_BOOT_SCRIPT } from "@/lib/entrance-boot";
 import { LabScene } from "@/components/lab-scene";
+import { ColdStart } from "@/components/cold-start";
 import { Chrome } from "@/components/chrome";
-import { KeyboardNav } from "@/components/keyboard-nav";
-import { TourRail } from "@/components/tour-rail";
 import { PageTransition } from "@/components/page-transition";
+import { ScrollReset } from "@/components/scroll-reset";
 import "./globals.css";
 
 const archivo = Archivo({
@@ -34,7 +35,7 @@ export const metadata: Metadata = {
   },
   description:
     "AI engineer and builder in Kuala Lumpur. Nothing here means anything until you find the angle. " +
-    "Work, process, and contact, hidden in a cloud of fragments.",
+    "A scroll journey through one cloud of fragments.",
   metadataBase: new URL("https://hongbing.dev"),
   openGraph: {
     title: `${SITE.name} — ${SITE.title}`,
@@ -51,11 +52,23 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={`${archivo.variable} ${inter.variable} ${jetbrains.variable}`}>
+    <html
+      lang="en"
+      className={`${archivo.variable} ${inter.variable} ${jetbrains.variable}`}
+      suppressHydrationWarning
+    >
+      <head>
+        {/* Hides the chrome before first paint so the entrance isn't preceded
+            by a flash of the name it exists to reveal. See entrance-boot.ts. */}
+        <script dangerouslySetInnerHTML={{ __html: ENTRANCE_BOOT_SCRIPT }} />
+      </head>
       <body>
-        {/* Persistent scene — never unmounts across routes. Renders the
-            static silhouette fallback itself when WebGL is unavailable. */}
+        {/* Persistent scene — fixed behind everything, never unmounts. */}
         <LabScene />
+
+        {/* First-load entrance. Owns the camera and the frame for ~2.5s, then
+            hands over. Skips itself on deep links and in-session returns. */}
+        <ColdStart />
 
         <a
           href="#content"
@@ -65,8 +78,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         </a>
 
         <Chrome />
-        <KeyboardNav />
-        <TourRail />
+        <ScrollReset />
 
         <main id="content" className="lab-chrome">
           <PageTransition>{children}</PageTransition>

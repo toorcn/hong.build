@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <ContentPanel code="vantage 00/05 — identity" title="Hong Bing">
+    <ContentPanel title="Hong Bing" sub="the human">
       <p className="max-w-xl text-xl leading-relaxed text-type">
         I build interfaces where AI, design systems, and code meet — and I
         care about the small feedback loops that make software feel alive.
@@ -29,11 +29,11 @@ export default function AboutPage() {
         someone built the room that changed that.
       </p>
 
-      <dl className="mt-14 space-y-px">
+      <dl className="panel-rows mt-14">
         {ABOUT_FACTS.map((f) => (
           <div
             key={f.k}
-            className="grid gap-1 border border-line bg-panel/60 px-5 py-4 sm:grid-cols-[200px_1fr] sm:gap-6"
+            className="panel-row grid gap-1 px-5 py-4 sm:grid-cols-[200px_1fr] sm:gap-6"
           >
             <dt className="font-mono text-[10px] uppercase tracking-[0.18em] text-type-faint">
               {f.k}

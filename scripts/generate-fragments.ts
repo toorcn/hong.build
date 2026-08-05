@@ -1,20 +1,23 @@
 /**
- * Build-time anamorphosis generator.
+ * Build-time narrative anamorphosis generator.
  *
- * For each vantage k:
- *   1. Rasterize the silhouette SVG to an alpha mask (sharp).
- *   2. Rejection-sample M points in the mask, mapped to NDC.
- *   3. Define the alignment camera Pk (spherical position, looks at origin).
- *   4. Unproject each sample through Pk to get a ray, then place the
- *      fragment at a RANDOM DEPTH along that ray.
+ * One pool of N fragments. Each fragment carries BEAT_COUNT target
+ * positions — one resolved position per story beat. The runtime shader
+ * morphs each fragment toward the current beat's target, so scrolling
+ * dissolves the cloud to noise and re-forms it as the next silhouette.
  *
- * From Pk every fragment lands exactly on the silhouette. From any other
- * angle the depth jitter scatters them into noise.
+ * Resolved position for fragment f at beat k:
+ *   - rasterize silhouette k to an alpha mask, rejection-sample a 2D point
+ *   - map to a plane at the beat's authored camera distance
+ *   - jitter depth along the camera ray so off-angle views scatter
+ *
+ * Between beats the shader interpolates targets, and a per-fragment
+ * "noise" vector (also generated here) is mixed in at the midpoint so the
+ * dissolve is visible rather than a straight slide.
  *
  * Output: public/fragments.bin + lib/generated/fragments-meta.ts
  *
- * Run: npx tsx scripts/generate-fragments.ts [--check]
- *   --check renders the five vantages plus off-axis views to public/preview/
+ * Run: npx tsx scripts/generate-fragments.ts
  */
 
 import { mkdirSync, writeFileSync } from "node:fs";
@@ -23,21 +26,14 @@ import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 import { PerspectiveCamera, Vector3 } from "three";
 import { SILHOUETTES } from "../assets/silhouettes";
-import {
-  CAMERA_DISTANCE,
-  CAMERA_FOV,
-  SCENE_RADIUS,
-  VANTAGE_COUNT,
-  VANTAGES,
-  vantageCameraPosition,
-} from "../lib/vantages";
+import { BEATS, BEAT_COUNT, beatPose } from "../lib/story";
+import { CAMERA_FOV } from "../lib/vantages";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..");
 
-/** Fragments per silhouette on desktop; mobile draws a fraction of these. */
-const SAMPLES_PER_VANTAGE = 2400;
-/** Seeded PRNG so regenerating never changes the scene for visitors. */
+/** Fragments in the shared pool. */
+const FRAGMENT_COUNT = 6000;
 const SEED = 1337;
 
 function mulberry32(seed: number): () => number {
@@ -58,7 +54,6 @@ async function rasterizeMask(svg: string): Promise<{ data: Buffer; size: number 
     .ensureAlpha()
     .raw()
     .toBuffer({ resolveWithObject: true });
-  // Keep only the alpha channel.
   const alpha = Buffer.alloc(size * size);
   for (let i = 0; i < size * size; i++) {
     alpha[i] = png.data[i * 4 + 3] ?? 0;
@@ -66,100 +61,93 @@ async function rasterizeMask(svg: string): Promise<{ data: Buffer; size: number 
   return { data: alpha, size };
 }
 
-/** Rejection-sample count points from the mask, returned as NDC in [-1, 1]. */
-function sampleMask(mask: Buffer, size: number, count: number, rand: () => number): Float32Array {
-  const out = new Float32Array(count * 2);
-  let placed = 0;
-  while (placed < count) {
+function sampleOne(mask: Buffer, size: number, rand: () => number): { x: number; y: number } {
+  // Rejection-sample a single point inside the silhouette.
+  for (;;) {
     const x = rand();
     const y = rand();
     const px = Math.floor(x * size);
     const py = Math.floor(y * size);
     if ((mask[py * size + px] ?? 0) > 16) {
-      // NDC: x right, y up. SVG y grows downward.
-      out[placed * 2] = x * 2 - 1;
-      out[placed * 2 + 1] = 1 - y * 2;
-      placed++;
+      return { x: x * 2 - 1, y: 1 - y * 2 };
     }
   }
-  return out;
 }
 
 interface Generated {
-  positions: Float32Array;
-  vantageIds: Uint8Array;
+  /** Per-beat resolved positions: BEAT_COUNT blocks of FRAGMENT_COUNT*3. */
+  targets: Float32Array;
+  /** Per-fragment noise offset for the dissolve midpoint. */
+  noise: Float32Array;
+  /** Per-fragment random seed for stagger and drift. */
   seeds: Float32Array;
 }
 
 function generate(): Generated {
-  const total = SAMPLES_PER_VANTAGE * VANTAGE_COUNT;
-  const positions = new Float32Array(total * 3);
-  const vantageIds = new Uint8Array(total);
-  const seeds = new Float32Array(total);
+  const targets = new Float32Array(BEAT_COUNT * FRAGMENT_COUNT * 3);
+  const noise = new Float32Array(FRAGMENT_COUNT * 3);
+  const seeds = new Float32Array(FRAGMENT_COUNT);
   const rand = mulberry32(SEED);
 
-  let cursor = 0;
-  for (const vantage of VANTAGES) {
-    const camPos = vantageCameraPosition(vantage);
-    const P = new Vector3(camPos.x, camPos.y, camPos.z);
-    const cam = new PerspectiveCamera(CAMERA_FOV, 1, 0.1, 100);
+  // Per-fragment noise vector, on a shell so dissolves read as scatter.
+  for (let i = 0; i < FRAGMENT_COUNT; i++) {
+    const theta = rand() * Math.PI * 2;
+    const phi = Math.acos(rand() * 2 - 1);
+    const r = 3.5 + rand() * 4.5;
+    noise[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+    noise[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+    noise[i * 3 + 2] = r * Math.cos(phi);
+    seeds[i] = rand();
+  }
+
+  // Per-beat resolved positions for every fragment.
+  for (let k = 0; k < BEAT_COUNT; k++) {
+    const beat = BEATS[k]!;
+    const mask = masks[beat.silhouette]!;
+    const pose = beatPose(beat);
+    const P = new Vector3(pose.x, pose.y, pose.z);
+    const cam = new PerspectiveCamera(CAMERA_FOV, 1, 0.1, 200);
     cam.position.copy(P);
     cam.lookAt(0, 0, 0);
     cam.updateMatrixWorld();
 
-    const { data: mask, size } = masks[vantage.id]!;
-    const samples = sampleMask(mask, size, SAMPLES_PER_VANTAGE, rand);
-
-    for (let i = 0; i < SAMPLES_PER_VANTAGE; i++) {
-      const ndcX = samples[i * 2]! * 0.86; // leave margin so silhouettes breathe in frame
-      const ndcY = samples[i * 2 + 1]! * 0.86;
-
-      // Ray from camera through this NDC point.
-      const origin = P;
-      const dir = new Vector3(ndcX, ndcY, 0.5)
-        .unproject(cam)
-        .sub(origin)
-        .normalize();
-
-      // Place at random depth so off-axis views dissolve into noise.
-      const depth = CAMERA_DISTANCE + (rand() * 2 - 1) * SCENE_RADIUS * 0.85;
-      const point = origin.clone().addScaledVector(dir, depth);
-
-      positions[cursor * 3] = point.x;
-      positions[cursor * 3 + 1] = point.y;
-      positions[cursor * 3 + 2] = point.z;
-      vantageIds[cursor] = vantage.id;
-      seeds[cursor] = rand();
-      cursor++;
+    const blockOffset = k * FRAGMENT_COUNT * 3;
+    for (let i = 0; i < FRAGMENT_COUNT; i++) {
+      const s = sampleOne(mask.data, mask.size, rand);
+      const ndcX = s.x * 0.82;
+      const ndcY = s.y * 0.82;
+      const dir = new Vector3(ndcX, ndcY, 0.5).unproject(cam).sub(P).normalize();
+      const depth = beat.distance + (rand() * 2 - 1) * 3.4;
+      const point = P.clone().addScaledVector(dir, depth);
+      targets[blockOffset + i * 3] = point.x;
+      targets[blockOffset + i * 3 + 1] = point.y;
+      targets[blockOffset + i * 3 + 2] = point.z;
     }
   }
 
-  return { positions, vantageIds, seeds };
+  return { targets, noise, seeds };
 }
 
-/** Merge 8-bit vantage ids + 16-bit quantized positions + 8-bit seeds into one binary. */
 function serialize(g: Generated): Buffer {
-  const total = g.vantageIds.length;
-  const posBytes = Buffer.from(g.positions.buffer, g.positions.byteOffset, g.positions.byteLength);
-  const idBytes = Buffer.from(g.vantageIds.buffer, g.vantageIds.byteOffset, g.vantageIds.byteLength);
-  const seedBytes = Buffer.from(g.seeds.buffer, g.seeds.byteOffset, g.seeds.byteLength);
-
   const header = Buffer.alloc(16);
   header.writeUInt32LE(0x46524147, 0); // "FRAG"
-  header.writeUInt32LE(1, 4); // version
-  header.writeUInt32LE(total, 8); // instance count
-  header.writeUInt32LE(SAMPLES_PER_VANTAGE, 12);
-  return Buffer.concat([header, posBytes, idBytes, seedBytes]);
+  header.writeUInt32LE(2, 4); // version 2 = narrative morph layout
+  header.writeUInt32LE(FRAGMENT_COUNT, 8);
+  header.writeUInt32LE(BEAT_COUNT, 12);
+
+  const targetBytes = Buffer.from(g.targets.buffer, g.targets.byteOffset, g.targets.byteLength);
+  const noiseBytes = Buffer.from(g.noise.buffer, g.noise.byteOffset, g.noise.byteLength);
+  const seedBytes = Buffer.from(g.seeds.buffer, g.seeds.byteOffset, g.seeds.byteLength);
+  return Buffer.concat([header, targetBytes, noiseBytes, seedBytes]);
 }
 
-// --- mask cache, populated in main ---
 const masks: { data: Buffer; size: number }[] = [];
 
 async function main(): Promise<void> {
-  const check = process.argv.includes("--check");
-
-  for (let i = 0; i < VANTAGE_COUNT; i++) {
-    masks[i] = await rasterizeMask(SILHOUETTES[i]!);
+  // Rasterize every unique silhouette referenced by the beats.
+  const uniqueSilhouettes = [...new Set(BEATS.map((b) => b.silhouette))];
+  for (const idx of uniqueSilhouettes) {
+    masks[idx] = await rasterizeMask(SILHOUETTES[idx]!);
   }
 
   const generated = generate();
@@ -172,20 +160,15 @@ async function main(): Promise<void> {
   writeFileSync(
     join(ROOT, "lib", "generated", "fragments-meta.ts"),
     `// Generated by scripts/generate-fragments.ts — do not edit.
-export const FRAGMENT_TOTAL = ${generated.vantageIds.length};
-export const FRAGMENTS_PER_VANTAGE = ${SAMPLES_PER_VANTAGE};
+export const FRAGMENT_TOTAL = ${FRAGMENT_COUNT};
+export const BEAT_TARGET_COUNT = ${BEAT_COUNT};
 `,
   );
 
   console.log(
-    `fragments.bin written: ${generated.vantageIds.length} instances ` +
-      `(${SAMPLES_PER_VANTAGE} per vantage x ${VANTAGE_COUNT}), ${(bin.length / 1024).toFixed(1)} KiB`,
+    `fragments.bin (v2 narrative) written: ${FRAGMENT_COUNT} fragments x ${BEAT_COUNT} beats, ` +
+      `${(bin.length / 1024).toFixed(1)} KiB`,
   );
-
-  if (check) {
-    const { renderChecks } = await import("./render-checks");
-    await renderChecks(generated.positions, generated.vantageIds);
-  }
 }
 
 void main();

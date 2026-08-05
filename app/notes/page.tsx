@@ -17,7 +17,7 @@ export default function SignalsPage() {
   const years = [...byYear.keys()].sort((a, b) => b - a);
 
   return (
-    <ContentPanel code="vantage 03/05 — signals" title="Run log" wide>
+    <ContentPanel title="Run log" wide>
       <p className="max-w-xl text-base leading-relaxed text-type-dim">
         {WIN_COUNT} wins and counting, mostly on ~24 hours of sleep and too
         much coffee. Hackathons are where I learned to build — the log is
@@ -30,11 +30,11 @@ export default function SignalsPage() {
             <h2 className="font-mono text-[11px] uppercase tracking-[0.22em] text-type-faint">
               {year}
             </h2>
-            <ul className="mt-5 space-y-px">
+            <ul className="panel-rows mt-5">
               {byYear.get(year)!.map((a) => (
                 <li
                   key={`${a.event}-${a.result}`}
-                  className="grid gap-2 border border-line bg-panel/60 px-5 py-4 sm:grid-cols-[auto_1fr_auto] sm:items-baseline sm:gap-6"
+                  className="panel-row grid gap-2 px-5 py-4 sm:grid-cols-[auto_1fr_auto] sm:items-baseline sm:gap-6"
                 >
                   <span
                     className={`font-mono text-[10px] uppercase tracking-[0.16em] ${

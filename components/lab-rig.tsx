@@ -1,224 +1,265 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
-import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import * as THREE from "three";
-import { CAMERA_DISTANCE, VANTAGES, vantageCameraPosition } from "@/lib/vantages";
-import { bestVantage, useLabStore, useSignalStore } from "@/lib/store";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  BEATS,
+  beatForRoute,
+  beatT,
+  spinePose,
+  storyPosition,
+  resolveAmount,
+} from "@/lib/story";
+import { useStoryStore } from "@/lib/story-store";
+import { entranceSignal, WRONG_ANGLE } from "@/lib/entrance";
 import { sound } from "@/lib/sound";
-import { useRouter } from "next/navigation";
-
-/** How alignment weight falls off with angular distance from a vantage. */
-const ALIGN_SIGMA_DEG = 14;
-/** Weight above which a vantage is considered locked. */
-const LOCK_WEIGHT = 0.86;
-/** Weight above which releasing the drag magnetically snaps to the vantage. */
-const SNAP_WEIGHT = 0.6;
-/** Intro drift duration, seconds. */
-const INTRO_SECONDS = 3.2;
-
-function angularDistanceDeg(aAz: number, aEl: number, bAz: number, bEl: number): number {
-  const az1 = THREE.MathUtils.degToRad(aAz);
-  const el1 = THREE.MathUtils.degToRad(aEl);
-  const az2 = THREE.MathUtils.degToRad(bAz);
-  const el2 = THREE.MathUtils.degToRad(bEl);
-  // Great-circle angle between two points on the sphere.
-  const cos =
-    Math.sin(el1) * Math.sin(el2) + Math.cos(el1) * Math.cos(el2) * Math.cos(az1 - az2);
-  return THREE.MathUtils.radToDeg(Math.acos(THREE.MathUtils.clamp(cos, -1, 1)));
-}
 
 interface LabRigProps {
-  weightsRef: { current: number[] };
+  /** Continuous beat position 0..(BEATS-1), written per frame for the shader. */
+  mixRef: { current: number };
+  /** Resolve amount 0..1 (1 at a beat center), written per frame. */
+  resolveRef: { current: number };
   dimRef: { current: number };
   motionScaleRef: { current: number };
   reducedMotion: boolean;
-  isHome: boolean;
 }
 
-export function LabRig({ weightsRef, dimRef, motionScaleRef, reducedMotion, isHome }: LabRigProps) {
-  const controlsRef = useRef<OrbitControlsImpl>(null);
-  const { camera } = useThree();
+/** Radians of free-look per pixel of pointer drag. */
+const DRAG_SPEED = 0.005;
+/** Clamp so you can't flip fully over the poles. */
+const EL_LIMIT = 1.2;
+/** How far the camera closes in when a content route opens. */
+const PANEL_DOLLY = 0.15;
+/** Radians the camera settles by on a content route — a slight lean in. */
+const PANEL_LEAN = 0.06;
+/** How far the cloud recedes behind a reading surface (drives uDim). */
+const PANEL_DIM = 0.85;
+
+/**
+ * Hybrid narrative rig — pointer-driven, no OrbitControls.
+ *
+ * Scroll drives storyT → the authored spine pose (position + look-at).
+ * A pointer drag adds an az/el free-look offset on top of that pose.
+ * On release the offset springs back to zero, so the camera returns to the
+ * authored angle at the current scroll position (option A).
+ */
+export function LabRig({
+  mixRef,
+  resolveRef,
+  dimRef,
+  motionScaleRef,
+  reducedMotion,
+}: LabRigProps) {
+  const { camera, gl } = useThree();
   const router = useRouter();
+  const pathname = usePathname();
 
-  const setCamera = useLabStore((s) => s.setCamera);
-  const setWeights = useLabStore((s) => s.setWeights);
-  const setLocked = useLabStore((s) => s.setLocked);
-  const setAlignment = useLabStore((s) => s.setAlignment);
-  const introPlaying = useLabStore((s) => s.introPlaying);
-  const setIntroPlaying = useLabStore((s) => s.setIntroPlaying);
-  const tourStep = useLabStore((s) => s.tourStep);
+  const storyT = useStoryStore((s) => s.storyT);
+  const setBeat = useStoryStore((s) => s.setBeat);
+  const setOriginT = useStoryStore((s) => s.setOriginT);
 
-  const introT = useRef(0);
-  const entering = useRef(false);
-  // Discrete-state snapshot from the previous frame, for change detection.
-  const prevDiscrete = useRef<{
-    lockedId: number | null;
-    alignment: string;
-    bestId: number;
-  }>({ lockedId: null, alignment: "SEEKING", bestId: 0 });
-  const coordAccum = useRef(0);
+  /** Which beat a content route holds, or null on the journey. */
+  const panelBeat = beatForRoute(pathname);
+  const onPanel = panelBeat !== null;
 
-  // Park the camera exactly on V0 at mount so the name resolves first.
+  /** Eased 0..1: how far into a content route the camera has settled. */
+  const panelEase = useRef(0);
+  /** Whether the current silhouette has already played its lock chord. */
+  const locked = useRef(true);
+
+  // Free-look offset (radians) on top of the spine pose.
+  const offset = useRef({ az: 0, el: 0 });
+  const target = useRef({ az: 0, el: 0 });
+  const drag = useRef<{ active: boolean; x: number; y: number }>({
+    active: false,
+    x: 0,
+    y: 0,
+  });
+  const lastBeat = useRef(-1);
+
+  // Opening a content route pauses the journey — remember where, so the
+  // spine can put us back on the way out.
   useEffect(() => {
-    const v0 = vantageCameraPosition(VANTAGES[0]!);
-    camera.position.set(v0.x, v0.y, v0.z);
+    if (onPanel) setOriginT(useStoryStore.getState().storyT);
+  }, [onPanel, setOriginT]);
+
+  // Park the camera at the first beat on mount.
+  useEffect(() => {
+    const p = spinePose(useStoryStore.getState().storyT);
+    camera.position.set(p.x, p.y, p.z);
     camera.lookAt(0, 0, 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [camera]);
 
-  // Compute spherical position of the camera each frame, derive weights.
-  // The shader reads weightsRef directly at 60fps for free; the Zustand
-  // store is only updated when discrete state CHANGES (lock, alignment,
-  // best vantage), so DOM components re-render a few times per gesture,
-  // not 60 times per second.
-  useFrame((state, delta) => {
-    const controls = controlsRef.current;
-    const pos = camera.position;
-    const r = Math.max(pos.length(), 0.0001);
-    const el = THREE.MathUtils.radToDeg(Math.asin(pos.y / r));
-    const az = THREE.MathUtils.radToDeg(Math.atan2(pos.x, pos.z));
-
-    // Intro: drift away from V0 so the resolved name crumbles to noise.
-    if (introPlaying && isHome && !reducedMotion) {
-      introT.current += delta;
-      const t = Math.min(introT.current / INTRO_SECONDS, 1);
-      const eased = 1 - Math.pow(1 - t, 3);
-      const v0 = VANTAGES[0]!;
-      const driftAz = v0.azimuthDeg + eased * 34;
-      const driftEl = v0.elevationDeg + eased * 6;
-      const target = vantageCameraPosition(
-        { ...v0, azimuthDeg: driftAz, elevationDeg: driftEl },
-        CAMERA_DISTANCE,
+  // Pointer handlers on the canvas → free-look target.
+  useEffect(() => {
+    const el = gl.domElement;
+    const down = (e: PointerEvent) => {
+      drag.current.active = true;
+      drag.current.x = e.clientX;
+      drag.current.y = e.clientY;
+      el.setPointerCapture(e.pointerId);
+    };
+    const move = (e: PointerEvent) => {
+      if (!drag.current.active) return;
+      const dx = e.clientX - drag.current.x;
+      const dy = e.clientY - drag.current.y;
+      drag.current.x = e.clientX;
+      drag.current.y = e.clientY;
+      target.current.az -= dx * DRAG_SPEED;
+      target.current.el = THREE.MathUtils.clamp(
+        target.current.el + dy * DRAG_SPEED,
+        -EL_LIMIT,
+        EL_LIMIT,
       );
-      camera.position.lerp(new THREE.Vector3(target.x, target.y, target.z), 0.08);
+    };
+    const up = (e: PointerEvent) => {
+      if (!drag.current.active) return;
+      drag.current.active = false;
+      try {
+        el.releasePointerCapture(e.pointerId);
+      } catch {
+        /* pointer already released */
+      }
+      sound.tick();
+    };
+    el.addEventListener("pointerdown", down);
+    el.addEventListener("pointermove", move);
+    el.addEventListener("pointerup", up);
+    el.addEventListener("pointercancel", up);
+    return () => {
+      el.removeEventListener("pointerdown", down);
+      el.removeEventListener("pointermove", move);
+      el.removeEventListener("pointerup", up);
+      el.removeEventListener("pointercancel", up);
+    };
+  }, [gl]);
+
+  useFrame((state, delta) => {
+    // Frame-rate independent damping. k is the responsive one (~0.15s) for
+    // free-look; kSlow (~0.33s) reads as an authored camera move.
+    const k = 1 - Math.pow(0.001, delta);
+    const kSlow = 1 - Math.pow(0.05, delta);
+
+    // COLD START owns the camera until it hands over. Its pose is authored
+    // per-frame from entranceSignal.snap, so there's no damping here — the
+    // easing is already in the signal.
+    if (entranceSignal.authority > 0) {
+      const s = entranceSignal.snap;
+      const az = THREE.MathUtils.lerp(
+        (WRONG_ANGLE.azimuthDeg * Math.PI) / 180,
+        (BEATS[0]!.azimuthDeg * Math.PI) / 180,
+        s,
+      );
+      const el = THREE.MathUtils.lerp(
+        (WRONG_ANGLE.elevationDeg * Math.PI) / 180,
+        (BEATS[0]!.elevationDeg * Math.PI) / 180,
+        s,
+      );
+      const r = THREE.MathUtils.lerp(WRONG_ANGLE.distance, BEATS[0]!.distance, s);
+      // A slow drift while held at the wrong angle so the void never freezes.
+      const wander = reducedMotion ? 0 : (1 - s) * Math.sin(state.clock.elapsedTime * 0.28) * 0.03;
+      camera.position.set(
+        r * Math.cos(el) * Math.sin(az + wander),
+        r * Math.sin(el),
+        r * Math.cos(el) * Math.cos(az + wander),
+      );
       camera.lookAt(0, 0, 0);
-      if (t >= 1) setIntroPlaying(false);
+
+      // Written straight through — LabCloud reads the signal itself for the
+      // shader, so these only keep the refs coherent for the handover.
+      mixRef.current = 0;
+      resolveRef.current = entranceSignal.resolve;
+      dimRef.current = 0;
+      motionScaleRef.current = reducedMotion ? 0 : 1;
+      lastBeat.current = 0;
+      locked.current = true;
+      return;
     }
 
-    // Per-vantage alignment weights from angular proximity.
-    const weights = weightsRef.current;
-    for (const v of VANTAGES) {
-      const d = angularDistanceDeg(az, el, v.azimuthDeg, v.elevationDeg);
-      // Gaussian falloff: 1 at the vantage, ~0 by ~3 sigma.
-      weights[v.id] = Math.exp(-(d * d) / (2 * ALIGN_SIGMA_DEG * ALIGN_SIGMA_DEG));
+    // On a content route the journey holds: the camera flies to that beat's
+    // authored pose and its silhouette stays fully resolved behind the panel.
+    const heldT = panelBeat !== null ? beatT(panelBeat) : storyT;
+    const pose = spinePose(heldT);
+    const { from, to, mix } = storyPosition(heldT);
+    const resolve = reducedMotion || onPanel ? 1 : resolveAmount(heldT);
+
+    panelEase.current += ((onPanel ? 1 : 0) - panelEase.current) * kSlow;
+
+    // Smooth offset toward target; spring target back to 0 when released.
+    offset.current.az += (target.current.az - offset.current.az) * k;
+    offset.current.el += (target.current.el - offset.current.el) * k;
+    if (!drag.current.active) {
+      target.current.az *= 0.94;
+      target.current.el *= 0.94;
     }
 
-    const { id, weight } = bestVantage(weights);
-    const locked = weight >= LOCK_WEIGHT;
-    const alignment = locked ? "LOCKED" : weight >= 0.35 ? "CLOSE" : "SEEKING";
-    const lockedId = locked ? id : null;
+    // Spine base angles + free-look offset, closing in on a content route.
+    const baseRadius = Math.max(Math.hypot(pose.x, pose.y, pose.z), 0.001);
+    const radius = baseRadius * (1 - panelEase.current * PANEL_DOLLY);
+    const baseAz = Math.atan2(pose.x, pose.z);
+    const baseEl = Math.asin(pose.y / baseRadius);
+    const azTotal = baseAz + offset.current.az;
+    const elTotal = THREE.MathUtils.clamp(
+      baseEl + offset.current.el - panelEase.current * PANEL_LEAN,
+      -EL_LIMIT,
+      EL_LIMIT,
+    );
+    camera.position.set(
+      radius * Math.cos(elTotal) * Math.sin(azTotal),
+      radius * Math.sin(elTotal),
+      radius * Math.cos(elTotal) * Math.cos(azTotal),
+    );
+    camera.lookAt(0, 0, 0);
 
-    // Only touch the store when discrete state actually changes.
-    const prev = prevDiscrete.current;
-    if (prev.lockedId !== lockedId || prev.alignment !== alignment || prev.bestId !== id) {
-      const nowLockedId = lockedId;
-      setWeights([...weights]);
-      setLocked(nowLockedId);
-      setAlignment(alignment);
-      setCamera(az, el);
-      // Sound cues fire on real transitions only.
-      if (prev.bestId !== id && weight > 0.35) sound.tick();
-      if (nowLockedId !== null && prev.lockedId !== nowLockedId) sound.lock();
-      prevDiscrete.current = { lockedId: nowLockedId, alignment, bestId: id };
+    // Drive the shader refs. dimRef pushes the cloud back so the reading
+    // surface has room without the scene disappearing.
+    mixRef.current += (from + mix - mixRef.current) * 0.16;
+    resolveRef.current += (resolve - resolveRef.current) * 0.16;
+    dimRef.current += (panelEase.current * PANEL_DIM - dimRef.current) * kSlow;
+    motionScaleRef.current = reducedMotion ? 0 : 1;
+
+    // Notify chrome when the active beat changes.
+    const active = mix < 0.5 ? from : to;
+    if (active !== lastBeat.current) {
+      lastBeat.current = active;
+      setBeat(active);
+      if (active > 0) sound.tick();
     }
 
-    // Live signal + coordinates flow to the HUD at a throttled cadence
-    // (~12fps) via the lightweight signal channel, so the meter animates
-    // smoothly during a drag without churning the discrete lab store.
-    coordAccum.current += delta;
-    if (coordAccum.current > 0.08) {
-      coordAccum.current = 0;
-      useSignalStore.getState().setBestWeight(weight);
-      if (prevDiscrete.current.bestId === id) setCamera(az, el);
-    }
-
-    // Magnetic snap on release.
-    if (controls && !controlsDragging.current && snapTarget.current) {
-      const target = vantageCameraPosition(snapTarget.current);
-      camera.position.lerp(new THREE.Vector3(target.x, target.y, target.z), 0.14);
-      if (camera.position.distanceTo(new THREE.Vector3(target.x, target.y, target.z)) < 0.05) {
-        snapTarget.current = null;
+    // Two-stage audio: tick on crossing into a beat's pull (above), then the
+    // resolving chord as its silhouette actually snaps into focus. Hysteresis
+    // so hovering near the threshold can't retrigger it.
+    if (!onPanel && !reducedMotion) {
+      if (!locked.current && resolve > 0.9) {
+        locked.current = true;
+        sound.lock();
+      } else if (locked.current && resolve < 0.8) {
+        locked.current = false;
       }
     }
 
-    // Scene dim + pull-back when a content route is open.
-    const dimTarget = isHome ? 0 : 1;
-    dimRef.current += (dimTarget - dimRef.current) * 0.08;
-
-    // Tour drives the camera between vantages.
-    if (tourStep >= 1 && tourStep <= 5) {
-      const v = VANTAGES[tourStep - 1];
-      if (v) {
-        const target = vantageCameraPosition(v);
-        camera.position.lerp(new THREE.Vector3(target.x, target.y, target.z), 0.06);
-        camera.lookAt(0, 0, 0);
-      }
-    }
-
-    // Gentle idle breathing so the void never feels frozen.
+    // Idle breathing so the void never freezes.
     if (!reducedMotion) {
       camera.position.y += Math.sin(state.clock.elapsedTime * 0.3) * 0.0015;
     }
-
-    motionScaleRef.current = reducedMotion ? 0 : locked ? 0.15 : 1;
   });
 
-  const controlsDragging = useRef(false);
-  const snapTarget = useRef<(typeof VANTAGES)[number] | null>(null);
-
-  const handleStart = () => {
-    controlsDragging.current = true;
-    snapTarget.current = null;
-    // Any drag cancels the intro immediately.
-    if (introPlaying) setIntroPlaying(false);
-  };
-
-  const handleEnd = () => {
-    controlsDragging.current = false;
-    const { id, weight } = bestVantage([...weightsRef.current]);
-    if (weight >= SNAP_WEIGHT) {
-      snapTarget.current = VANTAGES[id] ?? null;
-    }
-  };
-
-  // Enter a locked vantage with a deliberate press (double click / tap).
-  // Bound on the gl.domElement so it fires anywhere over the canvas.
-  const { gl } = useThree();
+  // Double-click a resolved beat to enter its detail route.
   useEffect(() => {
     const el = gl.domElement;
     const onDoubleClick = () => {
-      if (entering.current) return;
-      const { id, weight } = bestVantage(weightsRef.current);
-      if (weight >= LOCK_WEIGHT) {
-        entering.current = true;
+      const beat = BEATS[lastBeat.current];
+      if (beat?.route && resolveAmount(useStoryStore.getState().storyT) > 0.8) {
         sound.enter();
-        router.push(VANTAGES[id]!.route);
-        window.setTimeout(() => (entering.current = false), 400);
+        router.push(beat.route);
       }
     };
     el.addEventListener("dblclick", onDoubleClick);
     return () => el.removeEventListener("dblclick", onDoubleClick);
-  }, [gl, router, weightsRef]);
+  }, [gl, router]);
 
-  const controlsEnabled = useMemo(
-    () => !introPlaying && tourStep < 0,
-    [introPlaying, tourStep],
-  );
-
-  return (
-    <OrbitControls
-      ref={controlsRef}
-      enabled={controlsEnabled}
-      enablePan={false}
-      enableZoom={false}
-      rotateSpeed={0.55}
-      enableDamping
-      dampingFactor={0.08}
-      onStart={handleStart}
-      onEnd={handleEnd}
-      makeDefault
-    />
-  );
+  return null;
 }

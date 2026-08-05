@@ -27,15 +27,15 @@ const PRINCIPLES = [
 
 export default function ProcessPage() {
   return (
-    <ContentPanel code="vantage 02/05 — process" title="How I build">
+    <ContentPanel title="How I build">
       <p className="max-w-xl text-base leading-relaxed text-type-dim">
         I'm less impressed by a good first answer every year. This is the loop
         I actually trust, and the stance on AI it produced.
       </p>
 
-      <dl className="mt-14 space-y-px">
+      <dl className="panel-rows mt-14">
         {PRINCIPLES.map((p, i) => (
-          <div key={p.k} className="border border-line bg-panel/60 px-5 py-6 sm:px-7">
+          <div key={p.k} className="panel-row px-5 py-6 sm:px-7">
             <dt className="flex items-baseline gap-4">
               <span className="font-mono text-[10px] tracking-[0.18em] text-type-faint">
                 {String(i).padStart(2, "0")}

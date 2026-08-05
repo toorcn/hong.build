@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
   return (
-    <ContentPanel code="vantage 04/05 — contact" title="Say hi">
+    <ContentPanel title="Say hi">
       <p className="max-w-xl font-display text-2xl font-bold leading-snug tracking-tight text-type">
         Have an unusual interface in mind?
       </p>
@@ -28,20 +28,20 @@ export default function ContactPage() {
         </a>
       </div>
 
-      <dl className="mt-14 max-w-xl space-y-px">
-        <div className="grid gap-1 border border-line bg-panel/60 px-5 py-4 sm:grid-cols-[140px_1fr] sm:gap-6">
+      <dl className="panel-rows mt-14 max-w-xl">
+        <div className="panel-row grid gap-1 px-5 py-4 sm:grid-cols-[140px_1fr] sm:gap-6">
           <dt className="font-mono text-[10px] uppercase tracking-[0.18em] text-type-faint">
             location
           </dt>
           <dd className="text-sm text-type-dim">{SITE.location}</dd>
         </div>
-        <div className="grid gap-1 border border-line bg-panel/60 px-5 py-4 sm:grid-cols-[140px_1fr] sm:gap-6">
+        <div className="panel-row grid gap-1 px-5 py-4 sm:grid-cols-[140px_1fr] sm:gap-6">
           <dt className="font-mono text-[10px] uppercase tracking-[0.18em] text-type-faint">
             availability
           </dt>
           <dd className="text-sm text-type-dim">{SITE.availability}</dd>
         </div>
-        <div className="grid gap-1 border border-line bg-panel/60 px-5 py-4 sm:grid-cols-[140px_1fr] sm:gap-6">
+        <div className="panel-row grid gap-1 px-5 py-4 sm:grid-cols-[140px_1fr] sm:gap-6">
           <dt className="font-mono text-[10px] uppercase tracking-[0.18em] text-type-faint">
             elsewhere
           </dt>

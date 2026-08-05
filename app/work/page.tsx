@@ -12,18 +12,18 @@ export default function WorkPage() {
   const projects = getAllProjects();
 
   return (
-    <ContentPanel code="vantage 01/05 — work" title="Selected work">
+    <ContentPanel title="Selected work">
       <p className="max-w-xl text-base leading-relaxed text-type-dim">
-        Three things I built that taught me the most. Each is also hidden
-        somewhere in the cloud — find the right angle and it resolves.
+        Three things I built that taught me the most. Scroll back to the
+        WORK chapter and the cloud re-forms around them.
       </p>
 
-      <ul className="mt-12 space-y-px">
+      <ul className="panel-rows mt-12">
         {projects.map((p) => (
           <li key={p.frontmatter.slug}>
             <Link
               href={`/work/${p.frontmatter.slug}`}
-              className="focus-ring group flex items-baseline justify-between gap-6 border border-line bg-panel/60 px-5 py-6 transition-colors hover:border-accent sm:px-7"
+              className="focus-ring panel-row group flex items-baseline justify-between gap-6 px-5 py-6 sm:px-7"
             >
               <div className="min-w-0">
                 <div className="flex items-baseline gap-4">

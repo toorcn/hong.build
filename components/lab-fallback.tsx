@@ -1,5 +1,7 @@
 "use client";
 
+import { usePathname } from "next/navigation";
+import { useEntranceStore } from "@/lib/entrance";
 import { useLabStore } from "@/lib/store";
 
 /**
@@ -8,12 +10,22 @@ import { useLabStore } from "@/lib/store";
  * the client confirms WebGL, and permanently when WebGL is unavailable.
  */
 export function LabFallback() {
+  const pathname = usePathname();
   const checked = useLabStore((s) => s.webglChecked);
   const available = useLabStore((s) => s.webglAvailable);
+  const phase = useEntranceStore((s) => s.phase);
 
-  // Before hydration we haven't checked yet: show the fallback so the
-  // page is never empty. Once WebGL is confirmed, the canvas covers it.
-  const visible = !checked || !available;
+  // On the journey this mark is the entrance's no-WebGL reveal: it wipes in
+  // during the snap, holds, and then hands the story to NarrativeFallback,
+  // whose first section is the same wordmark. Staying put would mean two
+  // copies of the name on one screen. Content routes keep it as a backdrop.
+  const supersededByStory = pathname === "/" && phase === "done";
+
+  // Only once we know WebGL is unavailable. Showing it before the check would
+  // flash the resolved name over the entrance and give away the reveal; COLD
+  // START holds the frame meanwhile, and LabScene's <noscript> copy covers
+  // the case where no script runs at all.
+  const visible = checked && !available && !supersededByStory;
 
   return (
     <div

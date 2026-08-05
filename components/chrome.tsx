@@ -2,25 +2,29 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { NAV, SITE } from "@/content/site";
+import { SITE } from "@/content/site";
+import { BEATS } from "@/lib/story";
+import { useStoryStore } from "@/lib/story-store";
 import { SoundToggle } from "@/components/sound-toggle";
-import { Hud } from "@/components/hud";
 
 /**
- * Persistent interface chrome: identity, primary nav, sound control.
- * Deliberately sparse — the HUD (azimuth / signal / alignment) lives in
- * the Hud component layered over the scene.
+ * Narrative chrome: identity top-left, sound + contact top-right, and a
+ * slim mobile chapter strip. The right-edge ChapterRail (rendered by the
+ * page) handles desktop chapter navigation; this stays minimal so the
+ * journey owns the frame.
  */
 export function Chrome() {
   const pathname = usePathname();
   const onHome = pathname === "/";
+  const activeBeat = useStoryStore((s) => s.activeBeat);
+  const goToBeat = useStoryStore((s) => s.goToBeat);
 
   return (
     <header className="lab-chrome pointer-events-none fixed inset-x-0 top-0 z-20">
       <div className="flex items-start justify-between px-5 py-4 sm:px-8 sm:py-6">
         <Link
           href="/"
-          className="focus-ring pointer-events-auto group"
+          className="focus-ring entrance-hide pointer-events-auto group"
           aria-label={`${SITE.name} — home`}
         >
           <span className="block font-display text-lg font-black leading-none tracking-tight text-type">
@@ -31,54 +35,57 @@ export function Chrome() {
           </span>
         </Link>
 
-        <div className="pointer-events-auto flex items-center gap-5">
-          <nav aria-label="Primary" className="hidden items-center gap-5 sm:flex">
-            {NAV.map((item) => {
-              const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  aria-current={active ? "page" : undefined}
-                  className={`focus-ring font-mono text-[11px] uppercase tracking-[0.18em] transition-colors ${
-                    active ? "text-accent" : "text-type-dim hover:text-type"
-                  }`}
-                >
-                  <span className="mr-1 text-type-faint">{item.code}</span>
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
+        {/* The sound toggle is deliberately outside `entrance-hide`: sound must
+            be controllable before anything is ever played, including during
+            the entrance — click it there and the mark's lock chord sounds. */}
+        <div className="pointer-events-auto flex items-center gap-4">
+          {onHome ? (
+            <Link
+              href="/contact"
+              className="focus-ring entrance-hide hidden border border-line px-3.5 py-2 font-mono text-[11px] uppercase tracking-[0.18em] text-type-dim transition-colors hover:border-accent hover:text-type sm:block"
+            >
+              Contact
+            </Link>
+          ) : (
+            <Link
+              href="/"
+              className="focus-ring entrance-hide hidden border border-line px-3.5 py-2 font-mono text-[11px] uppercase tracking-[0.18em] text-type-dim transition-colors hover:border-accent hover:text-type sm:block"
+            >
+              ← Journey
+            </Link>
+          )}
           <SoundToggle />
         </div>
       </div>
 
-      {/* Mobile nav — same destinations, always reachable. */}
-      {!onHome && (
+      {/* Mobile chapter strip — bottom, only on the journey. */}
+      {onHome && (
         <nav
-          aria-label="Primary mobile"
-          className="pointer-events-auto fixed inset-x-0 bottom-0 z-20 flex justify-around border-t border-line bg-void/85 px-2 py-3 backdrop-blur sm:hidden"
+          aria-label="Chapters"
+          style={{ "--reveal-delay": "120ms" } as React.CSSProperties}
+          className="entrance-hide pointer-events-auto fixed inset-x-0 bottom-0 z-20 flex items-center justify-center gap-4 border-t border-line bg-void/85 px-2 py-3 backdrop-blur sm:hidden"
         >
-          {NAV.map((item) => {
-            const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+          {BEATS.map((beat) => {
+            const active = beat.id === activeBeat;
             return (
-              <Link
-                key={item.href}
-                href={item.href}
-                aria-current={active ? "page" : undefined}
-                className={`focus-ring font-mono text-[10px] uppercase tracking-[0.16em] ${
-                  active ? "text-accent" : "text-type-dim"
-                }`}
+              <button
+                key={beat.id}
+                type="button"
+                onClick={() => goToBeat(beat.id)}
+                aria-label={beat.label}
+                aria-current={active}
+                className="focus-ring flex h-7 items-center justify-center"
               >
-                {item.label}
-              </Link>
+                <span
+                  className={`block rounded-full transition-all duration-300 ${
+                    active ? "h-2 w-2 bg-accent" : "h-1.5 w-1.5 bg-type-faint"
+                  }`}
+                />
+              </button>
             );
           })}
         </nav>
       )}
-
-      <Hud />
     </header>
   );
 }

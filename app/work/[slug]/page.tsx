@@ -46,11 +46,7 @@ export default async function ProjectPage({
   const next = all[idx + 1] ?? null;
 
   return (
-    <ContentPanel
-      code={`vantage 01/05 — work / ${frontmatter.slug}`}
-      title={frontmatter.title}
-      wide
-    >
+    <ContentPanel title={frontmatter.title} sub={frontmatter.slug} wide>
       <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-b border-line pb-8 font-mono text-[11px] uppercase tracking-[0.16em] text-type-faint">
         <span>{frontmatter.year}</span>
         <span>{frontmatter.kind}</span>
@@ -61,7 +57,7 @@ export default async function ProjectPage({
         {frontmatter.tagline}
       </p>
 
-      <dl className="mt-10 grid gap-6 border border-line bg-panel/50 p-6 sm:grid-cols-2">
+      <dl className="panel-rows mt-10 grid gap-6 border-t border-line px-1 py-6 sm:grid-cols-2">
         <div>
           <dt className="font-mono text-[10px] uppercase tracking-[0.18em] text-accent">role</dt>
           <dd className="mt-2 text-sm leading-relaxed text-type-dim">{frontmatter.role}</dd>
