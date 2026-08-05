@@ -10,7 +10,9 @@
     "typecheck": "tsc --noEmit",
     "fragments": "tsx scripts/generate-fragments.ts",
     "fragments:check": "tsx scripts/generate-fragments.ts --check",
-    "verify:entrance": "node scripts/verify-cold-start.mjs"
+    "verify:entrance": "node scripts/verify-cold-start.mjs",
+    "verify:cursor": "node scripts/cursor-checks.mjs",
+    "shots:walk": "node scripts/walk-shots.mjs"
   },
   "repository": {
     "type": "git",
