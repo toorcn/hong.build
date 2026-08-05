@@ -15,9 +15,12 @@ import { JourneyOverlays, WebglSpacer } from "@/components/journey-overlays";
 export default function HomePage() {
   return (
     <StorySpine>
-      {/* One viewport of scroll per beat, only when the live scene runs.
+      {/* Roughly one viewport per beat. Total height is what sets the pace,
+          not the beat count — the beats are unevenly spaced (lib/story.ts),
+          so this works out to about two screens of travel across the four
+          quiet years and a little under one for the tight 2025 chapters.
           With WebGL off the fallback supplies its own section heights. */}
-      <WebglSpacer height={`${BEATS.length * 100}vh`} />
+      <WebglSpacer height={`${BEATS.length * 96}vh`} />
 
       {/* Live-scene overlays; hidden when WebGL is off. */}
       <JourneyOverlays>

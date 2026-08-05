@@ -1,19 +1,25 @@
 "use client";
 
 /**
- * Loads public/fragments.bin (v2 narrative morph layout).
+ * Loads public/fragments.bin (v3 walk layout).
  * Header: magic(4) version(4) count(4) beats(4), then
- *   targets[beats*count*3 f32] + noise[count*3 f32] + seeds[count f32].
+ *   targets[count*3 f32] + dust[count*3 f32] + seeds[count f32] + homes[count f32].
+ *
+ * Each fragment has one home beat: it gathers from its room's dust into its
+ * artifact as the camera approaches, and relaxes back toward the walls as
+ * the walk moves on. No fragment ever becomes a different artifact.
  */
 
 export interface FragmentData {
   count: number;
   beats: number;
-  /** BEAT_COUNT blocks of count*3 resolved positions. */
+  /** World-space resolved positions, count*3. */
   targets: Float32Array;
-  /** Per-fragment dissolve noise vector. */
-  noise: Float32Array;
+  /** World-space ambient dust positions, count*3. */
+  dust: Float32Array;
   seeds: Float32Array;
+  /** Home beat per fragment, stored as f32. */
+  homes: Float32Array;
 }
 
 let cache: Promise<FragmentData> | null = null;
@@ -67,26 +73,25 @@ export function loadFragments(onProgress?: ProgressFn): Promise<FragmentData> {
       const magic = view.getUint32(0, true);
       if (magic !== 0x46524147) throw new Error("bad fragments.bin magic");
       const version = view.getUint32(4, true);
-      if (version !== 2) throw new Error(`expected v2 fragments, got v${version}`);
+      if (version !== 3) throw new Error(`expected v3 fragments, got v${version}`);
       const count = view.getUint32(8, true);
       const beats = view.getUint32(12, true);
 
       const headerBytes = 16;
-      const targetBytes = beats * count * 3 * 4;
-      const noiseBytes = count * 3 * 4;
-      const seedBytes = count * 4;
+      const vecBytes = count * 3 * 4;
+      const fBytes = count * 4;
 
-      const targets = new Float32Array(buf.slice(headerBytes, headerBytes + targetBytes));
-      const noise = new Float32Array(
-        buf.slice(headerBytes + targetBytes, headerBytes + targetBytes + noiseBytes),
+      const targets = new Float32Array(buf.slice(headerBytes, headerBytes + vecBytes));
+      const dust = new Float32Array(
+        buf.slice(headerBytes + vecBytes, headerBytes + vecBytes * 2),
       );
       const seeds = new Float32Array(
-        buf.slice(
-          headerBytes + targetBytes + noiseBytes,
-          headerBytes + targetBytes + noiseBytes + seedBytes,
-        ),
+        buf.slice(headerBytes + vecBytes * 2, headerBytes + vecBytes * 2 + fBytes),
       );
-      return { count, beats, targets, noise, seeds };
+      const homes = new Float32Array(
+        buf.slice(headerBytes + vecBytes * 2 + fBytes, headerBytes + vecBytes * 2 + fBytes * 2),
+      );
+      return { count, beats, targets, dust, seeds, homes };
     });
   return cache;
 }

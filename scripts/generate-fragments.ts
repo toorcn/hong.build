@@ -1,19 +1,18 @@
 /**
- * Build-time narrative anamorphosis generator.
+ * Build-time generator for the walk (v3).
  *
- * One pool of N fragments. Each fragment carries BEAT_COUNT target
- * positions — one resolved position per story beat. The runtime shader
- * morphs each fragment toward the current beat's target, so scrolling
- * dissolves the cloud to noise and re-forms it as the next silhouette.
+ * One pool of N fragments, each with a HOME chapter. A fragment only ever
+ * belongs to one artifact — there is no morph. Each beat's allocation is
+ * sampled into its silhouette, placed at its room centre; the same
+ * fragment's dust position is a point in the room's shell, where it lives
+ * until the camera nears and the shader gathers it in. Past rooms, the
+ * fragment relaxes back toward its dust — history becomes the walls.
  *
- * Resolved position for fragment f at beat k:
- *   - rasterize silhouette k to an alpha mask, rejection-sample a 2D point
- *   - map to a plane at the beat's authored camera distance
- *   - jitter depth along the camera ray so off-angle views scatter
- *
- * Between beats the shader interpolates targets, and a per-fragment
- * "noise" vector (also generated here) is mixed in at the midpoint so the
- * dissolve is visible rather than a straight slide.
+ * Per fragment, generated here:
+ *   - home:   which beat it belongs to (f32 for the attribute)
+ *   - target: world-space resolved position in its artifact
+ *   - dust:   world-space ambient position in its room's shell
+ *   - seed:   random 0..1 for stagger and drift
  *
  * Output: public/fragments.bin + lib/generated/fragments-meta.ts
  *
@@ -26,14 +25,26 @@ import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 import { PerspectiveCamera, Vector3 } from "three";
 import { SILHOUETTES } from "../assets/silhouettes";
-import { BEATS, BEAT_COUNT, beatPose } from "../lib/story";
+import {
+  BEATS,
+  BEAT_ALLOCATIONS,
+  BEAT_COUNT,
+  ROOMS,
+  beatPose,
+  beatT,
+  fidelity,
+} from "../lib/story";
 import { CAMERA_FOV } from "../lib/vantages";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..");
 
-/** Fragments in the shared pool. */
-const FRAGMENT_COUNT = 6000;
+/**
+ * Fragments in the shared pool. Raised from 6,000 when the journey went from
+ * seven chapters to eleven — the per-chapter allocations were getting too thin
+ * to keep a silhouette legible. Costs ~32 bytes per fragment in fragments.bin.
+ */
+const FRAGMENT_COUNT = 7000;
 const SEED = 1337;
 
 function mulberry32(seed: number): () => number {
@@ -75,35 +86,41 @@ function sampleOne(mask: Buffer, size: number, rand: () => number): { x: number;
 }
 
 interface Generated {
-  /** Per-beat resolved positions: BEAT_COUNT blocks of FRAGMENT_COUNT*3. */
+  /** World-space resolved positions: count*3. */
   targets: Float32Array;
-  /** Per-fragment noise offset for the dissolve midpoint. */
-  noise: Float32Array;
+  /** World-space ambient dust positions: count*3. */
+  dust: Float32Array;
   /** Per-fragment random seed for stagger and drift. */
   seeds: Float32Array;
+  /** Per-fragment home beat, stored as f32 for the attribute. */
+  homes: Float32Array;
 }
 
 function generate(): Generated {
-  const targets = new Float32Array(BEAT_COUNT * FRAGMENT_COUNT * 3);
-  const noise = new Float32Array(FRAGMENT_COUNT * 3);
-  const seeds = new Float32Array(FRAGMENT_COUNT);
-  const rand = mulberry32(SEED);
-
-  // Per-fragment noise vector, on a shell so dissolves read as scatter.
-  for (let i = 0; i < FRAGMENT_COUNT; i++) {
-    const theta = rand() * Math.PI * 2;
-    const phi = Math.acos(rand() * 2 - 1);
-    const r = 3.5 + rand() * 4.5;
-    noise[i * 3] = r * Math.sin(phi) * Math.cos(theta);
-    noise[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
-    noise[i * 3 + 2] = r * Math.cos(phi);
-    seeds[i] = rand();
+  const allocTotal = BEAT_ALLOCATIONS.reduce((a, b) => a + b, 0);
+  if (allocTotal !== FRAGMENT_COUNT) {
+    throw new Error(`BEAT_ALLOCATIONS sums to ${allocTotal}, expected ${FRAGMENT_COUNT}`);
   }
 
-  // Per-beat resolved positions for every fragment.
+  const rand = mulberry32(SEED);
+
+  // Generate per-beat blocks first…
+  const perBeat = Array.from({ length: BEAT_COUNT }, () => ({
+    targets: [] as number[],
+    dust: [] as number[],
+    seeds: [] as number[],
+  }));
+
   for (let k = 0; k < BEAT_COUNT; k++) {
     const beat = BEATS[k]!;
+    const room = ROOMS[k]!;
+    const count = BEAT_ALLOCATIONS[k]!;
     const mask = masks[beat.silhouette]!;
+    const block = perBeat[k]!;
+
+    // The artifact is formed exactly as the old morph generator formed it —
+    // sampled through the beat's authored camera around the origin — then
+    // translated to its room. The authored angles survive the walk.
     const pose = beatPose(beat);
     const P = new Vector3(pose.x, pose.y, pose.z);
     const cam = new PerspectiveCamera(CAMERA_FOV, 1, 0.1, 200);
@@ -111,34 +128,70 @@ function generate(): Generated {
     cam.lookAt(0, 0, 0);
     cam.updateMatrixWorld();
 
-    const blockOffset = k * FRAGMENT_COUNT * 3;
-    for (let i = 0; i < FRAGMENT_COUNT; i++) {
+    const [cx, cy, cz] = room.center;
+    // Depth jitter IS the fidelity narrative: the gate scatters coarse
+    // (an 18 KB jar by a twelve-year-old), the wordmark sets tight.
+    const jitter = 3.4 * (1 - fidelity(beatT(k))) + 0.4;
+    for (let i = 0; i < count; i++) {
       const s = sampleOne(mask.data, mask.size, rand);
       const ndcX = s.x * 0.82;
       const ndcY = s.y * 0.82;
       const dir = new Vector3(ndcX, ndcY, 0.5).unproject(cam).sub(P).normalize();
-      const depth = beat.distance + (rand() * 2 - 1) * 3.4;
+      const depth = beat.distance + (rand() * 2 - 1) * jitter;
       const point = P.clone().addScaledVector(dir, depth);
-      targets[blockOffset + i * 3] = point.x;
-      targets[blockOffset + i * 3 + 1] = point.y;
-      targets[blockOffset + i * 3 + 2] = point.z;
+      block.targets.push(point.x + cx, point.y + cy, point.z + cz);
+
+      // The room's walls: most dust hugs the shell, some floats inside.
+      const theta = rand() * Math.PI * 2;
+      const phi = Math.acos(rand() * 2 - 1);
+      const wall = rand() < 0.7;
+      const r = wall
+        ? room.radius * (0.8 + rand() * 0.35)
+        : room.radius * (0.25 + rand() * 0.55);
+      block.dust.push(
+        cx + r * Math.sin(phi) * Math.cos(theta),
+        cy + r * Math.sin(phi) * Math.sin(theta),
+        cz + r * Math.cos(phi),
+      );
+
+      block.seeds.push(rand());
     }
   }
 
-  return { targets, noise, seeds };
+  // …then interleave blocks round-robin. The runtime trims drawRange on
+  // mobile, and an interleaved order means truncation thins every room
+  // evenly instead of amputating the final chapters.
+  const targets = new Float32Array(FRAGMENT_COUNT * 3);
+  const dust = new Float32Array(FRAGMENT_COUNT * 3);
+  const seeds = new Float32Array(FRAGMENT_COUNT);
+  const homes = new Float32Array(FRAGMENT_COUNT);
+  let out = 0;
+  for (let i = 0; out < FRAGMENT_COUNT; i++) {
+    for (let k = 0; k < BEAT_COUNT && out < FRAGMENT_COUNT; k++) {
+      const block = perBeat[k]!;
+      if (i * 3 >= block.targets.length) continue;
+      targets.set(block.targets.slice(i * 3, i * 3 + 3), out * 3);
+      dust.set(block.dust.slice(i * 3, i * 3 + 3), out * 3);
+      seeds[out] = block.seeds[i]!;
+      homes[out] = k;
+      out++;
+    }
+  }
+
+  return { targets, dust, seeds, homes };
 }
 
 function serialize(g: Generated): Buffer {
   const header = Buffer.alloc(16);
   header.writeUInt32LE(0x46524147, 0); // "FRAG"
-  header.writeUInt32LE(2, 4); // version 2 = narrative morph layout
+  header.writeUInt32LE(3, 4); // version 3 = the walk (home/dust/target/seed)
   header.writeUInt32LE(FRAGMENT_COUNT, 8);
   header.writeUInt32LE(BEAT_COUNT, 12);
 
-  const targetBytes = Buffer.from(g.targets.buffer, g.targets.byteOffset, g.targets.byteLength);
-  const noiseBytes = Buffer.from(g.noise.buffer, g.noise.byteOffset, g.noise.byteLength);
-  const seedBytes = Buffer.from(g.seeds.buffer, g.seeds.byteOffset, g.seeds.byteLength);
-  return Buffer.concat([header, targetBytes, noiseBytes, seedBytes]);
+  const parts = [g.targets, g.dust, g.seeds, g.homes].map((a) =>
+    Buffer.from(a.buffer, a.byteOffset, a.byteLength),
+  );
+  return Buffer.concat([header, ...parts]);
 }
 
 const masks: { data: Buffer; size: number }[] = [];
@@ -166,7 +219,7 @@ export const BEAT_TARGET_COUNT = ${BEAT_COUNT};
   );
 
   console.log(
-    `fragments.bin (v2 narrative) written: ${FRAGMENT_COUNT} fragments x ${BEAT_COUNT} beats, ` +
+    `fragments.bin (v3 walk) written: ${FRAGMENT_COUNT} fragments across ${BEAT_COUNT} rooms, ` +
       `${(bin.length / 1024).toFixed(1)} KiB`,
   );
 }

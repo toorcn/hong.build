@@ -1,7 +1,8 @@
 "use client";
 
 import { create } from "zustand";
-import { BEAT_COUNT } from "@/lib/story";
+import { BEAT_COUNT, beatT } from "@/lib/story";
+import { scrollSpineTo } from "@/lib/spine-scroll";
 
 interface StoryState {
   /** Continuous scroll position through the journey, 0..1. */
@@ -17,9 +18,20 @@ interface StoryState {
   setStoryT: (t: number) => void;
   setBeat: (beat: number) => void;
   setOriginT: (t: number) => void;
-  /** Scroll to a beat's position on the spine. */
-  goToBeat: (beat: number) => void;
+  /**
+   * Scroll to a beat's position on the spine.
+   * `duration` overrides the default eased settle (ms) — magnets pass a
+   * longer one so the pull feels soft rather than snapped.
+   * `onCancel` fires if the visitor interrupts the eased scroll.
+   */
+  goToBeat: (
+    beat: number,
+    opts?: { duration?: number; onCancel?: () => void },
+  ) => void;
 }
+
+/** Default for intentional rail / chrome jumps — still eased, not instant. */
+const GOTO_MS = 900;
 
 export const useStoryStore = create<StoryState>()((set) => ({
   storyT: 0,
@@ -28,15 +40,23 @@ export const useStoryStore = create<StoryState>()((set) => ({
   setStoryT: (storyT) => set({ storyT }),
   setBeat: (activeBeat) => set({ activeBeat }),
   setOriginT: (originT) => set({ originT }),
-  goToBeat: (beat) => {
+  goToBeat: (beat, opts) => {
     const clamped = Math.min(Math.max(beat, 0), BEAT_COUNT - 1);
-    const t = clamped / (BEAT_COUNT - 1);
-    // Scroll the window so the spine observer picks it up and animates.
+    // Beats are unevenly spaced along storyT (see lib/story.ts) — ask for
+    // the position rather than assuming a uniform division.
+    const t = beatT(clamped);
+    // Scroll the window so the spine observer picks storyT up from scrollY.
+    // Don't set storyT here: a premature jump would flash the resolved beat
+    // then dissolve again as scroll events rewrite it.
     const spine = document.getElementById("story-spine");
     if (spine) {
       const y = spine.offsetTop + t * (spine.offsetHeight - window.innerHeight);
-      window.scrollTo({ top: y, behavior: "smooth" });
+      scrollSpineTo(y, {
+        duration: opts?.duration ?? GOTO_MS,
+        onCancel: opts?.onCancel,
+      });
+    } else {
+      set({ storyT: t });
     }
-    set({ storyT: t });
   },
 }));

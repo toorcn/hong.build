@@ -37,6 +37,7 @@ export function NarrativeFallback() {
         >
           <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-accent">
             {beat.code} — {beat.label}
+            <span className="ml-3 text-type-faint">{beat.when}</span>
           </p>
           <div
             className="mt-8 h-[52vmin] w-[52vmin] text-accent [&_svg]:h-full [&_svg]:w-full"
@@ -45,8 +46,14 @@ export function NarrativeFallback() {
             // The silhouettes are authored constants in assets/silhouettes.ts.
             dangerouslySetInnerHTML={{ __html: SILHOUETTES[beat.silhouette] ?? "" }}
           />
+          {/* Both lines, stacked. Without the dissolve to carry the turn,
+              the fallback simply reads it as the next paragraph — which is
+              what makes this path a real essay rather than six icons. */}
           <p className="mt-8 max-w-md text-balance font-display text-2xl leading-snug text-type">
-            {beat.caption}
+            {beat.line}
+          </p>
+          <p className="mt-4 max-w-md text-balance text-base leading-relaxed text-type-dim">
+            {beat.turn}
           </p>
           {beat.route ? (
             <Link

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { SITE } from "@/content/site";
+import { BEAT_TARGET_COUNT, FRAGMENT_TOTAL } from "@/lib/generated/fragments-meta";
 import { ENTRANCE_SEEN_KEY as SEEN_KEY } from "@/lib/entrance-boot";
 import { useLabStore } from "@/lib/store";
 import { sound } from "@/lib/sound";
@@ -295,7 +296,8 @@ export function ColdStart() {
 
         {(phase === "arrival" || phase === "wrong") && (
           <p className="tnum mt-1 text-type-dim">
-            <span className="text-accent">✓</span> 6000 fragments · 6 beats ·{" "}
+            <span className="text-accent">✓</span> {FRAGMENT_TOTAL.toLocaleString()} fragments ·{" "}
+            {BEAT_TARGET_COUNT} beats ·{" "}
             <span className="text-type-faint">0 meaning</span>
           </p>
         )}
