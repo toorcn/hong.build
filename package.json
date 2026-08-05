@@ -1,0 +1,52 @@
+{
+  "name": "hongbing-site",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Hong Bing Sim — the Perception Lab. Nothing here means anything until you find the angle.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "fragments": "tsx scripts/generate-fragments.ts",
+    "fragments:check": "tsx scripts/generate-fragments.ts --check"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toorcn/personal-site-creative-brief.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/toorcn/personal-site-creative-brief/issues"
+  },
+  "homepage": "https://github.com/toorcn/personal-site-creative-brief#readme",
+  "dependencies": {
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.7.0",
+    "@react-three/postprocessing": "^3.0.4",
+    "gsap": "^3.15.0",
+    "next": "^16.3.0",
+    "next-mdx-remote": "^6.0.0",
+    "postprocessing": "^6.39.4",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "three": "^0.185.1",
+    "zustand": "^5.0.14"
+  },
+  "devDependencies": {
+    "@next/mdx": "^16.3.0",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^26.1.2",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@types/three": "^0.185.4",
+    "gray-matter": "^4.0.3",
+    "reading-time": "^1.5.0",
+    "sharp": "^0.35.3",
+    "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.6",
+    "typescript": "^7.0.2"
+  }
+}

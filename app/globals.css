@@ -1,0 +1,95 @@
+@import "tailwindcss";
+
+@theme {
+  --color-void: #0a0b0d;
+  --color-void-raised: #101216;
+  --color-panel: #14161b;
+  --color-line: #23262e;
+  --color-type: #edede8;
+  --color-type-dim: #9aa0ab;
+  --color-type-faint: #5b626e;
+  --color-accent: #c8ff4d;
+  --color-accent-dim: #8fb53a;
+  --color-slate-fragment: #4a5468;
+
+  --font-display: var(--font-archivo), "Arial Narrow", sans-serif;
+  --font-mono: var(--font-jetbrains), "SF Mono", Menlo, monospace;
+  --font-body: var(--font-inter), system-ui, sans-serif;
+
+  --ease-signal: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--color-void);
+  color: var(--color-type);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--color-accent);
+  color: var(--color-void);
+}
+
+/* Persistent scene sits behind every route. */
+.lab-canvas-root {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+
+.lab-chrome {
+  position: relative;
+  z-index: 10;
+}
+
+/* Editorial content panels read above the dimmed scene. */
+.content-scrim {
+  background:
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--color-void) 78%, transparent),
+      color-mix(in srgb, var(--color-void) 92%, transparent)
+    );
+  backdrop-filter: blur(6px);
+}
+
+.focus-ring {
+  outline: 2px solid transparent;
+  outline-offset: 3px;
+}
+.focus-ring:focus-visible {
+  outline-color: var(--color-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Mono HUD numerals */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Case-study body column */
+.prose-lab {
+  max-width: 44rem;
+}
