@@ -3,12 +3,12 @@
 import { useEffect } from "react";
 import { useLabStore } from "@/lib/store";
 import { useEntranceStore } from "@/lib/entrance";
-import { sound } from "@/lib/sound";
-
-const STORAGE_KEY = "lab.muted";
+import { MUTED_STORAGE_KEY as STORAGE_KEY, sound } from "@/lib/sound";
 
 /**
- * Sound control. Defaults to on; the choice persists.
+ * Sound control, drawn as a small record player: the arm drops onto a
+ * spinning record while the bed is running and lifts off when muted.
+ * Defaults to on; the choice persists.
  * Ambient only begins after the cold start releases it (or immediately on
  * returning visits). Browsers still need a gesture before audio can play.
  */
@@ -41,8 +41,8 @@ export function SoundToggle() {
     };
 
     start();
-    window.addEventListener("pointerdown", start, { passive: true });
-    window.addEventListener("keydown", start);
+    window.addEventListener("pointerdown", start, { passive: true, once: true });
+    window.addEventListener("keydown", start, { once: true });
     return () => {
       window.removeEventListener("pointerdown", start);
       window.removeEventListener("keydown", start);
@@ -66,15 +66,28 @@ export function SoundToggle() {
     <button
       type="button"
       onClick={toggle}
+      data-on={muted ? "0" : "1"}
       aria-pressed={!muted}
       aria-label={muted ? "Turn sound on" : "Turn sound off"}
-      className="focus-ring flex items-center gap-2 border border-line px-3 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-type-dim transition-colors hover:border-accent hover:text-type"
+      title={muted ? "Sound off" : "Sound on"}
+      className="focus-ring sound-disc"
     >
-      <span
-        className={`inline-block h-1.5 w-1.5 rounded-full ${muted ? "bg-type-faint" : "bg-accent"}`}
-        aria-hidden="true"
-      />
-      {muted ? "sound off" : "sound on"}
+      <span className="sound-disc-platter" aria-hidden="true">
+        <span className="sound-disc-index" />
+        <span className="sound-disc-scan" />
+        <span className="sound-disc-record" />
+        <span className="sound-disc-label" />
+        <span className="sound-disc-arm" />
+      </span>
+      <span className="sound-disc-caption" aria-hidden="true">
+        <span className="sound-disc-caption-label">ambient</span>
+        <span className="sound-disc-meter">
+          <i />
+          <i />
+          <i />
+        </span>
+        <span className="sound-disc-caption-state">{muted ? "muted" : "running"}</span>
+      </span>
     </button>
   );
 }

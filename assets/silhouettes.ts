@@ -242,51 +242,23 @@ export const SILHOUETTES: readonly string[] = [
     </g>
   </svg>`,
 
-  // ── 08 · NINETEEN CAMPUSES ─────────────────────────────────────────────
-  // One hub, eighteen campuses, every one of them wired to it. AI Hackerdorm:
-  // 500+ students across 19 campuses. Radial rather than a mesh because that
-  // is what it actually is — a place, and everyone's route into it.
+  // ── 08 · THE NETWORK ───────────────────────────────────────────────────
+  // One hub, four chapters, every one of them wired to it. AI Hackerdorm:
+  // four chapters, 400+ members nationwide. Radial rather than a mesh
+  // because that is what it actually is — a place, and everyone's route in.
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">
     <g stroke="#fff" stroke-width="16" fill="none">
-      <path d="M 500 500 L 500 270"/>
-      <path d="M 500 500 L 320 357"/>
-      <path d="M 500 500 L 276 551"/>
-      <path d="M 500 500 L 400 707"/>
-      <path d="M 500 500 L 600 707"/>
-      <path d="M 500 500 L 724 551"/>
-      <path d="M 500 500 L 680 357"/>
-      <path d="M 500 500 L 659 159"/>
-      <path d="M 500 500 L 449 127"/>
-      <path d="M 500 500 L 256 214"/>
-      <path d="M 500 500 L 140 392"/>
-      <path d="M 500 500 L 138 603"/>
-      <path d="M 500 500 L 251 782"/>
-      <path d="M 500 500 L 443 872"/>
-      <path d="M 500 500 L 654 843"/>
-      <path d="M 500 500 L 815 706"/>
-      <path d="M 500 500 L 876 503"/>
-      <path d="M 500 500 L 818 299"/>
+      <path d="M 500 500 L 500 220"/>
+      <path d="M 500 500 L 780 500"/>
+      <path d="M 500 500 L 500 780"/>
+      <path d="M 500 500 L 220 500"/>
     </g>
     <g fill="#fff">
       <circle cx="500" cy="500" r="72"/>
-      <circle cx="500" cy="270" r="30"/>
-      <circle cx="320" cy="357" r="30"/>
-      <circle cx="276" cy="551" r="30"/>
-      <circle cx="400" cy="707" r="30"/>
-      <circle cx="600" cy="707" r="30"/>
-      <circle cx="724" cy="551" r="30"/>
-      <circle cx="680" cy="357" r="30"/>
-      <circle cx="659" cy="159" r="26"/>
-      <circle cx="449" cy="127" r="26"/>
-      <circle cx="256" cy="214" r="26"/>
-      <circle cx="140" cy="392" r="26"/>
-      <circle cx="138" cy="603" r="26"/>
-      <circle cx="251" cy="782" r="26"/>
-      <circle cx="443" cy="872" r="26"/>
-      <circle cx="654" cy="843" r="26"/>
-      <circle cx="815" cy="706" r="26"/>
-      <circle cx="876" cy="503" r="26"/>
-      <circle cx="818" cy="299" r="26"/>
+      <circle cx="500" cy="220" r="36"/>
+      <circle cx="780" cy="500" r="36"/>
+      <circle cx="500" cy="780" r="36"/>
+      <circle cx="220" cy="500" r="36"/>
     </g>
   </svg>`,
 

@@ -27,12 +27,12 @@ export default function AboutPage() {
         Right now I'm building production AI at YTL AI Labs, R&D for an
         SF-based startup, and my own thing — Tack, a meeting moderator that
         intervenes while the conversation is still alive. I also co-founded
-        AI Hackerdorm — 500+ students across 19 campuses.
+        AI Hackerdorm — 4 chapters, 400+ members nationwide.
       </p>
 
       <dl className="panel-rows mt-14">
         {ABOUT_FACTS.map((f) => (
-          <LiveRow key={f.k} className="grid gap-1 px-5 py-4 sm:grid-cols-[200px_1fr] sm:gap-6">
+          <LiveRow key={f.k} className="grid gap-1 px-3 py-4 sm:grid-cols-[200px_1fr] sm:gap-6 sm:px-5">
             <dt className="font-mono text-[10px] uppercase tracking-[0.18em] text-type-faint">
               {f.k}
             </dt>

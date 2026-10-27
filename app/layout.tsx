@@ -8,6 +8,7 @@ import { ColdStart } from "@/components/cold-start";
 import { Chrome } from "@/components/chrome";
 import { PageTransition } from "@/components/page-transition";
 import { ScrollReset } from "@/components/scroll-reset";
+import { SiteCursor } from "@/components/site-cursor";
 import "./globals.css";
 
 const archivo = Archivo({
@@ -79,6 +80,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
         <Chrome />
         <ScrollReset />
+        <SiteCursor />
 
         <main id="content" className="lab-chrome">
           <PageTransition>{children}</PageTransition>

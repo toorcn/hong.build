@@ -1,7 +1,8 @@
 "use client";
 
-import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 import { BEATS, resolveAmount, storyPosition } from "@/lib/story";
+import { useLabStore } from "@/lib/store";
 import { useStoryStore } from "@/lib/story-store";
 
 /**
@@ -23,10 +24,12 @@ import { useStoryStore } from "@/lib/story-store";
  * crossfade. Nearest is also what the chapter rail highlights, so all three —
  * rail, artifact and copy — now name the same chapter at every scroll position.
  *
- * Long-form reading lives on the detail routes; these stay short.
+ * Long-form reading lives on the detail routes; these stay short. The way
+ * into them is BeatOpen, not a link in here.
  */
 export function BeatCaption() {
   const storyT = useStoryStore((s) => s.storyT);
+  const reducedMotion = useLabStore((s) => s.reducedMotion);
 
   const { from, to, mix } = storyPosition(storyT);
   const resolved = resolveAmount(storyT);
@@ -39,15 +42,12 @@ export function BeatCaption() {
   const claimOpacity = Math.max(0, (resolved - 0.35) / 0.65);
   const turnOpacity = Math.max(0, (0.5 - resolved) / 0.5);
 
-  // The route link only earns its place once the form is legible.
-  const linkVisible = resolved > 0.72;
-
   return (
     <div
       // Revealed last: the resolved mark holds the frame alone for a beat
       // before the journey's copy arrives.
       style={{ "--reveal-delay": "300ms" } as React.CSSProperties}
-      className="entrance-hide pointer-events-none fixed inset-x-0 bottom-0 z-10 flex justify-center px-6 pb-24 sm:pb-20"
+      className="entrance-hide pointer-events-none fixed inset-x-0 bottom-0 z-10 flex justify-center px-6 pb-[11.5rem] sm:pb-20"
     >
       {/* A scrim under the copy. The artifact is centred and the caption sits
           low, so at the wider chapters the type lands on the bottom edge of
@@ -64,7 +64,7 @@ export function BeatCaption() {
       <div className="grid w-full max-w-xl text-center">
         {/* The claim. */}
         <div
-          className="col-start-1 row-start-1 transition-opacity duration-200"
+          className="col-start-1 row-start-1 transition-opacity duration-500"
           style={{ opacity: claimOpacity }}
           aria-hidden={claimOpacity < 0.5}
         >
@@ -73,36 +73,27 @@ export function BeatCaption() {
             <span className="ml-3 text-type-faint">{beat.when}</span>
           </p>
           <p className="mt-3 text-balance font-display text-xl leading-snug text-type sm:text-2xl">
-            {beat.line}
+            <BeatWords
+              key={`claim-${beat.id}`}
+              text={beat.line}
+              active={claimOpacity > 0.22}
+              reducedMotion={reducedMotion}
+            />
           </p>
-          {/*
-            The gate ring at the artifact (see RoomGates) is the real way in.
-            This stays as the keyboard route and for anyone who doesn't think
-            to click the ring — so it's worded as a label for the thing in the
-            world, not as the primary button it used to be.
-          */}
-          {beat.route ? (
-            <Link
-              href={beat.route}
-              tabIndex={linkVisible ? 0 : -1}
-              className="focus-ring pointer-events-auto mt-4 inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-type-faint transition-all duration-300 hover:text-accent"
-              style={{ opacity: linkVisible ? 1 : 0 }}
-            >
-              <span aria-hidden="true" className="text-accent">
-                ◎
-              </span>
-              {beat.routeLabel}
-            </Link>
-          ) : null}
         </div>
 
         {/* The turn, stacked in the same cell so nothing reflows. */}
         <p
-          className="col-start-1 row-start-1 self-center text-balance font-display text-lg leading-snug text-type-dim transition-opacity duration-200 sm:text-xl"
+          className="col-start-1 row-start-1 self-center text-balance font-display text-lg leading-snug text-type-dim transition-opacity duration-500 sm:text-xl"
           style={{ opacity: turnOpacity }}
           aria-hidden={turnOpacity < 0.5}
         >
-          {leaving.turn}
+          <BeatWords
+            key={`turn-${leaving.id}`}
+            text={leaving.turn}
+            active={turnOpacity > 0.22}
+            reducedMotion={reducedMotion}
+          />
         </p>
       </div>
 
@@ -116,5 +107,39 @@ export function BeatCaption() {
         ))}
       </div>
     </div>
+  );
+}
+
+/**
+ * The line arrives a word at a time the first time it's shown, then stays
+ * put — scrolling back and forth across a beat doesn't replay it.
+ */
+function BeatWords({
+  text,
+  active,
+  reducedMotion,
+}: {
+  text: string;
+  active: boolean;
+  reducedMotion: boolean;
+}) {
+  const words = useMemo(() => text.trim().split(/\s+/).filter(Boolean), [text]);
+  const [played, setPlayed] = useState(active);
+  useEffect(() => {
+    if (active) setPlayed(true);
+  }, [active]);
+
+  if (reducedMotion) return <>{text}</>;
+  return (
+    <span className="beat-words" data-active={played ? "1" : "0"}>
+      {words.map((word, i) => (
+        <span key={`${i}-${word}`}>
+          <span className="beat-word" style={{ "--i": i } as React.CSSProperties}>
+            {word}
+          </span>
+          {i < words.length - 1 ? " " : null}
+        </span>
+      ))}
+    </span>
   );
 }

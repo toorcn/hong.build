@@ -170,4 +170,7 @@ class LabSound {
   }
 }
 
+/** localStorage key for the visitor's mute preference. */
+export const MUTED_STORAGE_KEY = "lab.muted";
+
 export const sound = new LabSound();

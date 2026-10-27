@@ -1,10 +1,22 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
+import { usePathname } from "next/navigation";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { BEAT_COUNT, BEAT_T, trackMixAt, trackNode } from "@/lib/story";
+import {
+  BEATS,
+  BEAT_COUNT,
+  BEAT_T,
+  beatT,
+  trackMixAt,
+  trackNode,
+  upcomingBeat,
+} from "@/lib/story";
 import { entranceSignal } from "@/lib/entrance";
+import { useStoryStore } from "@/lib/story-store";
+import { sound } from "@/lib/sound";
+import { resetTrailSignal, setTrailHot, setTrailVector } from "@/lib/trail-signal";
 
 /**
  * The track — the journey made visible.
@@ -46,6 +58,23 @@ const FLOW_WAVES = 130;
 const BEAD_RADIUS = 2.2;
 
 /** Deterministic per-index noise; the track must be identical every load. */
+/** Points can't be hovered; the invisible tube around the curve is the hit area. */
+function noRaycast() {}
+
+/** Radius of that tube, world units — generous, the track is a hairline. */
+const HIT_RADIUS = 1.85;
+
+/** How far ahead along the curve (0..1) to sample the track's screen heading. */
+const HEADING_LOOKAHEAD = 0.03;
+
+/** Below this screen-space length (NDC) the heading is noise; keep the last. */
+const HEADING_MIN_STRENGTH = 0.012;
+
+/** Click-to-travel: base duration, plus up to this much more for far jumps. */
+const TRAVEL_MS = 1200;
+const TRAVEL_MS_EXTRA = 1100;
+const TRAVEL_FULL_DIST = 0.14;
+
 function hash(n: number): number {
   const s = Math.sin(n * 127.1) * 43758.5453;
   return s - Math.floor(s);
@@ -62,6 +91,7 @@ const VERT = /* glsl */ `
   uniform float uDim;
   uniform float uReveal;
   uniform float uFlow;    // 0 under reduced motion — the track goes static
+  uniform float uHover;   // 0..1 — pointer is over the track
 
   varying float vHot;
   varying float vFlow;
@@ -89,15 +119,15 @@ const VERT = /* glsl */ `
     // Capped just under the cloud's own top mote size. A bead is a knot in
     // the thread, not an object — at the room you are standing in it is only
     // eleven units away, and any larger it out-renders the artifact above it.
-    float size = mix(0.55, 1.2, aNode) + near * 0.35;
+    float size = mix(0.66, 1.35, aNode) + near * 0.35 + uHover * ahead * local * 0.2;
     // Floored so the far stretch doesn't drop below a pixel and start to
     // sparkle; the fog below is what takes distance out, not point size.
     gl_PointSize = max(size * (140.0 / -mv.z), 0.8);
 
     // The way back is quieter than the way forward, but it is still there —
     // the rooms you have walked through are the point of the piece.
-    float a = mix(0.22, 0.55, ahead) + hot * 0.6 + flow * 0.22;
-    a = min(a, 0.8);
+    float a = mix(0.32, 0.75, ahead) + hot * 0.66 + flow * 0.26 + uHover * ahead * 0.18;
+    a = min(a, 0.95);
     // Slower falloff than the cloud's: the track's whole job is to be legible
     // further out than the thing it leads to.
     a *= exp(-max(-mv.z - 60.0, 0.0) * 0.005);
@@ -138,10 +168,95 @@ interface LabPathProps {
   motionScaleRef: { current: number };
 }
 
+/** Screen heading of the curve between two world points, clipped to the near plane. */
+function screenHeading(
+  a: THREE.Vector3,
+  b: THREE.Vector3,
+  camera: THREE.Camera & { near?: number },
+  viewA: THREE.Vector3,
+  viewB: THREE.Vector3,
+  ndcA: THREE.Vector3,
+  ndcB: THREE.Vector3,
+): { angle: number; strength: number } | null {
+  viewA.copy(a).applyMatrix4(camera.matrixWorldInverse);
+  viewB.copy(b).applyMatrix4(camera.matrixWorldInverse);
+  const nearZ = -(camera.near ?? 0.1) * 1.02;
+  const aBehind = viewA.z > nearZ;
+  const bBehind = viewB.z > nearZ;
+  if (aBehind && bBehind) return null;
+  if (aBehind || bBehind) {
+    // One end is behind the camera — clip it to the near plane so the
+    // projection doesn't flip, then project both by hand.
+    const f = (nearZ - viewA.z) / (viewB.z - viewA.z);
+    const x = viewA.x + (viewB.x - viewA.x) * f;
+    const y = viewA.y + (viewB.y - viewA.y) * f;
+    if (aBehind) viewA.set(x, y, nearZ);
+    else viewB.set(x, y, nearZ);
+    viewA.applyMatrix4(camera.projectionMatrix);
+    viewB.applyMatrix4(camera.projectionMatrix);
+    ndcA.copy(viewA);
+    ndcB.copy(viewB);
+  } else {
+    ndcA.copy(a).project(camera);
+    ndcB.copy(b).project(camera);
+  }
+  const dx = ndcB.x - ndcA.x;
+  const dy = -(ndcB.y - ndcA.y);
+  const strength = Math.hypot(dx, dy);
+  if (strength < 1e-5) return null;
+  return { angle: (Math.atan2(dy, dx) * 180) / Math.PI, strength };
+}
+
+/** Curve parameter (0..1) nearest a world point: coarse scan, then refine. */
+function nearestU(
+  curve: THREE.CatmullRomCurve3,
+  point: THREE.Vector3,
+  scratch: THREE.Vector3,
+  steps = 160,
+): number {
+  let best = 0;
+  let bestD = Infinity;
+  for (let i = 0; i <= steps; i++) {
+    const u = i / steps;
+    curve.getPointAt(u, scratch);
+    const d = scratch.distanceToSquared(point);
+    if (d < bestD) {
+      bestD = d;
+      best = u;
+    }
+  }
+  const step = 1 / steps;
+  const lo = Math.max(0, best - step);
+  const hi = Math.min(1, best + step);
+  for (let i = 0; i <= 12; i++) {
+    const u = lo + ((hi - lo) * i) / 12;
+    curve.getPointAt(u, scratch);
+    const d = scratch.distanceToSquared(point);
+    if (d < bestD) {
+      bestD = d;
+      best = u;
+    }
+  }
+  return best;
+}
+
 export function LabPath({ walkTRef, dimRef, motionScaleRef }: LabPathProps) {
   const materialRef = useRef<THREE.ShaderMaterial>(null);
+  // Hover: whether the pointer is on the track, where along it, and the
+  // arrow the cursor should draw.
+  const hovering = useRef(0);
+  const hoverU = useRef(0.5);
+  const vector = useRef<{ angle: number; depth: "in" | "out"; dest: number; live: boolean }>({
+    angle: 0,
+    depth: "in",
+    dest: -1,
+    live: false,
+  });
+  const onJourney = usePathname() === "/";
 
-  const geometry = useMemo(() => {
+  useEffect(() => () => resetTrailSignal(), []);
+
+  const { geometry, hitGeometry, curve } = useMemo(() => {
     const nodes = Array.from({ length: BEAT_COUNT }, (_, k) => {
       const n = trackNode(k);
       return new THREE.Vector3(n.x, n.y, n.z);
@@ -206,7 +321,11 @@ export function LabPath({ walkTRef, dimRef, motionScaleRef }: LabPathProps) {
     geo.setAttribute("aNode", new THREE.BufferAttribute(aNode, 1));
     geo.setAttribute("aSeed", new THREE.BufferAttribute(aSeed, 1));
     geo.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, 0, -250), 400);
-    return geo;
+    return {
+      geometry: geo,
+      hitGeometry: new THREE.TubeGeometry(curve, 180, HIT_RADIUS, 6, false),
+      curve,
+    };
   }, []);
 
   const uniforms = useMemo(
@@ -216,11 +335,103 @@ export function LabPath({ walkTRef, dimRef, motionScaleRef }: LabPathProps) {
       uDim: { value: 0 },
       uReveal: { value: 0 },
       uFlow: { value: 1 },
+      uHover: { value: 0 },
       uAccent: { value: new THREE.Color("#c8ff4d") },
       uSlate: { value: new THREE.Color("#4a5468") },
     }),
     [],
   );
+
+  const scratch = useMemo(
+    () => ({
+      viewA: new THREE.Vector3(),
+      viewB: new THREE.Vector3(),
+      ndcA: new THREE.Vector3(),
+      ndcB: new THREE.Vector3(),
+      wa: new THREE.Vector3(),
+      wb: new THREE.Vector3(),
+    }),
+    [],
+  );
+
+  // The track is only an instrument on the journey itself, once the
+  // entrance has let go and no content window owns the frame.
+  const interactive = () =>
+    onJourney &&
+    entranceSignal.authority === 0 &&
+    document.documentElement.dataset.inScene !== "1";
+
+  const release = () => {
+    vector.current.live = false;
+    vector.current.dest = -1;
+    hovering.current = 0;
+    resetTrailSignal();
+  };
+
+  /**
+   * Aim the cursor's arrow along the track at the hovered point, toward the
+   * chapter ahead. `ease` 0 snaps; otherwise the angle turns the short way
+   * round at that rate, so it doesn't jitter as the camera moves.
+   */
+  const aim = (camera: THREE.Camera, ease: number): boolean => {
+    const dest = upcomingBeat(walkTRef.current);
+    if (dest === null) return false;
+    const u0 = THREE.MathUtils.clamp(hoverU.current, 0, 1);
+    let u1 = u0 + HEADING_LOOKAHEAD;
+    if (u1 > 1) {
+      u1 = u0;
+      curve.getPointAt(Math.max(0, u0 - HEADING_LOOKAHEAD), scratch.wa);
+      curve.getPointAt(u1, scratch.wb);
+    } else {
+      curve.getPointAt(u0, scratch.wa);
+      curve.getPointAt(u1, scratch.wb);
+    }
+    const heading = screenHeading(
+      scratch.wa,
+      scratch.wb,
+      camera,
+      scratch.viewA,
+      scratch.viewB,
+      scratch.ndcA,
+      scratch.ndcB,
+    );
+    const v = vector.current;
+    const fresh = !v.live || v.dest !== dest;
+    if (heading && (fresh || heading.strength >= HEADING_MIN_STRENGTH)) {
+      v.angle = fresh
+        ? heading.angle
+        : v.angle + (((((heading.angle - v.angle) % 360) + 540) % 360) - 180) * ease;
+    }
+    v.depth = "in";
+    v.dest = dest;
+    v.live = true;
+    const beat = BEATS[dest];
+    setTrailVector({
+      angle: v.angle,
+      dir: "forward",
+      depth: v.depth,
+      dest,
+      destCode: beat?.code ?? "",
+      destLabel: beat?.label ?? "",
+    });
+    return true;
+  };
+
+  const track = (point: THREE.Vector3, camera: THREE.Camera, announce: boolean) => {
+    if (!interactive()) {
+      if (hovering.current) release();
+      return;
+    }
+    hoverU.current = nearestU(curve, point, scratch.wa);
+    if (!aim(camera, 0)) {
+      if (hovering.current) release();
+      return;
+    }
+    if (announce || !hovering.current) {
+      hovering.current = 1;
+      setTrailHot(true);
+    }
+  };
 
   useFrame((state, delta) => {
     const mat = materialRef.current;
@@ -242,19 +453,65 @@ export function LabPath({ walkTRef, dimRef, motionScaleRef }: LabPathProps) {
     u.uStoryT!.value = walkTRef.current;
     u.uDim!.value += (dimRef.current - (u.uDim!.value as number)) * 0.1;
     u.uFlow!.value = motionScaleRef.current;
+
+    // Keep the arrow true as the camera moves under a still pointer.
+    const live = interactive();
+    if (!live && hovering.current > 0) release();
+    if (live && hovering.current > 0 && !aim(state.camera, 1 - Math.pow(0.0008, delta))) release();
+    const hoverTarget = live && hovering.current > 0 ? 1 : 0;
+    u.uHover!.value += (hoverTarget - (u.uHover!.value as number)) * (1 - Math.pow(0.001, delta));
   });
 
   return (
-    <points geometry={geometry} frustumCulled={false}>
-      <shaderMaterial
-        ref={materialRef}
-        vertexShader={VERT}
-        fragmentShader={FRAG}
-        uniforms={uniforms}
-        transparent
-        depthWrite={false}
-        blending={THREE.AdditiveBlending}
-      />
-    </points>
+    <group>
+      <points geometry={geometry} frustumCulled={false} raycast={noRaycast}>
+        <shaderMaterial
+          ref={materialRef}
+          vertexShader={VERT}
+          fragmentShader={FRAG}
+          uniforms={uniforms}
+          transparent
+          depthWrite={false}
+          blending={THREE.AdditiveBlending}
+        />
+      </points>
+      {/* Invisible hit tube. Click travels to the chapter the arrow names. */}
+      <mesh
+        geometry={hitGeometry}
+        frustumCulled={false}
+        onPointerOver={(e) => {
+          if (e.pointerType === "touch") return;
+          e.stopPropagation();
+          track(e.point, e.camera, true);
+        }}
+        onPointerMove={(e) => {
+          if (e.pointerType === "touch") return;
+          track(e.point, e.camera, true);
+        }}
+        onPointerOut={() => {
+          release();
+        }}
+        onPointerDown={(e) => {
+          if (e.pointerType === "touch") return;
+          if (interactive()) e.stopPropagation();
+        }}
+        onClick={(e) => {
+          if (!interactive()) return;
+          e.stopPropagation();
+          track(e.point, e.camera, true);
+          const dest = vector.current.live ? vector.current.dest : -1;
+          if (dest < 0) return;
+          const from = useStoryStore.getState().storyT;
+          sound.tick();
+          useStoryStore.getState().goToBeat(dest, {
+            duration:
+              TRAVEL_MS +
+              TRAVEL_MS_EXTRA * Math.min(1, Math.abs(beatT(dest) - from) / TRAVEL_FULL_DIST),
+          });
+        }}
+      >
+        <meshBasicMaterial transparent opacity={0} depthWrite={false} side={THREE.DoubleSide} />
+      </mesh>
+    </group>
   );
 }

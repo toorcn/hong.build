@@ -6,6 +6,8 @@
  * chapter can feel slow and soft rather than like a CSS snap.
  */
 
+import { scrollToY } from "@/lib/smooth-scroll";
+
 let raf = 0;
 let detachAbort: (() => void) | null = null;
 let onCancelCb: (() => void) | null = null;
@@ -35,6 +37,8 @@ export interface SpineScrollOpts {
   duration?: number;
   /** Fired if the visitor interrupts (wheel / touch / key). */
   onCancel?: () => void;
+  /** Fired once the scroll lands — including when there was nowhere to go. */
+  onComplete?: () => void;
 }
 
 /**
@@ -42,7 +46,7 @@ export interface SpineScrollOpts {
  * visitor cancels so the magnet never fights intentional travel.
  */
 export function scrollSpineTo(top: number, opts: SpineScrollOpts = {}): void {
-  const { duration = 1100, onCancel } = opts;
+  const { duration = 1100, onCancel, onComplete } = opts;
   cancelSpineScroll({ silent: true });
   onCancelCb = onCancel ?? null;
 
@@ -50,6 +54,7 @@ export function scrollSpineTo(top: number, opts: SpineScrollOpts = {}): void {
   const delta = top - from;
   if (Math.abs(delta) < 1) {
     onCancelCb = null;
+    onComplete?.();
     return;
   }
 
@@ -57,8 +62,9 @@ export function scrollSpineTo(top: number, opts: SpineScrollOpts = {}): void {
     typeof window !== "undefined" &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (reduced) {
-    window.scrollTo(0, top);
+    scrollToY(top);
     onCancelCb = null;
+    onComplete?.();
     return;
   }
 
@@ -78,13 +84,14 @@ export function scrollSpineTo(top: number, opts: SpineScrollOpts = {}): void {
 
   const tick = (now: number) => {
     const p = Math.min(1, (now - start) / ms);
-    window.scrollTo(0, from + delta * easeInOutQuint(p));
+    scrollToY(from + delta * easeInOutQuint(p));
     if (p < 1) {
       raf = requestAnimationFrame(tick);
     } else {
       raf = 0;
       detachAbort?.();
       onCancelCb = null;
+      onComplete?.();
     }
   };
   raf = requestAnimationFrame(tick);
