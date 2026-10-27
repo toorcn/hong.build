@@ -4,14 +4,14 @@ For the next agent. Read this before touching the scene.
 
 ## What this is
 
-A personal site that is **one continuous scroll journey through a single
-morphing 3D fragment cloud** — not a portfolio with pages. The thesis:
-*nothing here means anything until you find the angle.* 6,000 fragments sit
-in a void; scrolling flies the camera along an authored spine, and at each
-story beat the cloud dissolves to noise and re-forms as a silhouette tied
-to that chapter of Hong Bing's life. Dragging looks around freely; release
-springs back to the authored angle ("hybrid option A" — a deliberate,
-confirmed product decision).
+A personal site that is **one continuous scroll journey — a walk through
+eleven rooms of a 3D fragment cloud** — not a portfolio with pages. The
+thesis: *nothing here means anything until you find the angle.* 7,000
+fragments are split across eleven chapters of Hong Bing's life; scrolling
+walks the camera along a winding path from room to room, and each room's
+dust gathers into that chapter's silhouette as you arrive. Dragging looks
+around freely; release springs back to the authored angle ("hybrid option
+A" — a deliberate, confirmed product decision).
 
 Stack: Next.js 16 App Router (Turbopack), React 19, R3F 9 + three 0.185,
 Tailwind v4, Zustand 5, sharp (build-time rasterization), MDX for case
@@ -27,8 +27,9 @@ studies, WebAudio-synthesized UI sounds (no assets).
 - Each beat: authored camera pose (az/el/distance), a silhouette id, two
   lines of copy (`line` lands on resolve, `turn` lands during dissolve),
   optional detail route.
-- **Beats are NOT evenly spaced** — `BEAT_T = [0, .26, .44, .6, .74, .88, 1]`
-  mirrors real elapsed time (four quiet years get the longest dissolve).
+- **Beats are NOT evenly spaced** — `BEAT_T` (11 entries, gaps .20 then
+  shrinking to .08) mirrors real elapsed time (four quiet years get the
+  longest stretch). `goToBeat` and the chapter rail read `beatT()`.
   `storyPosition(t)` normalizes `mix` per segment; `resolveAmount(t)` is 1
   at a beat, 0 mid-segment; `spinePose(t)` smoothstep-interpolates poses.
 - Content routes map back to beats via `beatForRoute(pathname)`. Opening a
@@ -38,18 +39,22 @@ studies, WebAudio-synthesized UI sounds (no assets).
 
 ### 2. The cloud (`components/lab-cloud.tsx` + `public/fragments.bin`)
 
-- One pool of 6,000 fragments. Each carries per-beat resolved targets
-  (`aTarget0..N`), a dissolve noise vector, and a seed. The custom shader
-  morphs between the two nearest beats by `uMix`, mixes in `aNoise` at
-  midpoints (dissolve→reform is THE signature transition), staggers per
-  fragment, swells/accent-colors by `uResolve`, and dims via `uDim` when a
-  reading panel opens.
-- `fragments.bin` v2 layout: header(magic "FRAG", version=2, count, beats)
-  then `targets[beats*count*3] f32` + `noise[count*3] f32` + `seeds[count]`.
-  Generated offline by `scripts/generate-fragments.ts` (rasterizes
-  `assets/silhouettes.ts` with sharp, unprojects through each beat camera
-  with ±3.4 depth jitter). **Always regenerate after changing BEATS or
-  silhouettes: `npm run fragments`.**
+- One pool of 7,000 fragments, each with a single **home** chapter — there
+  is no morph. `BEAT_ALLOCATIONS` in story.ts splits the pool per chapter;
+  `ROOMS` places each chapter's room along the walk. A fragment lives as
+  dust in its room's shell, gathers into its silhouette as the camera
+  nears, and relaxes back toward the walls once the walk moves on.
+  `components/lab-path.tsx` draws the dust thread the camera walks.
+- `fragments.bin` v3 layout: header(magic, version, count, beats) then
+  `targets[count*3]` + `dust[count*3]` + `seeds[count]` + `homes[count]`,
+  all f32. Generated offline by `scripts/generate-fragments.ts`
+  (rasterizes `assets/silhouettes.ts` with sharp; `fidelity(t)` scales the
+  depth jitter so early chapters scatter and late ones set tight).
+  **Always regenerate after changing BEATS, ROOMS or silhouettes:
+  `npm run fragments`.**
+- Some silhouettes are hand-drawn charts of real data (06: committee terms;
+  09: entries per year from `content/awards.ts`). They don't update
+  themselves — redraw them when the data changes.
 - Per-frame values NEVER go through React: rig writes `mixRef/resolveRef/
   dimRef/motionScaleRef`, cloud reads them in `useFrame`. Zustand only sees
   discrete changes (active beat).
@@ -72,30 +77,21 @@ arrival (fragments ignite) → wrong (held at a useless angle) → snap
 
 ## Known issues / in-flight work (READ FIRST)
 
-The working tree has **uncommitted changes to `lib/story.ts`** — a 6→7 beat
-rewrite with real biography (HG748 Minecraft plugin → four quiet years →
-five lost hackathons → mentored win → Top 1s → seven committees → ASEAN/500
-Global → "now"). It is **incomplete**:
+The 6→7 beat issues this section used to list are all resolved: the
+journey is now 11 beats, `fragments.bin` is regenerated to match,
+`goToBeat` reads `beatT()`, `fidelity(t)` is wired into the generator, and
+the COLD START log reads its counts from `lib/generated/fragments-meta.ts`.
 
-1. **`fragments.bin` and `lib/generated/fragments-meta.ts` are still the
-   6-beat build.** `tsc` passes, but at runtime the 7th beat (`id: 6`, the
-   HONG BING wordmark finale) reads a nonexistent `aTarget6` block — the
-   finale will silently render as beat 5's silhouette. Fix:
-   `npm run fragments` (silhouettes 5–8 already exist in
-   `assets/silhouettes.ts`, so the generator has everything it needs),
-   then sanity-render with `scripts/render-morph-checks.ts`.
-2. **`useStoryStore.goToBeat` still assumes even spacing**
-   (`t = beat / (BEAT_COUNT - 1)`). With uneven `BEAT_T` it scrolls chapter
-   dots to the wrong positions. It should use `beatT(beat)` from story.ts
-   (and BEAT_T-scaled scroll math). ChapterRail and the mobile chapter
-   strip both call it.
-3. **`fidelity(t)` is exported but unwired** — meant to make beat 0 render
-   coarse/blocky and sharpen through the journey ("the rendering technique
-   narrates the growth"). No `uFidelity` uniform exists yet. Either
-   implement it in the shader (e.g. quantize `gl_PointSize`/positions early)
-   or drop the export.
-4. The COLD START status log hardcodes "6000 fragments · 6 beats" — update
-   to 7 after regenerating.
+Still open:
+
+1. **Draft content.** Case studies (`content/projects/*.mdx`) and
+   `ABOUT_FACTS` in `content/site.ts` were drafted from LinkedIn and are not
+   yet confirmed by the owner.
+2. **Counts in copy are hand-written.** Chapter 09's line and the about
+   page quote event/result totals that `content/awards.ts` computes. When
+   the run log changes, update both and redraw silhouette 09.
+3. **`NARRATIVE_HANDOFF.md` is historical** — it briefs the 7-beat rewrite
+   that has since landed and been superseded by the 11-beat walk.
 
 ## How to validate (this environment)
 
@@ -119,9 +115,10 @@ Global → "now"). It is **incomplete**:
 
 - Feel of drag/spring: `DRAG_SPEED`, `EL_LIMIT`, the `0.94` spring and
   damping `k`/`kSlow` in `components/lab-rig.tsx`.
-- Dissolve character: noise radius in `scripts/generate-fragments.ts`
-  (shell r 3.5–8), `aNoise * dissolve * 0.9` and stagger `0.35` in the
-  vertex shader, aberration `0.0038` in `lab-effects.tsx`.
+- Gather character: room sizes in `ROOMS` (lib/story.ts), dust-shell
+  spread (`room.radius * …`) in `scripts/generate-fragments.ts`, the
+  stagger uniforms (`uStaggerAxis`/`uStaggerSpread`) in
+  `components/lab-cloud.tsx`, aberration in `lab-effects.tsx`.
 - Entrance pacing: `ENTRANCE_TIMING`, `WRONG_ANGLE`, `RESOLVE_FROM/TO`,
   `OVER_CONTRACT`, `SWEEP_SPREAD` in `lib/entrance.ts`.
 - Beat rhythm: `BEAT_T` gaps and per-beat camera poses in `lib/story.ts`
@@ -132,7 +129,7 @@ Global → "now"). It is **incomplete**:
 Case studies (`content/projects/*.mdx`) and `ABOUT_FACTS` in
 `content/site.ts` were drafted from LinkedIn and are **DRAFT — confirm with
 the user before treating as final**. Awards live in `content/awards.ts`.
-The 7-beat copy in story.ts (`line`/`turn`) is authored and intentional;
+The 11-beat copy in story.ts (`line`/`turn`) is authored and intentional;
 preserve its voice (short, plain, past-tense claims).
 
 ## Don't regress
