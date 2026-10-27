@@ -21,14 +21,48 @@ export interface Award {
   org?: string;
   /** Competitive programming rather than a build event. */
   compCode?: boolean;
-  /** Placement earned by a team he mentored, not competed on. */
+  /**
+   * He mentored at this event rather than competing. `result` holds what the
+   * mentored team placed, or the mentor role when there was no placement.
+   */
   mentored?: boolean;
   /** One-line note for the log. */
   note?: string;
 }
 
-export const AWARDS: readonly Award[] = [
+/** Logged newest first, the way entries get added. AWARDS re-sorts it. */
+const LOGGED: readonly Award[] = [
   // ── 2026 ──────────────────────────────────────────────────────────────
+  {
+    year: 2026,
+    month: "oct",
+    event: "MIT Hacking Medicine Malaysia 2026",
+    result: "Mentor",
+    org: "MIT",
+    mentored: true,
+  },
+  {
+    year: 2026,
+    month: "sep",
+    event: "HackMIT 2026",
+    result: "#1 Hardware — Special Prize",
+    org: "HackMIT",
+  },
+  {
+    year: 2026,
+    month: "aug",
+    event: "Devin KL Hackathon 2026",
+    result: "Finalist",
+    org: "Cognition",
+  },
+  {
+    year: 2026,
+    month: "jul",
+    event: "Codex Community Hackathon 2026 (OpenAI Build Week), Kuala Lumpur",
+    result: "Technical mentor",
+    org: "OpenAI",
+    mentored: true,
+  },
   {
     year: 2026,
     month: "jun",
@@ -58,6 +92,13 @@ export const AWARDS: readonly Award[] = [
     result: "Top 5% of 210 teams · 4 track placements",
     org: "LotusHacks & HackHarvard",
     note: "3rd Edtech (Etest Vietnam) · 1st Agora · 1st fal · 1st Exa",
+  },
+  {
+    year: 2026,
+    month: "sep",
+    event: "CodeNection 2026",
+    result: "Mentor",
+    mentored: true,
   },
 
   // ── 2025 ──────────────────────────────────────────────────────────────
@@ -129,7 +170,7 @@ export const AWARDS: readonly Award[] = [
   },
   {
     year: 2025,
-    month: "—",
+    month: "jun",
     event: "Loophole Hackathon 2025",
     result: "Judges' Favourite",
     org: "Build Club MY",
@@ -218,6 +259,22 @@ export const AWARDS: readonly Award[] = [
     note: "The first one.",
   },
 ] as const;
+
+const MONTHS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+
+/** Month index from the log's month token. A span sorts by its start; "—" sorts last in its year. */
+function monthIndex(month: string): number {
+  const i = MONTHS.indexOf(month.slice(0, 3));
+  return i === -1 ? MONTHS.length : i;
+}
+
+/**
+ * The log, oldest first. LOGGED is reversed before sorting so entries that
+ * share a month keep their true order — the first one stays first.
+ */
+export const AWARDS: readonly Award[] = [...LOGGED]
+  .reverse()
+  .sort((a, b) => a.year - b.year || monthIndex(a.month) - monthIndex(b.month));
 
 /** Every event entered. */
 export const EVENT_COUNT = AWARDS.length;

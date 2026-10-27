@@ -196,7 +196,7 @@ export const BEATS: readonly Beat[] = [
     elevationDeg: 13,
     distance: 12,
     line: "AI Hackerdorm. Five hundred students across nineteen campuses, and we co-ran Cursor × Anthropic Malaysia with $410,000 on the table.",
-    turn: "Then HackHarvard. Macau. Singapore. OpenAI. Nobody announced the venues getting bigger — they just did.",
+    turn: "Then HackHarvard. OpenAI. Macau. Singapore. MIT. Nobody announced the venues getting bigger — they just did.",
     route: "/work/ai-hackerdorm",
     routeLabel: "the dorm",
   },
@@ -206,11 +206,11 @@ export const BEATS: readonly Beat[] = [
     label: "THE RUN",
     year: "22–26",
     when: "2022 — 2026",
-    silhouette: 9, // thirty entries, plotted by year
+    silhouette: 9, // thirty-three entries, plotted by year
     azimuthDeg: 40,
     elevationDeg: 11,
     distance: 12,
-    line: "Thirty events across five years. Nineteen results — and eleven that gave me nothing at all.",
+    line: "Thirty-three events across five years. Twenty results — and nine that gave me nothing at all.",
     turn: "The blanks stay in the log. They are the part that explains the rest.",
     route: "/notes",
     routeLabel: "the run log",

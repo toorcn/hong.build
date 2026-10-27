@@ -18,8 +18,8 @@ export default function AboutPage() {
       <p className="mt-5 max-w-xl text-base leading-relaxed text-type-dim">
         I came up through computer science and psychology, which is probably
         why I keep ending up where I do: most of my work sits between a
-        technical system and the person trying to use it. Nineteen results
-        across thirty events taught me to build fast and throw away faster.
+        technical system and the person trying to use it. Twenty results
+        across thirty-three events taught me to build fast and throw away faster.
         Running communities taught me that the tool is never the point — the
         room is.
       </p>

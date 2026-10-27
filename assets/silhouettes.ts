@@ -292,16 +292,16 @@ export const SILHOUETTES: readonly string[] = [
 
   // ── 09 · THE RUN ───────────────────────────────────────────────────────
   // Entries per year, to scale, with a tick under each year. Derived from
-  // BY_YEAR in content/awards.ts: 2022:2 2023:4 2024:8 2025:12 2026:4.
-  // The last bar is short because 2026 isn't over. If the log changes,
-  // redraw these bars and re-run `npm run fragments`.
+  // BY_YEAR in content/awards.ts: 2022:2 2023:4 2024:8 2025:10 2026:9,
+  // at 52 units per entry. If the log changes, redraw these bars and
+  // re-run `npm run fragments`.
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">
     <g fill="#fff">
-      <rect x="145" y="673" width="110" height="87"/>
-      <rect x="295" y="587" width="110" height="173"/>
-      <rect x="445" y="413" width="110" height="347"/>
+      <rect x="145" y="656" width="110" height="104"/>
+      <rect x="295" y="552" width="110" height="208"/>
+      <rect x="445" y="344" width="110" height="416"/>
       <rect x="595" y="240" width="110" height="520"/>
-      <rect x="745" y="587" width="110" height="173"/>
+      <rect x="745" y="292" width="110" height="468"/>
       <rect x="120" y="782" width="760" height="16"/>
       <rect x="192" y="812" width="16" height="40"/>
       <rect x="342" y="812" width="16" height="40"/>
