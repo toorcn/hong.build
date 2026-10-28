@@ -27,7 +27,7 @@ export default function AboutPage() {
         Right now I'm founding something I can't talk about yet, and building
         production AI at YTL AI Labs. Before that: R&D for an SF-based startup,
         and Tack, a meeting moderator that intervenes while the conversation
-        is still alive. I also co-founded AI Hackerdorm — 4 chapters, 400+
+        is still alive. I also co-founded AI Hackerdorm — 4 chapters, 700+
         members nationwide.
       </p>
 
