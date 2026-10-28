@@ -7,7 +7,6 @@ import Questions from './components/Questions'
 import Playbook from './components/Playbook'
 import Stack from './components/Stack'
 import Links from './components/Links'
-import Sprite from './components/Sprite'
 
 export default function App() {
   return (
@@ -38,10 +37,7 @@ export default function App() {
       </div>
       <footer className="border-t border-line">
         <div className="mx-auto flex max-w-6xl flex-col gap-3 px-5 py-8 sm:flex-row sm:items-center sm:justify-between sm:px-8">
-          <p className="flex items-center gap-3 font-mono text-[11px] text-type-faint">
-            <Sprite name="figure" size={24} />
-            <span>{'// written for first-time teams. use what helps, skip the rest.'}</span>
-          </p>
+          <p className="font-mono text-[11px] text-type-faint">{'// written for first-time teams. use what helps, skip the rest.'}</p>
           <p className="flex gap-5 font-mono text-[11px] uppercase tracking-[0.16em]">
             <a href="/" className="focus-ring text-type-dim hover:text-accent">hong.build</a>
             <a href="/contact" className="focus-ring text-type-dim hover:text-accent">Contact</a>
