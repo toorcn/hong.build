@@ -15,7 +15,8 @@
     "verify:entrance": "node scripts/verify-cold-start.mjs",
     "verify:cursor": "node scripts/cursor-checks.mjs",
     "shots:walk": "node scripts/walk-shots.mjs",
-    "check:walk": "tsx scripts/render-walk-checks.ts"
+    "check:walk": "tsx scripts/render-walk-checks.ts",
+    "readme:art": "node scripts/generate-readme-art.mjs"
   },
   "repository": {
     "type": "git",

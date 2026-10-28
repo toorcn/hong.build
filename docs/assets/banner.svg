@@ -1,0 +1,282 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 320" width="1280" height="320" role="img" aria-label="Hong Bing — hong.build">
+  <style>
+    .g { animation: gather 1.6s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+    .m { animation: twinkle 5s ease-in-out infinite alternate; }
+    .t { animation: rise 1.2s ease-out 1.6s backwards; }
+    .scan { animation: scan 6s linear infinite; }
+    @keyframes gather { from { transform: translate(var(--dx), var(--dy)); opacity: 0; } }
+    @keyframes twinkle { from { opacity: 0.15; transform: translateY(0); } to { opacity: 0.75; transform: translateY(var(--drift)); } }
+    @keyframes rise { from { opacity: 0; transform: translateY(8px); } }
+    @keyframes scan { from { transform: translateX(-120px); } to { transform: translateX(1280px); } }
+    @media (prefers-reduced-motion: reduce) { .g, .m, .t, .scan { animation: none; } }
+  </style>
+  <defs>
+    <linearGradient id="scan" x1="0" x2="1">
+      <stop offset="0" stop-color="#c8ff4d" stop-opacity="0"/>
+      <stop offset="0.5" stop-color="#c8ff4d" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#c8ff4d" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.45" r="0.6">
+      <stop offset="0" stop-color="#c8ff4d" stop-opacity="0.09"/>
+      <stop offset="1" stop-color="#c8ff4d" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1280" height="320" fill="#0a0b0d"/>
+  <rect width="1280" height="320" fill="url(#glow)"/>
+  <g>
+    <circle class="m" cx="298" cy="232" r="0.8" fill="#4a5468" style="--drift:-9px;animation-duration:3.0s;animation-delay:0.0s"/>
+    <circle class="m" cx="245" cy="124" r="1.6" fill="#4a5468" style="--drift:6px;animation-duration:4.0s;animation-delay:0.0s"/>
+    <circle class="m" cx="330" cy="161" r="1.1" fill="#4a5468" style="--drift:7px;animation-duration:5.0s;animation-delay:1.8s"/>
+    <circle class="m" cx="16" cy="0" r="1.7" fill="#4a5468" style="--drift:-9px;animation-duration:6.3s;animation-delay:1.6s"/>
+    <circle class="m" cx="329" cy="281" r="1.8" fill="#4a5468" style="--drift:9px;animation-duration:4.3s;animation-delay:1.6s"/>
+    <circle class="m" cx="97" cy="288" r="2.1" fill="#4a5468" style="--drift:7px;animation-duration:6.6s;animation-delay:1.8s"/>
+    <circle class="m" cx="1275" cy="188" r="2.5" fill="#4a5468" style="--drift:-1px;animation-duration:7.6s;animation-delay:0.0s"/>
+    <circle class="m" cx="960" cy="73" r="1.5" fill="#c8ff4d" style="--drift:-4px;animation-duration:4.0s;animation-delay:0.2s"/>
+    <circle class="m" cx="996" cy="277" r="2.1" fill="#4a5468" style="--drift:3px;animation-duration:5.1s;animation-delay:0.2s"/>
+    <circle class="m" cx="1062" cy="72" r="1.9" fill="#4a5468" style="--drift:-2px;animation-duration:3.3s;animation-delay:2.2s"/>
+    <circle class="m" cx="773" cy="193" r="2.6" fill="#4a5468" style="--drift:4px;animation-duration:4.2s;animation-delay:2.8s"/>
+    <circle class="m" cx="559" cy="106" r="1.7" fill="#c8ff4d" style="--drift:4px;animation-duration:7.5s;animation-delay:2.4s"/>
+    <circle class="m" cx="1038" cy="276" r="2.2" fill="#4a5468" style="--drift:-2px;animation-duration:6.8s;animation-delay:3.5s"/>
+    <circle class="m" cx="871" cy="215" r="2.9" fill="#4a5468" style="--drift:-1px;animation-duration:5.4s;animation-delay:0.2s"/>
+    <circle class="m" cx="758" cy="83" r="1.0" fill="#4a5468" style="--drift:6px;animation-duration:6.2s;animation-delay:3.7s"/>
+    <circle class="m" cx="1124" cy="85" r="2.6" fill="#c8ff4d" style="--drift:-1px;animation-duration:7.1s;animation-delay:1.1s"/>
+    <circle class="m" cx="665" cy="141" r="2.8" fill="#4a5468" style="--drift:7px;animation-duration:6.4s;animation-delay:2.8s"/>
+    <circle class="m" cx="684" cy="258" r="2.4" fill="#4a5468" style="--drift:8px;animation-duration:3.1s;animation-delay:3.7s"/>
+    <circle class="m" cx="506" cy="29" r="2.7" fill="#4a5468" style="--drift:-9px;animation-duration:6.5s;animation-delay:1.8s"/>
+    <circle class="m" cx="989" cy="250" r="1.1" fill="#4a5468" style="--drift:-2px;animation-duration:7.2s;animation-delay:1.3s"/>
+    <circle class="m" cx="559" cy="264" r="1.2" fill="#4a5468" style="--drift:9px;animation-duration:6.6s;animation-delay:0.1s"/>
+    <circle class="m" cx="711" cy="52" r="2.4" fill="#c8ff4d" style="--drift:-8px;animation-duration:7.1s;animation-delay:2.2s"/>
+    <circle class="m" cx="451" cy="227" r="1.9" fill="#4a5468" style="--drift:-3px;animation-duration:7.6s;animation-delay:3.2s"/>
+    <circle class="m" cx="1137" cy="162" r="2.8" fill="#4a5468" style="--drift:-2px;animation-duration:7.8s;animation-delay:2.5s"/>
+    <circle class="m" cx="65" cy="50" r="1.6" fill="#c8ff4d" style="--drift:-8px;animation-duration:4.0s;animation-delay:3.0s"/>
+    <circle class="m" cx="90" cy="283" r="2.5" fill="#4a5468" style="--drift:-5px;animation-duration:3.5s;animation-delay:0.7s"/>
+    <circle class="m" cx="941" cy="319" r="2.2" fill="#4a5468" style="--drift:4px;animation-duration:4.6s;animation-delay:2.9s"/>
+    <circle class="m" cx="1188" cy="111" r="2.9" fill="#4a5468" style="--drift:1px;animation-duration:6.8s;animation-delay:4.0s"/>
+    <circle class="m" cx="1075" cy="162" r="0.9" fill="#4a5468" style="--drift:5px;animation-duration:5.4s;animation-delay:1.9s"/>
+    <circle class="m" cx="48" cy="238" r="1.6" fill="#c8ff4d" style="--drift:2px;animation-duration:6.4s;animation-delay:0.8s"/>
+    <circle class="m" cx="1094" cy="30" r="1.9" fill="#4a5468" style="--drift:3px;animation-duration:6.5s;animation-delay:0.1s"/>
+    <circle class="m" cx="1001" cy="183" r="2.2" fill="#4a5468" style="--drift:-5px;animation-duration:7.4s;animation-delay:0.3s"/>
+    <circle class="m" cx="396" cy="115" r="2.3" fill="#4a5468" style="--drift:5px;animation-duration:6.0s;animation-delay:3.9s"/>
+    <circle class="m" cx="443" cy="35" r="0.9" fill="#c8ff4d" style="--drift:2px;animation-duration:4.2s;animation-delay:1.6s"/>
+    <circle class="m" cx="580" cy="32" r="2.2" fill="#4a5468" style="--drift:1px;animation-duration:8.0s;animation-delay:1.7s"/>
+    <circle class="m" cx="414" cy="204" r="1.8" fill="#c8ff4d" style="--drift:-2px;animation-duration:7.8s;animation-delay:1.9s"/>
+    <circle class="m" cx="467" cy="231" r="2.1" fill="#4a5468" style="--drift:7px;animation-duration:7.8s;animation-delay:2.1s"/>
+    <circle class="m" cx="506" cy="133" r="2.3" fill="#4a5468" style="--drift:-8px;animation-duration:5.6s;animation-delay:1.4s"/>
+    <circle class="m" cx="286" cy="259" r="2.6" fill="#c8ff4d" style="--drift:-8px;animation-duration:6.6s;animation-delay:2.7s"/>
+    <circle class="m" cx="1274" cy="220" r="1.8" fill="#4a5468" style="--drift:-8px;animation-duration:4.4s;animation-delay:2.4s"/>
+    <circle class="m" cx="999" cy="87" r="2.6" fill="#c8ff4d" style="--drift:6px;animation-duration:4.2s;animation-delay:1.3s"/>
+    <circle class="m" cx="1266" cy="316" r="2.3" fill="#4a5468" style="--drift:-8px;animation-duration:3.5s;animation-delay:2.2s"/>
+    <circle class="m" cx="1026" cy="190" r="1.1" fill="#4a5468" style="--drift:8px;animation-duration:6.0s;animation-delay:1.8s"/>
+    <circle class="m" cx="1193" cy="258" r="2.3" fill="#4a5468" style="--drift:9px;animation-duration:6.1s;animation-delay:3.8s"/>
+    <circle class="m" cx="492" cy="85" r="2.7" fill="#c8ff4d" style="--drift:1px;animation-duration:4.0s;animation-delay:1.7s"/>
+    <circle class="m" cx="715" cy="175" r="1.1" fill="#4a5468" style="--drift:-4px;animation-duration:4.7s;animation-delay:0.7s"/>
+    <circle class="m" cx="874" cy="89" r="2.2" fill="#c8ff4d" style="--drift:-2px;animation-duration:7.8s;animation-delay:1.0s"/>
+    <circle class="m" cx="898" cy="146" r="2.7" fill="#4a5468" style="--drift:7px;animation-duration:7.0s;animation-delay:0.4s"/>
+    <circle class="m" cx="1097" cy="114" r="1.2" fill="#4a5468" style="--drift:4px;animation-duration:4.8s;animation-delay:3.7s"/>
+    <circle class="m" cx="129" cy="82" r="1.0" fill="#4a5468" style="--drift:3px;animation-duration:6.7s;animation-delay:1.0s"/>
+    <circle class="m" cx="53" cy="233" r="1.0" fill="#4a5468" style="--drift:-8px;animation-duration:6.2s;animation-delay:2.4s"/>
+    <circle class="m" cx="812" cy="74" r="2.4" fill="#c8ff4d" style="--drift:8px;animation-duration:4.1s;animation-delay:2.8s"/>
+    <circle class="m" cx="962" cy="148" r="2.1" fill="#4a5468" style="--drift:2px;animation-duration:8.0s;animation-delay:3.6s"/>
+    <circle class="m" cx="58" cy="204" r="1.0" fill="#c8ff4d" style="--drift:-5px;animation-duration:7.3s;animation-delay:0.3s"/>
+    <circle class="m" cx="600" cy="257" r="0.9" fill="#c8ff4d" style="--drift:-1px;animation-duration:7.6s;animation-delay:3.9s"/>
+    <circle class="m" cx="982" cy="130" r="1.3" fill="#4a5468" style="--drift:9px;animation-duration:5.3s;animation-delay:1.2s"/>
+    <circle class="m" cx="341" cy="151" r="1.2" fill="#c8ff4d" style="--drift:6px;animation-duration:7.3s;animation-delay:2.8s"/>
+    <circle class="m" cx="806" cy="258" r="1.9" fill="#c8ff4d" style="--drift:-3px;animation-duration:5.8s;animation-delay:0.5s"/>
+    <circle class="m" cx="557" cy="45" r="2.3" fill="#c8ff4d" style="--drift:9px;animation-duration:3.0s;animation-delay:2.9s"/>
+    <circle class="m" cx="989" cy="200" r="1.6" fill="#4a5468" style="--drift:-8px;animation-duration:5.7s;animation-delay:3.0s"/>
+    <circle class="m" cx="284" cy="13" r="0.9" fill="#c8ff4d" style="--drift:-9px;animation-duration:5.2s;animation-delay:2.6s"/>
+    <circle class="m" cx="655" cy="301" r="2.2" fill="#c8ff4d" style="--drift:4px;animation-duration:7.2s;animation-delay:3.7s"/>
+    <circle class="m" cx="620" cy="26" r="1.2" fill="#c8ff4d" style="--drift:6px;animation-duration:6.4s;animation-delay:0.1s"/>
+    <circle class="m" cx="494" cy="117" r="1.6" fill="#4a5468" style="--drift:1px;animation-duration:6.5s;animation-delay:2.8s"/>
+    <circle class="m" cx="531" cy="168" r="1.2" fill="#4a5468" style="--drift:-5px;animation-duration:5.1s;animation-delay:1.6s"/>
+    <circle class="m" cx="1023" cy="174" r="2.2" fill="#4a5468" style="--drift:-8px;animation-duration:3.8s;animation-delay:3.4s"/>
+    <circle class="m" cx="639" cy="290" r="2.3" fill="#4a5468" style="--drift:6px;animation-duration:7.7s;animation-delay:1.4s"/>
+    <circle class="m" cx="966" cy="207" r="1.1" fill="#4a5468" style="--drift:1px;animation-duration:6.0s;animation-delay:3.4s"/>
+    <circle class="m" cx="507" cy="284" r="1.2" fill="#4a5468" style="--drift:3px;animation-duration:6.4s;animation-delay:1.2s"/>
+    <circle class="m" cx="964" cy="221" r="2.1" fill="#4a5468" style="--drift:2px;animation-duration:5.6s;animation-delay:1.8s"/>
+    <circle class="m" cx="335" cy="266" r="2.0" fill="#c8ff4d" style="--drift:2px;animation-duration:4.6s;animation-delay:0.8s"/>
+    <circle class="m" cx="1185" cy="175" r="1.5" fill="#4a5468" style="--drift:-4px;animation-duration:8.0s;animation-delay:1.8s"/>
+    <circle class="m" cx="59" cy="60" r="2.0" fill="#4a5468" style="--drift:5px;animation-duration:5.0s;animation-delay:1.3s"/>
+    <circle class="m" cx="787" cy="248" r="1.8" fill="#4a5468" style="--drift:9px;animation-duration:4.1s;animation-delay:0.6s"/>
+    <circle class="m" cx="223" cy="50" r="2.5" fill="#c8ff4d" style="--drift:3px;animation-duration:3.8s;animation-delay:0.9s"/>
+    <circle class="m" cx="1027" cy="183" r="2.4" fill="#4a5468" style="--drift:-6px;animation-duration:7.0s;animation-delay:1.9s"/>
+    <circle class="m" cx="237" cy="22" r="2.5" fill="#4a5468" style="--drift:-8px;animation-duration:7.4s;animation-delay:2.9s"/>
+    <circle class="m" cx="803" cy="34" r="1.4" fill="#4a5468" style="--drift:4px;animation-duration:3.8s;animation-delay:1.5s"/>
+    <circle class="m" cx="408" cy="65" r="2.6" fill="#4a5468" style="--drift:4px;animation-duration:5.9s;animation-delay:3.1s"/>
+    <circle class="m" cx="1203" cy="286" r="2.7" fill="#4a5468" style="--drift:0px;animation-duration:4.7s;animation-delay:0.4s"/>
+    <circle class="m" cx="1060" cy="172" r="2.2" fill="#4a5468" style="--drift:4px;animation-duration:7.8s;animation-delay:0.4s"/>
+    <circle class="m" cx="84" cy="0" r="1.6" fill="#4a5468" style="--drift:9px;animation-duration:4.6s;animation-delay:3.9s"/>
+    <circle class="m" cx="386" cy="25" r="0.8" fill="#c8ff4d" style="--drift:3px;animation-duration:6.8s;animation-delay:3.8s"/>
+    <circle class="m" cx="951" cy="81" r="0.9" fill="#4a5468" style="--drift:2px;animation-duration:4.0s;animation-delay:1.7s"/>
+    <circle class="m" cx="533" cy="137" r="1.2" fill="#4a5468" style="--drift:0px;animation-duration:4.0s;animation-delay:3.3s"/>
+    <circle class="m" cx="1139" cy="56" r="2.4" fill="#4a5468" style="--drift:-7px;animation-duration:3.1s;animation-delay:0.9s"/>
+    <circle class="m" cx="1260" cy="139" r="2.2" fill="#4a5468" style="--drift:-6px;animation-duration:6.8s;animation-delay:3.8s"/>
+    <circle class="m" cx="873" cy="99" r="3.0" fill="#c8ff4d" style="--drift:-6px;animation-duration:5.0s;animation-delay:0.8s"/>
+    <circle class="m" cx="1119" cy="219" r="1.0" fill="#4a5468" style="--drift:-5px;animation-duration:7.6s;animation-delay:2.7s"/>
+    <circle class="m" cx="193" cy="223" r="2.5" fill="#4a5468" style="--drift:-3px;animation-duration:5.0s;animation-delay:1.7s"/>
+    <circle class="m" cx="574" cy="234" r="2.7" fill="#4a5468" style="--drift:-8px;animation-duration:3.5s;animation-delay:0.0s"/>
+    <circle class="m" cx="873" cy="257" r="2.0" fill="#4a5468" style="--drift:-8px;animation-duration:5.5s;animation-delay:0.6s"/>
+    <circle class="m" cx="661" cy="248" r="0.9" fill="#4a5468" style="--drift:0px;animation-duration:5.6s;animation-delay:0.3s"/>
+    <circle class="m" cx="1148" cy="249" r="1.8" fill="#4a5468" style="--drift:-8px;animation-duration:5.1s;animation-delay:1.0s"/>
+    <circle class="m" cx="1117" cy="199" r="1.2" fill="#c8ff4d" style="--drift:0px;animation-duration:3.3s;animation-delay:2.6s"/>
+    <circle class="m" cx="1204" cy="68" r="1.3" fill="#4a5468" style="--drift:-2px;animation-duration:7.3s;animation-delay:1.9s"/>
+    <circle class="m" cx="164" cy="80" r="1.5" fill="#c8ff4d" style="--drift:8px;animation-duration:7.6s;animation-delay:2.4s"/>
+    <circle class="m" cx="387" cy="65" r="1.1" fill="#4a5468" style="--drift:2px;animation-duration:3.7s;animation-delay:1.4s"/>
+    <circle class="m" cx="314" cy="125" r="2.2" fill="#4a5468" style="--drift:8px;animation-duration:3.9s;animation-delay:3.7s"/>
+    <circle class="m" cx="308" cy="178" r="2.0" fill="#4a5468" style="--drift:-2px;animation-duration:6.3s;animation-delay:4.0s"/>
+    <circle class="m" cx="753" cy="124" r="2.0" fill="#4a5468" style="--drift:-8px;animation-duration:3.5s;animation-delay:3.0s"/>
+    <circle class="m" cx="1258" cy="170" r="1.0" fill="#4a5468" style="--drift:-2px;animation-duration:3.2s;animation-delay:0.7s"/>
+    <circle class="m" cx="259" cy="244" r="2.3" fill="#4a5468" style="--drift:-2px;animation-duration:3.4s;animation-delay:1.2s"/>
+    <circle class="m" cx="866" cy="188" r="1.6" fill="#c8ff4d" style="--drift:6px;animation-duration:7.7s;animation-delay:0.9s"/>
+    <circle class="m" cx="543" cy="39" r="3.0" fill="#c8ff4d" style="--drift:-4px;animation-duration:5.3s;animation-delay:2.8s"/>
+    <circle class="m" cx="470" cy="33" r="2.5" fill="#4a5468" style="--drift:0px;animation-duration:6.2s;animation-delay:0.8s"/>
+    <circle class="m" cx="672" cy="51" r="1.8" fill="#4a5468" style="--drift:-8px;animation-duration:6.6s;animation-delay:0.0s"/>
+    <circle class="m" cx="1119" cy="241" r="2.2" fill="#c8ff4d" style="--drift:5px;animation-duration:3.8s;animation-delay:1.0s"/>
+    <circle class="m" cx="48" cy="137" r="0.9" fill="#4a5468" style="--drift:0px;animation-duration:6.0s;animation-delay:1.4s"/>
+    <circle class="m" cx="941" cy="147" r="2.2" fill="#c8ff4d" style="--drift:4px;animation-duration:7.9s;animation-delay:2.2s"/>
+  </g>
+  <rect class="scan" x="0" y="0" width="120" height="320" fill="url(#scan)"/>
+  <g>
+    <rect class="g" x="240" y="70" width="14" height="14" fill="#edede8" style="--dx:-450px;--dy:-73px;animation-delay:1.13s"/>
+    <rect class="g" x="304" y="70" width="14" height="14" fill="#c8ff4d" style="--dx:278px;--dy:17px;animation-delay:1.12s"/>
+    <rect class="g" x="240" y="86" width="14" height="14" fill="#edede8" style="--dx:-11px;--dy:-102px;animation-delay:0.09s"/>
+    <rect class="g" x="304" y="86" width="14" height="14" fill="#c8ff4d" style="--dx:271px;--dy:-182px;animation-delay:0.08s"/>
+    <rect class="g" x="240" y="102" width="14" height="14" fill="#c8ff4d" style="--dx:-218px;--dy:59px;animation-delay:1.27s"/>
+    <rect class="g" x="304" y="102" width="14" height="14" fill="#c8ff4d" style="--dx:385px;--dy:180px;animation-delay:0.23s"/>
+    <rect class="g" x="240" y="118" width="14" height="14" fill="#edede8" style="--dx:124px;--dy:-101px;animation-delay:0.27s"/>
+    <rect class="g" x="256" y="118" width="14" height="14" fill="#edede8" style="--dx:397px;--dy:96px;animation-delay:0.18s"/>
+    <rect class="g" x="272" y="118" width="14" height="14" fill="#c8ff4d" style="--dx:-293px;--dy:-17px;animation-delay:0.21s"/>
+    <rect class="g" x="288" y="118" width="14" height="14" fill="#c8ff4d" style="--dx:-173px;--dy:112px;animation-delay:1.05s"/>
+    <rect class="g" x="304" y="118" width="14" height="14" fill="#c8ff4d" style="--dx:-172px;--dy:-11px;animation-delay:1.07s"/>
+    <rect class="g" x="240" y="134" width="14" height="14" fill="#c8ff4d" style="--dx:-200px;--dy:-38px;animation-delay:0.24s"/>
+    <rect class="g" x="304" y="134" width="14" height="14" fill="#c8ff4d" style="--dx:-291px;--dy:-28px;animation-delay:0.36s"/>
+    <rect class="g" x="240" y="150" width="14" height="14" fill="#c8ff4d" style="--dx:-287px;--dy:-128px;animation-delay:0.27s"/>
+    <rect class="g" x="304" y="150" width="14" height="14" fill="#c8ff4d" style="--dx:348px;--dy:117px;animation-delay:0.37s"/>
+    <rect class="g" x="240" y="166" width="14" height="14" fill="#c8ff4d" style="--dx:-227px;--dy:-105px;animation-delay:0.37s"/>
+    <rect class="g" x="304" y="166" width="14" height="14" fill="#c8ff4d" style="--dx:94px;--dy:32px;animation-delay:1.21s"/>
+    <rect class="g" x="352" y="70" width="14" height="14" fill="#edede8" style="--dx:314px;--dy:49px;animation-delay:0.56s"/>
+    <rect class="g" x="368" y="70" width="14" height="14" fill="#edede8" style="--dx:109px;--dy:-110px;animation-delay:0.49s"/>
+    <rect class="g" x="384" y="70" width="14" height="14" fill="#c8ff4d" style="--dx:-154px;--dy:114px;animation-delay:0.45s"/>
+    <rect class="g" x="336" y="86" width="14" height="14" fill="#c8ff4d" style="--dx:80px;--dy:-12px;animation-delay:0.61s"/>
+    <rect class="g" x="400" y="86" width="14" height="14" fill="#edede8" style="--dx:-139px;--dy:-40px;animation-delay:0.11s"/>
+    <rect class="g" x="336" y="102" width="14" height="14" fill="#c8ff4d" style="--dx:346px;--dy:-114px;animation-delay:0.24s"/>
+    <rect class="g" x="400" y="102" width="14" height="14" fill="#c8ff4d" style="--dx:375px;--dy:164px;animation-delay:0.21s"/>
+    <rect class="g" x="336" y="118" width="14" height="14" fill="#c8ff4d" style="--dx:-352px;--dy:-144px;animation-delay:0.05s"/>
+    <rect class="g" x="400" y="118" width="14" height="14" fill="#c8ff4d" style="--dx:-54px;--dy:-19px;animation-delay:0.18s"/>
+    <rect class="g" x="336" y="134" width="14" height="14" fill="#c8ff4d" style="--dx:139px;--dy:36px;animation-delay:0.33s"/>
+    <rect class="g" x="400" y="134" width="14" height="14" fill="#c8ff4d" style="--dx:259px;--dy:-112px;animation-delay:1.10s"/>
+    <rect class="g" x="336" y="150" width="14" height="14" fill="#edede8" style="--dx:-170px;--dy:83px;animation-delay:1.37s"/>
+    <rect class="g" x="400" y="150" width="14" height="14" fill="#c8ff4d" style="--dx:-337px;--dy:20px;animation-delay:0.41s"/>
+    <rect class="g" x="352" y="166" width="14" height="14" fill="#c8ff4d" style="--dx:335px;--dy:-153px;animation-delay:1.27s"/>
+    <rect class="g" x="368" y="166" width="14" height="14" fill="#c8ff4d" style="--dx:88px;--dy:81px;animation-delay:0.85s"/>
+    <rect class="g" x="384" y="166" width="14" height="14" fill="#edede8" style="--dx:-248px;--dy:90px;animation-delay:1.18s"/>
+    <rect class="g" x="432" y="70" width="14" height="14" fill="#edede8" style="--dx:-244px;--dy:163px;animation-delay:1.35s"/>
+    <rect class="g" x="496" y="70" width="14" height="14" fill="#c8ff4d" style="--dx:-45px;--dy:209px;animation-delay:1.37s"/>
+    <rect class="g" x="432" y="86" width="14" height="14" fill="#c8ff4d" style="--dx:-387px;--dy:-40px;animation-delay:0.46s"/>
+    <rect class="g" x="448" y="86" width="14" height="14" fill="#c8ff4d" style="--dx:159px;--dy:43px;animation-delay:0.71s"/>
+    <rect class="g" x="496" y="86" width="14" height="14" fill="#c8ff4d" style="--dx:-264px;--dy:-200px;animation-delay:0.24s"/>
+    <rect class="g" x="432" y="102" width="14" height="14" fill="#c8ff4d" style="--dx:-77px;--dy:-132px;animation-delay:0.15s"/>
+    <rect class="g" x="464" y="102" width="14" height="14" fill="#c8ff4d" style="--dx:-40px;--dy:58px;animation-delay:0.11s"/>
+    <rect class="g" x="496" y="102" width="14" height="14" fill="#c8ff4d" style="--dx:-195px;--dy:-71px;animation-delay:0.48s"/>
+    <rect class="g" x="432" y="118" width="14" height="14" fill="#c8ff4d" style="--dx:125px;--dy:-52px;animation-delay:0.66s"/>
+    <rect class="g" x="480" y="118" width="14" height="14" fill="#c8ff4d" style="--dx:320px;--dy:171px;animation-delay:0.26s"/>
+    <rect class="g" x="496" y="118" width="14" height="14" fill="#c8ff4d" style="--dx:273px;--dy:32px;animation-delay:1.03s"/>
+    <rect class="g" x="432" y="134" width="14" height="14" fill="#c8ff4d" style="--dx:-323px;--dy:-10px;animation-delay:0.88s"/>
+    <rect class="g" x="496" y="134" width="14" height="14" fill="#c8ff4d" style="--dx:62px;--dy:-72px;animation-delay:0.45s"/>
+    <rect class="g" x="432" y="150" width="14" height="14" fill="#c8ff4d" style="--dx:-328px;--dy:-180px;animation-delay:1.00s"/>
+    <rect class="g" x="496" y="150" width="14" height="14" fill="#c8ff4d" style="--dx:388px;--dy:-42px;animation-delay:1.00s"/>
+    <rect class="g" x="432" y="166" width="14" height="14" fill="#c8ff4d" style="--dx:387px;--dy:200px;animation-delay:1.35s"/>
+    <rect class="g" x="496" y="166" width="14" height="14" fill="#c8ff4d" style="--dx:437px;--dy:65px;animation-delay:1.01s"/>
+    <rect class="g" x="544" y="70" width="14" height="14" fill="#edede8" style="--dx:-102px;--dy:79px;animation-delay:1.14s"/>
+    <rect class="g" x="560" y="70" width="14" height="14" fill="#edede8" style="--dx:152px;--dy:54px;animation-delay:0.75s"/>
+    <rect class="g" x="576" y="70" width="14" height="14" fill="#edede8" style="--dx:-167px;--dy:-129px;animation-delay:0.44s"/>
+    <rect class="g" x="528" y="86" width="14" height="14" fill="#edede8" style="--dx:-119px;--dy:-53px;animation-delay:1.29s"/>
+    <rect class="g" x="592" y="86" width="14" height="14" fill="#c8ff4d" style="--dx:-243px;--dy:98px;animation-delay:0.61s"/>
+    <rect class="g" x="528" y="102" width="14" height="14" fill="#c8ff4d" style="--dx:397px;--dy:206px;animation-delay:0.17s"/>
+    <rect class="g" x="528" y="118" width="14" height="14" fill="#c8ff4d" style="--dx:43px;--dy:147px;animation-delay:1.39s"/>
+    <rect class="g" x="560" y="118" width="14" height="14" fill="#c8ff4d" style="--dx:151px;--dy:144px;animation-delay:0.05s"/>
+    <rect class="g" x="576" y="118" width="14" height="14" fill="#c8ff4d" style="--dx:375px;--dy:139px;animation-delay:1.26s"/>
+    <rect class="g" x="592" y="118" width="14" height="14" fill="#c8ff4d" style="--dx:361px;--dy:-162px;animation-delay:1.27s"/>
+    <rect class="g" x="528" y="134" width="14" height="14" fill="#c8ff4d" style="--dx:95px;--dy:44px;animation-delay:0.91s"/>
+    <rect class="g" x="592" y="134" width="14" height="14" fill="#c8ff4d" style="--dx:349px;--dy:-164px;animation-delay:0.70s"/>
+    <rect class="g" x="528" y="150" width="14" height="14" fill="#c8ff4d" style="--dx:-39px;--dy:55px;animation-delay:0.70s"/>
+    <rect class="g" x="592" y="150" width="14" height="14" fill="#c8ff4d" style="--dx:-283px;--dy:-111px;animation-delay:0.77s"/>
+    <rect class="g" x="544" y="166" width="14" height="14" fill="#c8ff4d" style="--dx:-267px;--dy:-105px;animation-delay:1.20s"/>
+    <rect class="g" x="560" y="166" width="14" height="14" fill="#c8ff4d" style="--dx:-132px;--dy:-18px;animation-delay:0.77s"/>
+    <rect class="g" x="576" y="166" width="14" height="14" fill="#c8ff4d" style="--dx:287px;--dy:-194px;animation-delay:1.34s"/>
+    <rect class="g" x="672" y="70" width="14" height="14" fill="#edede8" style="--dx:178px;--dy:-87px;animation-delay:0.04s"/>
+    <rect class="g" x="688" y="70" width="14" height="14" fill="#c8ff4d" style="--dx:-13px;--dy:-34px;animation-delay:1.10s"/>
+    <rect class="g" x="704" y="70" width="14" height="14" fill="#edede8" style="--dx:133px;--dy:115px;animation-delay:0.08s"/>
+    <rect class="g" x="720" y="70" width="14" height="14" fill="#c8ff4d" style="--dx:298px;--dy:99px;animation-delay:0.21s"/>
+    <rect class="g" x="672" y="86" width="14" height="14" fill="#edede8" style="--dx:111px;--dy:166px;animation-delay:1.25s"/>
+    <rect class="g" x="736" y="86" width="14" height="14" fill="#c8ff4d" style="--dx:-285px;--dy:116px;animation-delay:1.35s"/>
+    <rect class="g" x="672" y="102" width="14" height="14" fill="#c8ff4d" style="--dx:-219px;--dy:-87px;animation-delay:0.66s"/>
+    <rect class="g" x="736" y="102" width="14" height="14" fill="#c8ff4d" style="--dx:41px;--dy:173px;animation-delay:0.71s"/>
+    <rect class="g" x="672" y="118" width="14" height="14" fill="#c8ff4d" style="--dx:132px;--dy:-74px;animation-delay:1.02s"/>
+    <rect class="g" x="688" y="118" width="14" height="14" fill="#c8ff4d" style="--dx:309px;--dy:-117px;animation-delay:0.48s"/>
+    <rect class="g" x="704" y="118" width="14" height="14" fill="#edede8" style="--dx:179px;--dy:-134px;animation-delay:0.33s"/>
+    <rect class="g" x="720" y="118" width="14" height="14" fill="#c8ff4d" style="--dx:-398px;--dy:46px;animation-delay:0.50s"/>
+    <rect class="g" x="672" y="134" width="14" height="14" fill="#c8ff4d" style="--dx:224px;--dy:-167px;animation-delay:0.29s"/>
+    <rect class="g" x="736" y="134" width="14" height="14" fill="#edede8" style="--dx:421px;--dy:-147px;animation-delay:0.91s"/>
+    <rect class="g" x="672" y="150" width="14" height="14" fill="#c8ff4d" style="--dx:367px;--dy:-160px;animation-delay:1.08s"/>
+    <rect class="g" x="736" y="150" width="14" height="14" fill="#c8ff4d" style="--dx:-274px;--dy:91px;animation-delay:0.86s"/>
+    <rect class="g" x="672" y="166" width="14" height="14" fill="#c8ff4d" style="--dx:-186px;--dy:67px;animation-delay:0.39s"/>
+    <rect class="g" x="688" y="166" width="14" height="14" fill="#c8ff4d" style="--dx:-239px;--dy:-185px;animation-delay:1.19s"/>
+    <rect class="g" x="704" y="166" width="14" height="14" fill="#c8ff4d" style="--dx:8px;--dy:-181px;animation-delay:0.27s"/>
+    <rect class="g" x="720" y="166" width="14" height="14" fill="#edede8" style="--dx:-351px;--dy:182px;animation-delay:0.89s"/>
+    <rect class="g" x="768" y="70" width="14" height="14" fill="#edede8" style="--dx:-306px;--dy:-25px;animation-delay:0.52s"/>
+    <rect class="g" x="784" y="70" width="14" height="14" fill="#edede8" style="--dx:334px;--dy:15px;animation-delay:0.96s"/>
+    <rect class="g" x="800" y="70" width="14" height="14" fill="#c8ff4d" style="--dx:435px;--dy:46px;animation-delay:0.29s"/>
+    <rect class="g" x="816" y="70" width="14" height="14" fill="#c8ff4d" style="--dx:-391px;--dy:-6px;animation-delay:0.09s"/>
+    <rect class="g" x="832" y="70" width="14" height="14" fill="#c8ff4d" style="--dx:-226px;--dy:-29px;animation-delay:1.30s"/>
+    <rect class="g" x="800" y="86" width="14" height="14" fill="#edede8" style="--dx:351px;--dy:177px;animation-delay:0.63s"/>
+    <rect class="g" x="800" y="102" width="14" height="14" fill="#c8ff4d" style="--dx:-237px;--dy:12px;animation-delay:0.80s"/>
+    <rect class="g" x="800" y="118" width="14" height="14" fill="#c8ff4d" style="--dx:-67px;--dy:144px;animation-delay:1.19s"/>
+    <rect class="g" x="800" y="134" width="14" height="14" fill="#c8ff4d" style="--dx:57px;--dy:-69px;animation-delay:1.15s"/>
+    <rect class="g" x="800" y="150" width="14" height="14" fill="#edede8" style="--dx:98px;--dy:-100px;animation-delay:0.64s"/>
+    <rect class="g" x="768" y="166" width="14" height="14" fill="#c8ff4d" style="--dx:335px;--dy:147px;animation-delay:0.66s"/>
+    <rect class="g" x="784" y="166" width="14" height="14" fill="#c8ff4d" style="--dx:-382px;--dy:-89px;animation-delay:1.06s"/>
+    <rect class="g" x="800" y="166" width="14" height="14" fill="#c8ff4d" style="--dx:-380px;--dy:119px;animation-delay:0.30s"/>
+    <rect class="g" x="816" y="166" width="14" height="14" fill="#c8ff4d" style="--dx:-168px;--dy:-52px;animation-delay:1.26s"/>
+    <rect class="g" x="832" y="166" width="14" height="14" fill="#c8ff4d" style="--dx:-368px;--dy:-76px;animation-delay:0.96s"/>
+    <rect class="g" x="864" y="70" width="14" height="14" fill="#c8ff4d" style="--dx:358px;--dy:49px;animation-delay:0.32s"/>
+    <rect class="g" x="928" y="70" width="14" height="14" fill="#c8ff4d" style="--dx:245px;--dy:99px;animation-delay:0.47s"/>
+    <rect class="g" x="864" y="86" width="14" height="14" fill="#c8ff4d" style="--dx:-336px;--dy:-187px;animation-delay:0.04s"/>
+    <rect class="g" x="880" y="86" width="14" height="14" fill="#c8ff4d" style="--dx:-130px;--dy:92px;animation-delay:1.17s"/>
+    <rect class="g" x="928" y="86" width="14" height="14" fill="#c8ff4d" style="--dx:355px;--dy:37px;animation-delay:0.10s"/>
+    <rect class="g" x="864" y="102" width="14" height="14" fill="#c8ff4d" style="--dx:74px;--dy:-192px;animation-delay:0.29s"/>
+    <rect class="g" x="896" y="102" width="14" height="14" fill="#c8ff4d" style="--dx:283px;--dy:-186px;animation-delay:0.36s"/>
+    <rect class="g" x="928" y="102" width="14" height="14" fill="#c8ff4d" style="--dx:45px;--dy:-36px;animation-delay:0.67s"/>
+    <rect class="g" x="864" y="118" width="14" height="14" fill="#edede8" style="--dx:-96px;--dy:-9px;animation-delay:0.92s"/>
+    <rect class="g" x="912" y="118" width="14" height="14" fill="#edede8" style="--dx:401px;--dy:-82px;animation-delay:0.88s"/>
+    <rect class="g" x="928" y="118" width="14" height="14" fill="#edede8" style="--dx:404px;--dy:-81px;animation-delay:0.03s"/>
+    <rect class="g" x="864" y="134" width="14" height="14" fill="#c8ff4d" style="--dx:86px;--dy:204px;animation-delay:1.12s"/>
+    <rect class="g" x="928" y="134" width="14" height="14" fill="#c8ff4d" style="--dx:409px;--dy:78px;animation-delay:0.01s"/>
+    <rect class="g" x="864" y="150" width="14" height="14" fill="#c8ff4d" style="--dx:199px;--dy:127px;animation-delay:0.33s"/>
+    <rect class="g" x="928" y="150" width="14" height="14" fill="#edede8" style="--dx:273px;--dy:0px;animation-delay:0.12s"/>
+    <rect class="g" x="864" y="166" width="14" height="14" fill="#c8ff4d" style="--dx:332px;--dy:6px;animation-delay:0.49s"/>
+    <rect class="g" x="928" y="166" width="14" height="14" fill="#c8ff4d" style="--dx:-225px;--dy:-21px;animation-delay:1.03s"/>
+    <rect class="g" x="976" y="70" width="14" height="14" fill="#c8ff4d" style="--dx:6px;--dy:-150px;animation-delay:1.36s"/>
+    <rect class="g" x="992" y="70" width="14" height="14" fill="#c8ff4d" style="--dx:424px;--dy:-4px;animation-delay:0.72s"/>
+    <rect class="g" x="1008" y="70" width="14" height="14" fill="#c8ff4d" style="--dx:-220px;--dy:170px;animation-delay:0.33s"/>
+    <rect class="g" x="960" y="86" width="14" height="14" fill="#c8ff4d" style="--dx:444px;--dy:-133px;animation-delay:1.32s"/>
+    <rect class="g" x="1024" y="86" width="14" height="14" fill="#c8ff4d" style="--dx:-23px;--dy:-191px;animation-delay:0.39s"/>
+    <rect class="g" x="960" y="102" width="14" height="14" fill="#c8ff4d" style="--dx:437px;--dy:-96px;animation-delay:0.68s"/>
+    <rect class="g" x="960" y="118" width="14" height="14" fill="#c8ff4d" style="--dx:-56px;--dy:-192px;animation-delay:0.69s"/>
+    <rect class="g" x="992" y="118" width="14" height="14" fill="#c8ff4d" style="--dx:-11px;--dy:197px;animation-delay:0.43s"/>
+    <rect class="g" x="1008" y="118" width="14" height="14" fill="#c8ff4d" style="--dx:211px;--dy:162px;animation-delay:0.47s"/>
+    <rect class="g" x="1024" y="118" width="14" height="14" fill="#c8ff4d" style="--dx:-16px;--dy:88px;animation-delay:0.22s"/>
+    <rect class="g" x="960" y="134" width="14" height="14" fill="#edede8" style="--dx:34px;--dy:-129px;animation-delay:0.25s"/>
+    <rect class="g" x="1024" y="134" width="14" height="14" fill="#edede8" style="--dx:219px;--dy:-19px;animation-delay:0.98s"/>
+    <rect class="g" x="960" y="150" width="14" height="14" fill="#c8ff4d" style="--dx:382px;--dy:-105px;animation-delay:0.68s"/>
+    <rect class="g" x="1024" y="150" width="14" height="14" fill="#c8ff4d" style="--dx:54px;--dy:-155px;animation-delay:0.52s"/>
+    <rect class="g" x="976" y="166" width="14" height="14" fill="#c8ff4d" style="--dx:170px;--dy:-124px;animation-delay:0.76s"/>
+    <rect class="g" x="992" y="166" width="14" height="14" fill="#c8ff4d" style="--dx:-221px;--dy:-154px;animation-delay:0.10s"/>
+    <rect class="g" x="1008" y="166" width="14" height="14" fill="#c8ff4d" style="--dx:403px;--dy:-144px;animation-delay:0.36s"/>
+  </g>
+  <g class="t" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" text-anchor="middle">
+    <text x="640" y="238" fill="#edede8" font-size="20" letter-spacing="6">FOUNDER, BUILDING IN STEALTH</text>
+    <text x="640" y="270" fill="#8fb53a" font-size="14" letter-spacing="4">NOTHING HERE MEANS ANYTHING UNTIL YOU FIND THE ANGLE</text>
+  </g>
+  <rect x="0.5" y="0.5" width="1279" height="319" fill="none" stroke="#23262e"/>
+</svg>
