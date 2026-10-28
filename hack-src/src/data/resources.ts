@@ -91,9 +91,9 @@ export const aiTools = [
 export const communityLinks = {
   aiHackerdorm: {
     title: 'AI Hackerdorm',
-    description: 'Malaysia\'s first Student AI Builder community. 350+ members and growing. Emphasis on peer sharing, builder culture, and leading students at tech and AI events in KL and Southeast Asia.',
+    description: 'Malaysia\'s first Student AI Builder community. 700+ members across 19 universities, with 4 university chapters. Emphasis on peer sharing, builder culture, and leading students at tech and AI events in KL and Southeast Asia.',
     url: 'https://chat.whatsapp.com/C0wtRulIyxiCJgrrRHMC2I',
-    stats: '350+ members, 4 chapters across Malaysia',
+    stats: '700+ members across 19 universities, 4 university chapters',
   },
   linkedin: {
     title: 'Hong Bing on LinkedIn',
