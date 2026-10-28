@@ -24,7 +24,7 @@ export default function AgentsPage() {
       note: `${p.frontmatter.title} case study`,
     })),
     { path: "/process.md", note: "How I build" },
-    { path: "/notes.md", note: "Run log, every event entered" },
+    { path: "/hackathons.md", note: "Hackathons & competitions, every event entered" },
     { path: "/contact.md", note: "Email and links" },
     { path: "/llms.txt", note: "Index for LLM crawlers" },
     { path: "/profile.json", note: "Structured profile and run log" },

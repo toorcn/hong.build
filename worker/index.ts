@@ -47,6 +47,12 @@ function prefersMarkdown(accept: string | null): boolean {
 }
 
 async function serveSite(request: Request, env: Env, url: URL): Promise<Response> {
+  // Preserve links to the previous event-list routes.
+  if (/^\/(?:notes?|run-log)(?:\/|\.html|\.md)?$/.test(url.pathname)) {
+    url.pathname = url.pathname.endsWith(".md") ? "/hackathons.md" : "/hackathons";
+    return Response.redirect(url.toString(), 308);
+  }
+
   const readOnly = request.method === "GET" || request.method === "HEAD";
   const accept = request.headers.get("accept");
   const target = readOnly ? markdownAsset(url.pathname, prefersMarkdown(accept)) : null;

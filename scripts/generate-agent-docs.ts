@@ -86,10 +86,10 @@ ${ABOUT_FACTS.map((f) => `- **${f.k}**: ${f.v}`).join("\n")}`,
     "Process",
     `# How I build\n\n${PRINCIPLES.map((p, i) => `## ${i}. ${p.k}\n\n${p.v}`).join("\n\n")}`,
   ),
-  "notes.md": page(
-    "/notes",
-    "Run log",
-    `# Run log
+  "hackathons.md": page(
+    "/hackathons",
+    "Hackathons & competitions",
+    `# Hackathons & competitions
 
 Every event entered since October 2022, including the ones that produced nothing.
 
