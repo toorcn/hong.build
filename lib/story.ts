@@ -242,13 +242,13 @@ export const BEATS: readonly Beat[] = [
     azimuthDeg: 356,
     elevationDeg: 13,
     distance: 12,
-    line: "AI Hackerdorm. Four chapters, four hundred-plus members nationwide. We co-organised Cursor × Anthropic Malaysia — $410,000 on the table.",
+    line: "AI Hackerdorm. Four chapters, seven hundred-plus members nationwide. We co-organised Cursor × Anthropic Malaysia — $410,000 on the table.",
     turn: "Then HackMIT. HackHarvard. Macau. Hong Kong. Vietnam, Singapore. OpenAI. Nobody announced the venues getting bigger — they just did.",
     route: "/work/ai-hackerdorm",
     routeLabel: "the dorm",
     routeTitle: "AI Hackerdorm",
     routePreview:
-      "A student-first builder community — four chapters and 400+ members nationwide.",
+      "A student-first builder community — four chapters and 700+ members nationwide.",
     gateBias: [0, -0.34],
   },
   {

@@ -36,7 +36,7 @@ export const ABOUT_FACTS = [
   { k: "role.previous", v: "SWE, research lab — SF-based startup ($3.2M pre-seed)" },
   { k: "built", v: "Tack (tack.im), real-time AI meeting moderator" },
   { k: "study", v: "Computer science & psychology, Taylor's University" },
-  { k: "community", v: "Co-founder & VP — AI Hackerdorm (4 chapters, 400+ members)" },
+  { k: "community", v: "Co-founder & VP — AI Hackerdorm (4 chapters, 700+ members)" },
   { k: "side", v: "\"Chief Reality Officer\" — Polytera, seeded entirely by hackathon winnings" },
   { k: "graphics", v: "First Malaysian student showcase @ ACM SIGGRAPH Asia" },
 ] as const;

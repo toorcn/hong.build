@@ -34,7 +34,7 @@ Malaysia's largest student-organised convention — 1,700 attendees, 50 booths, 
 ### [AI Hackerdorm](https://hong.build/work/ai-hackerdorm)
 COMMUNITY · 2025 · Co-founder & vice-president
 
-A student-first builder community — 4 chapters, 400+ members nationwide. Co-organiser, Cursor × Anthropic Hackathon Malaysia 2025 ($410k USD).
+A student-first builder community — 4 chapters, 700+ members nationwide. Co-organiser, Cursor × Anthropic Hackathon Malaysia 2025 ($410k USD).
 
 ## Contact
 

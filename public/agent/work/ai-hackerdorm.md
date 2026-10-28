@@ -7,7 +7,7 @@ url: https://hong.build/work/ai-hackerdorm
 
 COMMUNITY · 2025 · Co-founder & vice-president
 
-A student-first builder community — 4 chapters, 400+ members nationwide.
+A student-first builder community — 4 chapters, 700+ members nationwide.
 
 Stack: Community, Curriculum, Partnerships, Ecosystem
 
@@ -35,7 +35,7 @@ We started at Taylor's, proved the model, then grew to four chapters nationwide.
 
 ## Implementation
 
-Today AI Hackerdorm runs four chapters with 400+ members nationwide — build weeks, hackathons, mentorship pipelines. Separately, we co-organised the Cursor × Anthropic Hackathon Malaysia 2025: a $410k USD prize pool that put Malaysian student builders on a regional stage.
+Today AI Hackerdorm runs four chapters with 700+ members nationwide — build weeks, hackathons, mentorship pipelines. Separately, we co-organised the Cursor × Anthropic Hackathon Malaysia 2025: a $410k USD prize pool that put Malaysian student builders on a regional stage.
 
 ## Outcome
 
