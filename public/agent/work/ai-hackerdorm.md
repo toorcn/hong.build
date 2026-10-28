@@ -7,7 +7,7 @@ url: https://hong.build/work/ai-hackerdorm
 
 COMMUNITY · 2025 · Co-founder & vice-president
 
-A student-first builder community — 500+ students across 19 campuses.
+A student-first builder community — 4 chapters, 400+ members nationwide.
 
 Stack: Community, Curriculum, Partnerships, Ecosystem
 
@@ -25,7 +25,7 @@ I co-founded AI Hackerdorm and serve as vice-president — the builder-ecosystem
 
 ## Process
 
-We started at Taylor's, proved the model, then expanded to a second chapter at Universiti Putra Malaysia, with a third on the way. Growth wasn't the goal in itself — each chapter had to reproduce the *feeling*, not just the logo, so we documented the culture as carefully as the operations.
+We started at Taylor's, proved the model, then grew to four chapters nationwide. Growth wasn't the goal in itself — each chapter had to reproduce the *feeling*, not just the logo, so we documented the culture as carefully as the operations.
 
 ## Key decisions
 
@@ -35,7 +35,7 @@ We started at Taylor's, proved the model, then expanded to a second chapter at U
 
 ## Implementation
 
-Today AI Hackerdorm reaches 500+ students across 19 campuses. We run build weeks, hackathons, and mentorship pipelines, and we co-organised the Cursor × Anthropic Hackathon Malaysia 2025 — a $410k USD event that put Malaysian student builders on a regional stage.
+Today AI Hackerdorm runs four chapters with 400+ members nationwide — build weeks, hackathons, mentorship pipelines. Separately, we co-organised the Cursor × Anthropic Hackathon Malaysia 2025: a $410k USD prize pool that put Malaysian student builders on a regional stage.
 
 ## Outcome
 

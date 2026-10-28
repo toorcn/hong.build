@@ -1,13 +1,82 @@
 "use client";
 
 import { useEffect, useMemo, useRef } from "react";
-import { useFrame } from "@react-three/fiber";
+import { usePathname } from "next/navigation";
+import { useFrame, type ThreeEvent } from "@react-three/fiber";
 import * as THREE from "three";
 import { BEAT_TARGET_COUNT, FRAGMENT_TOTAL } from "@/lib/generated/fragments-meta";
-import { BEAT_T, ROOMS } from "@/lib/story";
+import { BEATS, BEAT_T, ROOMS, beatPose, nearestBeat, resolveAmount } from "@/lib/story";
 import type { FragmentData } from "@/lib/fragments";
 import { entranceSignal, SWEEP_Y_LEAD } from "@/lib/entrance";
 import { cursorSignal } from "@/lib/cursor-signal";
+import { clearCloudHot, cloudSignal, setCloudHot } from "@/lib/cloud-signal";
+import { resetTrailSignal } from "@/lib/trail-signal";
+import type { HandoffPreview } from "@/lib/panel-handoff";
+
+/** What the cursor's preview card shows for each chapter that opens a route. */
+const PREVIEWS: (HandoffPreview | null)[] = BEATS.map((b) =>
+  b.route && b.routeTitle && b.routePreview
+    ? {
+        route: b.route,
+        code: b.code,
+        label: b.label,
+        title: b.routeTitle,
+        excerpt: b.routePreview,
+      }
+    : null,
+);
+
+/** Resolve at which the hero artifact starts reading as the cloud's hot zone. */
+const HOVER_RESOLVE = 0.58;
+/** Resolve at which hovering it offers the chapter's route. */
+const PREVIEW_RESOLVE = 0.8;
+
+/** Twice the signed area of triangle abc; > 0 when c is left of ab. */
+function cross2(a: THREE.Vector2, b: THREE.Vector2, c: THREE.Vector2): number {
+  return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
+}
+
+/** Monotone-chain convex hull, counter-clockwise. */
+function convexHull(points: THREE.Vector2[]): THREE.Vector2[] {
+  if (points.length <= 3) return points;
+  const sorted = [...points].sort((a, b) => a.x - b.x || a.y - b.y);
+  const lower: THREE.Vector2[] = [];
+  const upper: THREE.Vector2[] = [];
+  for (const p of sorted) {
+    while (lower.length >= 2 && cross2(lower.at(-2)!, lower.at(-1)!, p) <= 0) lower.pop();
+    lower.push(p);
+  }
+  for (let i = sorted.length - 1; i >= 0; i--) {
+    const p = sorted[i]!;
+    while (upper.length >= 2 && cross2(upper.at(-2)!, upper.at(-1)!, p) <= 0) upper.pop();
+    upper.push(p);
+  }
+  lower.pop();
+  upper.pop();
+  return lower.concat(upper);
+}
+
+function insideHull(p: THREE.Vector2, hull: THREE.Vector2[]): boolean {
+  if (hull.length < 3) return false;
+  for (let i = 0; i < hull.length; i++) {
+    if (cross2(hull[i]!, hull[(i + 1) % hull.length]!, p) < -1e-4) return false;
+  }
+  return true;
+}
+
+/**
+ * A chapter artifact's silhouette as a flat footprint: the plane it faces the
+ * hero camera on, and the convex hull of its fragments in that plane. The
+ * pointer hits the artifact when its ray lands inside the hull — points have
+ * no area to raycast, and a bounding box would light up the empty corners.
+ */
+interface Footprint {
+  plane: THREE.Plane;
+  origin: THREE.Vector3;
+  right: THREE.Vector3;
+  up: THREE.Vector3;
+  hull: THREE.Vector2[];
+}
 
 /**
  * The walk shader (v3).
@@ -247,9 +316,16 @@ export function LabCloud({
   motionScaleRef,
   maxCount = FRAGMENT_TOTAL,
 }: LabCloudProps) {
+  const pathname = usePathname();
   const materialRef = useRef<THREE.ShaderMaterial>(null);
+  // Which chapter the pointer can hit this frame, and what it would open.
+  const hover = useRef<{ enabled: boolean; home: number; preview: HandoffPreview | null }>({
+    enabled: false,
+    home: 0,
+    preview: null,
+  });
 
-  const { geometry, limit, span } = useMemo(() => {
+  const { geometry, footprints, limit, span } = useMemo(() => {
     const geo = new THREE.BufferGeometry();
     // The built-in `position` attribute doubles as the fragment's resolved
     // target — the shader reads it directly.
@@ -271,7 +347,39 @@ export function LabCloud({
       spanX = Math.max(spanX, Math.abs(data.targets[i * 3] ?? 0));
       spanY = Math.max(spanY, Math.abs(data.targets[i * 3 + 1] ?? 0));
     }
-    return { geometry: geo, limit: drawn, span: new THREE.Vector2(spanX, spanY) };
+
+    const footprints: Footprint[] = BEATS.map((b, k) => {
+      const room = ROOMS[k]!;
+      const origin = new THREE.Vector3(...room.center);
+      const pose = beatPose(b);
+      const normal = new THREE.Vector3(pose.x, pose.y, pose.z).normalize();
+      const right = new THREE.Vector3(0, 1, 0).cross(normal).normalize();
+      const up = normal.clone().cross(right).normalize();
+      const flat: THREE.Vector2[] = [];
+      const p = new THREE.Vector3();
+      const d = new THREE.Vector3();
+      for (let i = 0; i < drawn; i++) {
+        if (data.homes[i] !== k) continue;
+        p.fromBufferAttribute(geo.getAttribute("position") as THREE.BufferAttribute, i);
+        d.copy(p).sub(origin);
+        flat.push(new THREE.Vector2(d.dot(right), d.dot(up)));
+      }
+      const hull = convexHull(flat);
+      // A touch of slack so the edge motes still count as on the artifact.
+      const centroid = hull
+        .reduce((acc, v) => acc.add(v), new THREE.Vector2())
+        .multiplyScalar(1 / Math.max(1, hull.length));
+      for (const v of hull) v.sub(centroid).multiplyScalar(1.035).add(centroid);
+      return {
+        plane: new THREE.Plane().setFromNormalAndCoplanarPoint(normal, origin),
+        origin,
+        right,
+        up,
+        hull,
+      };
+    });
+
+    return { geometry: geo, footprints, limit: drawn, span: new THREE.Vector2(spanX, spanY) };
   }, [data, maxCount]);
 
   const uniforms = useMemo(
@@ -308,6 +416,37 @@ export function LabCloud({
   /** Scratch for deriving the pointer ray; reused so the frame loop is allocation-free. */
   const scratch = useMemo(() => new THREE.Vector3(), []);
 
+  /**
+   * Raycast against the hero chapter's footprint instead of the points.
+   * Reports a hit at the near plane so the cloud wins over anything behind it.
+   */
+  const raycast = useMemo(() => {
+    const hit = new THREE.Vector3();
+    const local = new THREE.Vector3();
+    const flat = new THREE.Vector2();
+    return function (this: THREE.Object3D, raycaster: THREE.Raycaster, hits: THREE.Intersection[]) {
+      const h = hover.current;
+      if (!h.enabled) return;
+      const fp = footprints[h.home];
+      if (!fp || !raycaster.ray.intersectPlane(fp.plane, hit)) return;
+      local.copy(hit).sub(fp.origin);
+      flat.set(local.dot(fp.right), local.dot(fp.up));
+      if (!insideHull(flat, fp.hull)) return;
+      const distance = raycaster.ray.origin.distanceTo(hit);
+      if (distance < raycaster.near || distance > raycaster.far) return;
+      hits.push({ distance: raycaster.near, point: hit.clone(), object: this });
+    };
+  }, [footprints]);
+
+  useEffect(() => () => clearCloudHot(), []);
+
+  // The cloud sits over the track, so it claims the pointer from it.
+  const onHover = (e: ThreeEvent<PointerEvent | MouseEvent>) => {
+    e.stopPropagation();
+    resetTrailSignal();
+    setCloudHot(true, hover.current.preview);
+  };
+
   // The span depends on the loaded payload, so push it once it's measured.
   useEffect(() => {
     (uniforms.uSpan.value as THREE.Vector2).copy(span);
@@ -328,6 +467,8 @@ export function LabCloud({
     // the rig's own damping would blunt the snap into a fade. The gate
     // (home 0) sweeps; every other room waits as dust.
     if (entranceSignal.authority > 0) {
+      hover.current.enabled = false;
+      if (cloudSignal.hot) clearCloudHot();
       u.uStoryT!.value = 0;
       ovr[0] = entranceSignal.resolve;
       for (let k = 1; k < BEAT_TARGET_COUNT; k++) ovr[k] = 0;
@@ -356,6 +497,17 @@ export function LabCloud({
     u.uCursor!.value = cursorSignal.presence;
     u.uCursorEnergy!.value = cursorSignal.energy;
 
+    // Only the resolved hero artifact on the journey is hoverable, and only
+    // once it's legible enough to be worth opening.
+    const t = storyTRef.current;
+    const h = hover.current;
+    const resolved = resolveAmount(t);
+    h.home = nearestBeat(t);
+    h.enabled = pathname === "/" && resolved >= HOVER_RESOLVE;
+    h.preview = h.enabled && resolved > PREVIEW_RESOLVE ? (PREVIEWS[h.home] ?? null) : null;
+    if (!h.enabled && cloudSignal.hot) clearCloudHot();
+    else if (cloudSignal.hot && cloudSignal.preview !== h.preview) setCloudHot(true, h.preview);
+
     // Journey: smooth toward the live story position, sweep off.
     u.uStoryT!.value += (storyTRef.current - (u.uStoryT!.value as number)) * 0.16;
     for (let k = 0; k < BEAT_TARGET_COUNT; k++) ovr[k] = overrideRef.current[k] ?? -1;
@@ -366,7 +518,16 @@ export function LabCloud({
   });
 
   return (
-    <points geometry={geometry} frustumCulled={false}>
+    <points
+      geometry={geometry}
+      frustumCulled={false}
+      raycast={raycast}
+      onPointerOver={onHover}
+      onPointerMove={onHover}
+      onPointerOut={clearCloudHot}
+      onPointerDown={onHover}
+      onClick={onHover}
+    >
       <shaderMaterial
         ref={materialRef}
         vertexShader={VERT}

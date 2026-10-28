@@ -2,6 +2,7 @@
 
 import { create } from "zustand";
 import type { ReactNode } from "react";
+import type { HandoffPreview } from "@/lib/panel-handoff";
 
 /**
  * Hand-off for the in-scene reading surface.
@@ -17,6 +18,9 @@ import type { ReactNode } from "react";
  */
 export interface PanelPayload {
   beat: number;
+  /** Set when this panel should grow out of the cursor's preview card. */
+  handoffToken?: number;
+  handoffPreview?: HandoffPreview;
   title: string;
   sub?: string;
   wide: boolean;

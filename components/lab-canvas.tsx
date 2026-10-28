@@ -9,10 +9,10 @@ import { FRAGMENT_TOTAL, BEAT_TARGET_COUNT } from "@/lib/generated/fragments-met
 import { CAMERA_FOV } from "@/lib/vantages";
 import { LabCloud } from "@/components/lab-cloud";
 import { LabPath } from "@/components/lab-path";
+import { LabWalls } from "@/components/lab-walls";
 import { LabRig } from "@/components/lab-rig";
 import { LabEffects } from "@/components/lab-effects";
 import { PanelSurface } from "@/components/panel-surface";
-import { TabletGate } from "@/components/tablet-gate";
 
 function useIsMobile(): boolean {
   const [mobile, setMobile] = useState(false);
@@ -112,6 +112,14 @@ export function LabCanvas() {
             maxCount={maxCount}
           />
         ) : null}
+        {/* Each room's shell, around the edges of the frame. */}
+        <LabWalls
+          walkTRef={walkTRef}
+          resolveRef={resolveRef}
+          dimRef={dimRef}
+          motionScaleRef={motionScaleRef}
+          density={mobile ? 0.6 : 1}
+        />
         {/* The route through the rooms, under the artifacts. Drawn before the
             rig so it exists on the first frame the journey owns the camera. */}
         <LabPath walkTRef={walkTRef} dimRef={dimRef} motionScaleRef={motionScaleRef} />
@@ -125,9 +133,6 @@ export function LabCanvas() {
           reducedMotion={reducedMotion}
         />
         <LabEffects enabled={!mobile && !reducedMotion} resolveRef={resolveRef} />
-        {/* The way in: the chapter's own tablet, dormant in front of its
-            artifact until you click it open. */}
-        <TabletGate />
         {/* The reading surface, standing in whichever room the route holds. */}
         <PanelSurface />
       </Suspense>

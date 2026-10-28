@@ -9,7 +9,7 @@ import {
   ENTRANCE_SEEN_KEY as SEEN_KEY,
 } from "@/lib/entrance-boot";
 import { useLabStore } from "@/lib/store";
-import { sound } from "@/lib/sound";
+import { MUTED_STORAGE_KEY, sound } from "@/lib/sound";
 import {
   ENTRANCE_TIMING as T,
   OVER_CONTRACT,
@@ -88,6 +88,12 @@ export function ColdStart() {
       };
     }
 
+    // The ambient bed is part of the cold start now, so it begins with it —
+    // unless the visitor muted on a previous visit.
+    const muted = window.localStorage.getItem(MUTED_STORAGE_KEY) === "1";
+    sound.setMuted(muted);
+    if (!muted) sound.beginAmbient();
+
     // The entrance owns the frame, so hold scroll at the top for its
     // duration. Any scroll attempt is a skip gesture, so this never traps.
     const priorOverflow = document.body.style.overflow;
@@ -121,8 +127,6 @@ export function ColdStart() {
       document.body.style.overflow = priorOverflow;
       if (raf) cancelAnimationFrame(raf);
       raf = 0;
-      // Bed starts with the chrome reveal — not during the cold start.
-      sound.beginAmbient();
       // Once the staggered reveal has played, drop the attribute so the
       // entrance CSS stops matching and the overlays own their own motion.
       detach = window.setTimeout(() => {
@@ -233,10 +237,9 @@ export function ColdStart() {
 
     raf = requestAnimationFrame(tick);
 
-    // Prime the audio context on first gesture so beginAmbient() can fade in
-    // immediately when the reveal ends — without audibly starting the bed yet.
+    // Browsers hold the bed until a gesture; the first one starts it.
     const prime = () => {
-      void sound.unlock();
+      sound.beginAmbient();
     };
     window.addEventListener("pointerdown", prime, { passive: true, once: true });
     window.addEventListener("keydown", prime, { once: true });

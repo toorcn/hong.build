@@ -18,12 +18,12 @@ export default function ProcessPage() {
 
       <dl className="panel-rows mt-14">
         {PRINCIPLES.map((p, i) => (
-          <LiveRow key={p.k} delay={i * 90} className="px-5 py-6 sm:px-7">
-            <dt className="flex items-baseline gap-4">
-              <span className="font-mono text-[10px] tracking-[0.18em] text-type-faint">
+          <LiveRow key={p.k} delay={i * 90} className="px-3 py-6 sm:px-7">
+            <dt className="flex min-w-0 items-baseline gap-3">
+              <span className="shrink-0 font-mono text-[10px] tracking-[0.18em] text-type-faint">
                 {String(i).padStart(2, "0")}
               </span>
-              <span className="font-mono text-[12px] uppercase tracking-[0.14em] text-accent">
+              <span className="min-w-0 font-mono text-[12px] uppercase tracking-[0.14em] text-accent">
                 {p.k}
               </span>
             </dt>

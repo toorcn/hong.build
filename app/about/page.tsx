@@ -5,7 +5,7 @@ import { ABOUT_FACTS, SITE } from "@/content/site";
 
 export const metadata: Metadata = {
   title: "About",
-  description: "Who is Hong Bing — AI engineer and builder in Kuala Lumpur.",
+  description: "Who is Hong Bing — founder and AI engineer in Kuala Lumpur and San Francisco.",
 };
 
 export default function AboutPage() {
@@ -24,15 +24,16 @@ export default function AboutPage() {
         room is.
       </p>
       <p className="mt-5 max-w-xl text-base leading-relaxed text-type-dim">
-        Right now I'm building production AI at YTL AI Labs, R&D for an
-        SF-based startup, and my own thing — Tack, a meeting moderator that
-        intervenes while the conversation is still alive. I also co-founded
-        AI Hackerdorm — 500+ students across 19 campuses.
+        Right now I'm founding something I can't talk about yet, and building
+        production AI at YTL AI Labs. Before that: R&D for an SF-based startup,
+        and Tack, a meeting moderator that intervenes while the conversation
+        is still alive. I also co-founded AI Hackerdorm — 4 chapters, 400+
+        members nationwide.
       </p>
 
       <dl className="panel-rows mt-14">
         {ABOUT_FACTS.map((f) => (
-          <LiveRow key={f.k} className="grid gap-1 px-5 py-4 sm:grid-cols-[200px_1fr] sm:gap-6">
+          <LiveRow key={f.k} className="grid gap-1 px-3 py-4 sm:grid-cols-[200px_1fr] sm:gap-6 sm:px-5">
             <dt className="font-mono text-[10px] uppercase tracking-[0.18em] text-type-faint">
               {f.k}
             </dt>

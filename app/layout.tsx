@@ -8,6 +8,7 @@ import { ColdStart } from "@/components/cold-start";
 import { Chrome } from "@/components/chrome";
 import { PageTransition } from "@/components/page-transition";
 import { ScrollReset } from "@/components/scroll-reset";
+import { SiteCursor } from "@/components/site-cursor";
 import "./globals.css";
 
 const archivo = Archivo({
@@ -34,7 +35,7 @@ export const metadata: Metadata = {
     template: `%s — ${SITE.shortName}`,
   },
   description:
-    "AI engineer and builder in Kuala Lumpur. Nothing here means anything until you find the angle. " +
+    "Founder and AI engineer in Kuala Lumpur and San Francisco. Nothing here means anything until you find the angle. " +
     "A scroll journey through one cloud of fragments.",
   metadataBase: new URL("https://hongbing.dev"),
   openGraph: {
@@ -79,6 +80,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
         <Chrome />
         <ScrollReset />
+        <SiteCursor />
 
         <main id="content" className="lab-chrome">
           <PageTransition>{children}</PageTransition>

@@ -29,7 +29,7 @@ const SEGMENTS: readonly {
   fill: string;
 }[] = [
   { key: "placed", label: "placed", text: "text-accent", fill: "var(--color-accent)" },
-  { key: "mentored", label: "mentored", text: "text-type-dim", fill: "var(--color-type-dim)" },
+  { key: "mentored", label: "mentored", text: "text-accent-dim", fill: "var(--color-accent-dim)" },
   { key: "nothing", label: "nothing", text: "text-type-faint", fill: "var(--color-type-faint)" },
 ];
 
@@ -114,20 +114,24 @@ function Bar({
 
   return (
     <div className="run-frequency-bar-col">
-      <div className="run-frequency-bar" style={{ height: `${heightPct}%` }}>
-        {SEGMENTS.map((s) => {
-          const count = outcome[s.key];
-          if (count === 0) return null;
-          const segPct = (count / outcome.total) * 100;
-          return (
-            <span
-              key={s.key}
-              className="run-frequency-seg"
-              style={{ height: `${segPct}%`, background: s.fill }}
-              title={`${s.label}: ${count}`}
-            />
-          );
-        })}
+      {/* The plot area is the bar's 100% — the count and year labels sit
+          below it, so a full-height bar can't push them out of the chart. */}
+      <div className="run-frequency-bar-plot">
+        <div className="run-frequency-bar" style={{ height: `${heightPct}%` }}>
+          {SEGMENTS.map((s) => {
+            const count = outcome[s.key];
+            if (count === 0) return null;
+            const segPct = (count / outcome.total) * 100;
+            return (
+              <span
+                key={s.key}
+                className="run-frequency-seg"
+                style={{ height: `${segPct}%`, background: s.fill }}
+                title={`${s.label}: ${count}`}
+              />
+            );
+          })}
+        </div>
       </div>
       <span className="run-frequency-count tnum">
         {Math.round(outcome.total * progress)}

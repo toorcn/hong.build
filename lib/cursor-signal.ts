@@ -75,7 +75,7 @@ const PRESENCE_RETENTION = 0.001;
 /** Focus remaining after one second of easing — snappier than presence. */
 const FOCUS_RETENTION = 0.0001;
 /** Floor on cursor energy while a gate is held, so still hover still stirs. */
-const FOCUS_ENERGY_FLOOR = 0.55;
+const FOCUS_ENERGY_FLOOR = 0.28;
 
 /**
  * Tablet gates call this on enter/leave. Not React state — the cloud and rig

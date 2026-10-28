@@ -5,7 +5,7 @@ url: https://hong.build/
 
 # Hong Bing Sim
 
-AI engineer & builder. Kuala Lumpur, MY (UTC+8). AI engineering at YTL AI Labs since Apr 2026. Building Tack.
+Founder, building in stealth. Kuala Lumpur (UTC+8) · San Francisco (PT). Founder, building in stealth. AI engineering at YTL AI Labs since Apr 2026.
 
 > Meaning is found in the absurdity of our perception.
 
@@ -34,12 +34,14 @@ Malaysia's largest student-organised convention — 1,700 attendees, 50 booths, 
 ### [AI Hackerdorm](https://hong.build/work/ai-hackerdorm)
 COMMUNITY · 2025 · Co-founder & vice-president
 
-A student-first builder community — 500+ students across 19 campuses. Co-organisers, Cursor × Anthropic Hackathon Malaysia 2025 ($410k USD).
+A student-first builder community — 4 chapters, 400+ members nationwide. Co-organiser, Cursor × Anthropic Hackathon Malaysia 2025 ($410k USD).
 
 ## Contact
 
-- Email: hong@polytera.dev
+- Email: hi@hong.build
 - LinkedIn: https://linkedin.com/in/hong-bing
+- Instagram: https://instagram.com/h.0.n.4
+- X: https://x.com/leapinghong
 - GitHub: https://github.com/toorcn
 - Tack: https://tack.im
 - AI Hackerdorm: https://aihackerdorm.com

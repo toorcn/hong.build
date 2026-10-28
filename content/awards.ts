@@ -21,45 +21,29 @@ export interface Award {
   org?: string;
   /** Competitive programming rather than a build event. */
   compCode?: boolean;
-  /**
-   * He mentored at this event rather than competing. `result` holds what the
-   * mentored team placed, or the mentor role when there was no placement.
-   */
+  /** Placement earned by a team he mentored, not competed on. */
   mentored?: boolean;
   /** One-line note for the log. */
   note?: string;
+  /** The post about it, where there is one. */
+  linkedin?: string;
 }
 
-/** Logged newest first, the way entries get added. AWARDS re-sorts it. */
-const LOGGED: readonly Award[] = [
+export const AWARDS: readonly Award[] = [
   // ── 2026 ──────────────────────────────────────────────────────────────
   {
     year: 2026,
-    month: "oct",
-    event: "MIT Hacking Medicine Malaysia 2026",
+    month: "aug",
+    event: "TalentLabs DevLeague",
     result: "Mentor",
-    org: "MIT",
+    org: "TalentLabs",
     mentored: true,
   },
   {
     year: 2026,
-    month: "sep",
-    event: "HackMIT 2026",
-    result: "#1 Hardware — Special Prize",
-    org: "HackMIT",
-  },
-  {
-    year: 2026,
-    month: "aug",
-    event: "Devin KL Hackathon 2026",
-    result: "Finalist",
-    org: "Cognition",
-  },
-  {
-    year: 2026,
     month: "jul",
-    event: "Codex Community Hackathon 2026 (OpenAI Build Week), Kuala Lumpur",
-    result: "Technical mentor",
+    event: "Codex Community Hackathon 2026 (OpenAI Build Week)",
+    result: "Mentor · Technical",
     org: "OpenAI",
     mentored: true,
   },
@@ -70,6 +54,7 @@ const LOGGED: readonly Award[] = [
     result: "Champion — Overall",
     org: "OpenAI, 'Sup, Carousell",
     note: "AUNTIE — trust-first AI copilot for SEA live commerce. 550+ international sign-ups.",
+    linkedin: "https://www.linkedin.com/posts/hong-bing_sup-won-%F0%9D%97%99%F0%9D%97%B6%F0%9D%97%BF%F0%9D%98%80%F0%9D%98%81-%F0%9D%97%BD%F0%9D%97%B9%F0%9D%97%AE%F0%9D%97%B0%F0%9D%97%B2-at-the-%F0%9D%97%A6-activity-7487729044659249152-H7z1",
   },
   {
     year: 2026,
@@ -77,6 +62,15 @@ const LOGGED: readonly Award[] = [
     event: "Beyond Hack 2026, Macau",
     result: "2nd — Innovation & Creativity",
     org: "Beyond Expo",
+    linkedin: "https://www.linkedin.com/posts/hong-bing_openclaw-codex-clawcon-activity-7472445350163886080-CE4B",
+  },
+  {
+    year: 2026,
+    month: "may",
+    event: "Lovable Vibeathon KL",
+    result: "Mentor · Preliminary Judge",
+    org: "Lovable",
+    mentored: true,
   },
   {
     year: 2026,
@@ -84,6 +78,16 @@ const LOGGED: readonly Award[] = [
     event: "OpenAI × January Capital × Jelawang Capital",
     result: "3rd — $5k credits + 1y Pro",
     org: "OpenAI",
+    linkedin: "https://www.linkedin.com/posts/hong-bing_sup-won-an-openai-hackathon-solo-7k-activity-7460677775901888512-ARHi",
+  },
+  {
+    year: 2026,
+    month: "may",
+    event: "ImagineHack 2026",
+    result: "Workshop Speaker",
+    org: "Taylor's Agents Of Tech",
+    mentored: true,
+    note: "https://hackathon.polytera.dev",
   },
   {
     year: 2026,
@@ -92,16 +96,27 @@ const LOGGED: readonly Award[] = [
     result: "Top 5% of 210 teams · 4 track placements",
     org: "LotusHacks & HackHarvard",
     note: "3rd Edtech (Etest Vietnam) · 1st Agora · 1st fal · 1st Exa",
+    linkedin: "https://www.linkedin.com/posts/hong-bing_we-just-won-9-awards-at-%F0%9D%91%BD%F0%9D%92%8A%F0%9D%92%86%F0%9D%92%95%F0%9D%92%8F%F0%9D%92%82%F0%9D%92%8E%F0%9D%92%94-activity-7442494731399630848-zHjK",
   },
   {
     year: 2026,
-    month: "sep",
-    event: "CodeNection 2026",
-    result: "Mentor",
+    month: "mar",
+    event: "KitaHack 2026",
+    result: "Finalist",
+    org: "KitaHack",
     mentored: true,
+    linkedin: "https://www.linkedin.com/posts/hong-bing_kitahack2026-activity-7449275182059266048-E-XT",
   },
-
   // ── 2025 ──────────────────────────────────────────────────────────────
+  {
+    year: 2025,
+    month: "dec",
+    event: "Cursor × Anthropic Hackathon",
+    result: "Preliminary Judge · Mentor · Organiser",
+    org: "Cursor, Anthropic",
+    mentored: true,
+    linkedin: "https://www.linkedin.com/posts/hong-bing_i-stick-to-one-rule-say-yes-for-fundamental-activity-7404717003661406208-K24S",
+  },
   {
     year: 2025,
     month: "oct",
@@ -109,6 +124,7 @@ const LOGGED: readonly Award[] = [
     result: "Champion",
     org: "Vortex XR Lab",
     note: "Mindspace — AR spatial organization companion.",
+    linkedin: "https://www.linkedin.com/posts/hong-bing_hackathon-kiyokocon-kiyokocon-activity-7389121966659571713-bBwY",
   },
   {
     year: 2025,
@@ -116,6 +132,7 @@ const LOGGED: readonly Award[] = [
     event: "Great Malaysia AI Hackathon 2025",
     result: "Finalist — Top 5 of 550",
     org: "MDEC, AWS, APU",
+    linkedin: "https://www.linkedin.com/posts/hong-bing_top-2-tight-competition-and-learnt-so-much-activity-7383737320824426496-sRjz",
   },
   {
     year: 2025,
@@ -124,6 +141,15 @@ const LOGGED: readonly Award[] = [
     result: "Student Champion",
     org: "Ministry of Digital & AI Tinkerer",
     note: "AI CodeFest & AI Buildathon. A managing partner from 500 Global was watching — the residency invite came out of this room.",
+    linkedin: "https://www.linkedin.com/posts/hong-bing_secured-my-14th-award-at-the-asean-ai-activity-7362339830074150912-BnRA",
+  },
+  {
+    year: 2025,
+    month: "aug",
+    event: "CodeNection 2025",
+    result: "Mentor",
+    org: "CodeNection",
+    mentored: true,
   },
   {
     year: 2025,
@@ -131,6 +157,7 @@ const LOGGED: readonly Award[] = [
     event: "iCube IGNITE 2025",
     result: "Finalist",
     org: "iCube International",
+    linkedin: "https://www.linkedin.com/posts/hong-bing_my-first-hackathon-pitch-was-a-%F0%9D%92%85%F0%9D%92%8A%F0%9D%92%94%F0%9D%92%82%F0%9D%92%94-activity-7359524305593905153-W5cI",
   },
   {
     year: 2025,
@@ -139,6 +166,7 @@ const LOGGED: readonly Award[] = [
     result: "Top 2 — 1st runner-up",
     org: "Data Science Association",
     compCode: true,
+    linkedin: "https://www.linkedin.com/posts/hong-bing_my-first-hackathon-pitch-was-a-%F0%9D%92%85%F0%9D%92%8A%F0%9D%92%94%F0%9D%92%82%F0%9D%92%94-activity-7359524305593905153-W5cI",
   },
   {
     year: 2025,
@@ -146,6 +174,7 @@ const LOGGED: readonly Award[] = [
     event: "FutureHack! A.I. Battlefield",
     result: "Semi-finalist & Speaker",
     org: "Newell",
+    linkedin: "https://www.linkedin.com/posts/hong-bing_my-first-hackathon-pitch-was-a-%F0%9D%92%85%F0%9D%92%8A%F0%9D%92%94%F0%9D%92%82%F0%9D%92%94-activity-7359524305593905153-W5cI",
   },
   {
     year: 2025,
@@ -153,6 +182,7 @@ const LOGGED: readonly Award[] = [
     event: "Turboline × IIMS International Hackathon",
     result: "Special Recognition",
     org: "Turboline",
+    linkedin: "https://www.linkedin.com/posts/hong-bing_my-first-hackathon-pitch-was-a-%F0%9D%92%85%F0%9D%92%8A%F0%9D%92%94%F0%9D%92%82%F0%9D%92%94-activity-7359524305593905153-W5cI",
   },
   {
     year: 2025,
@@ -160,6 +190,7 @@ const LOGGED: readonly Award[] = [
     event: "ViTrox Tech 4 Good 2025",
     result: "Grand Finalist",
     org: "ViTrox",
+    linkedin: "https://www.linkedin.com/posts/hong-bing_finalist-problem-neurodivergent-activity-7319648261663862784-N4za",
   },
   {
     year: 2025,
@@ -167,15 +198,15 @@ const LOGGED: readonly Award[] = [
     event: "ImagineHack 2025",
     result: "Best Technical Implementation",
     org: "Taylor's Agents Of Tech",
+    linkedin: "https://www.linkedin.com/posts/hong-bing_my-first-hackathon-pitch-was-a-%F0%9D%92%85%F0%9D%92%8A%F0%9D%92%94%F0%9D%92%82%F0%9D%92%94-activity-7359524305593905153-W5cI",
   },
   {
     year: 2025,
-    month: "jun",
+    month: "—",
     event: "Loophole Hackathon 2025",
     result: "Judges' Favourite",
     org: "Build Club MY",
   },
-
   // ── 2024 ── the placements start ──────────────────────────────────────
   {
     year: 2024,
@@ -184,6 +215,7 @@ const LOGGED: readonly Award[] = [
     result: "Champion — Top 1",
     org: "Data Science Association",
     compCode: true,
+    linkedin: "https://www.linkedin.com/posts/hong-bing_champion-coding-activity-7279750519869349888-h1JA",
   },
   {
     year: 2024,
@@ -192,8 +224,6 @@ const LOGGED: readonly Award[] = [
     result: "Semi-finalist",
     org: "PayNet",
   },
-  { year: 2024, month: "nov", event: "Deriv AI Hackathon", result: null },
-  { year: 2024, month: "oct", event: "IIUM I-Hax", result: null },
   {
     year: 2024,
     month: "oct",
@@ -216,8 +246,12 @@ const LOGGED: readonly Award[] = [
     result: null,
     compCode: true,
   },
-  { year: 2024, month: "feb", event: "Hilti IT Competition", result: null },
-
+  {
+    year: 2024,
+    month: "feb",
+    event: "Hilti IT Competition",
+    result: null,
+  },
   // ── 2023 ── the only result this year belongs to someone else ─────────
   {
     year: 2023,
@@ -248,9 +282,13 @@ const LOGGED: readonly Award[] = [
     result: null,
     org: "RHB",
   },
-
   // ── 2022 ── where it starts. Nothing to show for either. ──────────────
-  { year: 2022, month: "oct", event: "Hong Leong Bank Hackathon", result: null },
+  {
+    year: 2022,
+    month: "oct",
+    event: "Hong Leong Bank Hackathon",
+    result: null,
+  },
   {
     year: 2022,
     month: "oct",
@@ -259,22 +297,6 @@ const LOGGED: readonly Award[] = [
     note: "The first one.",
   },
 ] as const;
-
-const MONTHS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
-
-/** Month index from the log's month token. A span sorts by its start; "—" sorts last in its year. */
-function monthIndex(month: string): number {
-  const i = MONTHS.indexOf(month.slice(0, 3));
-  return i === -1 ? MONTHS.length : i;
-}
-
-/**
- * The log, oldest first. LOGGED is reversed before sorting so entries that
- * share a month keep their true order — the first one stays first.
- */
-export const AWARDS: readonly Award[] = [...LOGGED]
-  .reverse()
-  .sort((a, b) => a.year - b.year || monthIndex(a.month) - monthIndex(b.month));
 
 /** Every event entered. */
 export const EVENT_COUNT = AWARDS.length;

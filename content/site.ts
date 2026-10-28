@@ -6,13 +6,15 @@
 export const SITE = {
   name: "Hong Bing Sim",
   shortName: "HONG BING",
-  title: "AI engineer & builder",
-  location: "Kuala Lumpur, MY (UTC+8)",
+  title: "Founder, building in stealth",
+  location: "Kuala Lumpur (UTC+8) · San Francisco (PT)",
   thesis: "Meaning is found in the absurdity of our perception.",
-  email: "hong@polytera.dev",
-  status: "AI engineering at YTL AI Labs since Apr 2026. Building Tack.",
+  email: "hi@hong.build",
+  status: "Founder, building in stealth. AI engineering at YTL AI Labs since Apr 2026.",
   socials: [
     { label: "LinkedIn", href: "https://linkedin.com/in/hong-bing" },
+    { label: "Instagram", href: "https://instagram.com/h.0.n.4" },
+    { label: "X", href: "https://x.com/leapinghong" },
     { label: "GitHub", href: "https://github.com/toorcn" },
     { label: "Tack", href: "https://tack.im" },
     { label: "AI Hackerdorm", href: "https://aihackerdorm.com" },
@@ -27,13 +29,14 @@ export const NAV = [
   { label: "Contact", href: "/contact", code: "V4" },
 ] as const;
 
-/** Owner-confirmed public: YTL AI Labs, the SF research lab, and Polytera. */
+/** Owner-confirmed public: the stealth company, YTL AI Labs, the SF research lab, and Polytera. */
 export const ABOUT_FACTS = [
+  { k: "role.founder", v: "Founder — building in stealth" },
   { k: "role.current", v: "AI engineering, API & console — YTL AI Labs" },
-  { k: "role.research", v: "SWE, research lab — SF-based startup ($3.2M pre-seed)" },
-  { k: "role.founder", v: "Founder — Tack (tack.im), real-time AI meeting moderator" },
+  { k: "role.previous", v: "SWE, research lab — SF-based startup ($3.2M pre-seed)" },
+  { k: "built", v: "Tack (tack.im), real-time AI meeting moderator" },
   { k: "study", v: "Computer science & psychology, Taylor's University" },
-  { k: "community", v: "Co-founder & VP — AI Hackerdorm (500+ students, 19 campuses)" },
+  { k: "community", v: "Co-founder & VP — AI Hackerdorm (4 chapters, 400+ members)" },
   { k: "side", v: "\"Chief Reality Officer\" — Polytera, seeded entirely by hackathon winnings" },
   { k: "graphics", v: "First Malaysian student showcase @ ACM SIGGRAPH Asia" },
 ] as const;
