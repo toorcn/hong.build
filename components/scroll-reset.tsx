@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { scrollToY } from "@/lib/smooth-scroll";
 
 /**
  * Keeps window scroll honest across route changes. The home page is a tall
@@ -13,7 +14,7 @@ export function ScrollReset() {
   const pathname = usePathname();
   useEffect(() => {
     if (pathname !== "/") {
-      window.scrollTo(0, 0);
+      scrollToY(0);
     }
   }, [pathname]);
   return null;

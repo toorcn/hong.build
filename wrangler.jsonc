@@ -1,12 +1,23 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "hong-build",
+  "main": "worker/index.ts",
   "compatibility_date": "2026-10-01",
   "assets": {
     "directory": "./out",
+    "binding": "ASSETS",
     "html_handling": "auto-trailing-slash",
-    "not_found_handling": "404-page"
+    "not_found_handling": "404-page",
+    "run_worker_first": ["/*", "!/_next/*", "!/audio/*", "!/hack/assets/*", "!/fragments.bin"]
   },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "hong-build-hack",
+      "database_id": "cb01436d-96c7-4494-b435-cc062b0760d4",
+      "migrations_dir": "migrations"
+    }
+  ],
   "routes": [
     { "pattern": "hong.build", "custom_domain": true },
     { "pattern": "www.hong.build", "custom_domain": true }

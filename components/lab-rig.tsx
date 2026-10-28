@@ -8,6 +8,7 @@ import {
   BEATS,
   beatForRoute,
   beatT,
+  framingFor,
   pathLook,
   pathPose,
   storyPosition,
@@ -18,6 +19,9 @@ import { entranceSignal, WRONG_ANGLE } from "@/lib/entrance";
 import { panelSignal } from "@/lib/panel-signal";
 import { attachCursorTracking, clearCursor, cursorSignal, stepCursor } from "@/lib/cursor-signal";
 import { sound } from "@/lib/sound";
+import { CLOUD_HOT_EVENT, cloudSignal } from "@/lib/cloud-signal";
+import { trailSignal } from "@/lib/trail-signal";
+import { beginHandoff, getHandoff } from "@/lib/panel-handoff";
 
 interface LabRigProps {
   /** Continuous journey position 0..1, written per frame for the shader. */
@@ -62,6 +66,8 @@ const PANEL_PARALLAX = 0.05;
  * world. Small enough that it never fights the authored beat angle.
  */
 const JOURNEY_PARALLAX = 0.075;
+/** How far hovering a tablet leans the camera in. */
+const FOCUS_DOLLY = 0.02;
 
 /**
  * The walk rig — pointer-driven, no OrbitControls.
@@ -138,6 +144,8 @@ export function LabRig({
   useEffect(() => {
     const el = gl.domElement;
     const down = (e: PointerEvent) => {
+      // Touch scrolls; and on the track a press is a click, not a drag.
+      if (e.pointerType === "touch" || trailSignal.hot) return;
       drag.current.active = true;
       drag.current.x = e.clientX;
       drag.current.y = e.clientY;
@@ -183,11 +191,24 @@ export function LabRig({
   // fixed overlays — see lib/cursor-signal.ts.
   useEffect(() => attachCursorTracking(), []);
 
+  // SiteCursor draws the pointer over the scene.
+  useEffect(() => {
+    const el = gl.domElement;
+    el.style.cursor = "none";
+    return () => {
+      el.style.cursor = "";
+    };
+  }, [gl]);
+
   useFrame((state, delta) => {
     // Frame-rate independent damping. k is the responsive one (~0.15s) for
     // free-look; kSlow (~0.33s) reads as an authored camera move.
     const k = 1 - Math.pow(0.001, delta);
     const kSlow = 1 - Math.pow(0.05, delta);
+    // Small or narrow viewports pull the camera back so the artifact clears
+    // the chrome, and phones lift it above the caption band.
+    const framing = framingFor(state.size.width, state.size.height);
+    const pull = framing.pull;
 
     // Integrate the pointer once per frame, for both the cloud and the lean
     // below. Reduced motion and the entrance both strip its authority.
@@ -212,7 +233,7 @@ export function LabRig({
         (BEATS[0]!.elevationDeg * Math.PI) / 180,
         s,
       );
-      const r = THREE.MathUtils.lerp(WRONG_ANGLE.distance, BEATS[0]!.distance, s);
+      const r = THREE.MathUtils.lerp(WRONG_ANGLE.distance, BEATS[0]!.distance, s) * pull;
       // A slow drift while held at the wrong angle so the void never freezes.
       const wander = reducedMotion ? 0 : (1 - s) * Math.sin(state.clock.elapsedTime * 0.28) * 0.03;
       camera.position.set(
@@ -243,7 +264,11 @@ export function LabRig({
     const { from, to, mix } = storyPosition(heldT);
     const resolve = reducedMotion || onPanel ? 1 : resolveAmount(heldT);
 
-    panelEase.current += ((onPanel ? 1 : 0) - panelEase.current) * kSlow;
+    // Held while a hand-off is in flight: the window is still growing out of
+    // the cursor's card, and the camera mustn't dolly under it.
+    if (getHandoff() === null) {
+      panelEase.current += ((onPanel ? 1 : 0) - panelEase.current) * kSlow;
+    }
 
     // Reading the panel disturbs the world. Addressing a row surges the cloud
     // back toward full brightness and eases the camera a touch closer; the
@@ -267,8 +292,13 @@ export function LabRig({
     const oy = pose.y - look.y;
     const oz = pose.z - look.z;
     const baseRadius = Math.max(Math.hypot(ox, oy, oz), 0.001);
+    // Hovering a tablet leans the camera in a touch toward it.
     const radius =
-      baseRadius * (1 - panelEase.current * (PANEL_DOLLY + surge * PANEL_SURGE_DOLLY));
+      baseRadius *
+      pull *
+      (1 -
+        panelEase.current * (PANEL_DOLLY + surge * PANEL_SURGE_DOLLY) -
+        cursorSignal.focus * FOCUS_DOLLY * (1 - panelEase.current));
     const baseAz = Math.atan2(ox, oz);
     const baseEl = Math.asin(oy / baseRadius);
 
@@ -299,7 +329,15 @@ export function LabRig({
       look.y + radius * Math.sin(elTotal),
       look.z + radius * Math.cos(elTotal) * Math.cos(azTotal),
     );
-    camera.lookAt(look.x, look.y, look.z);
+    // Aim below the artifact by the lift, so it rises clear of the caption.
+    const lift =
+      framing.liftNdc > 0
+        ? framing.liftNdc *
+          radius *
+          Math.tan(((camera as THREE.PerspectiveCamera).fov * Math.PI) / 360) *
+          (1 - panelEase.current)
+        : 0;
+    camera.lookAt(look.x, look.y - lift, look.z);
 
     // Drive the shader refs. Reduced motion pins every artifact resolved —
     // the camera still walks, but nothing gathers or ghosts. dimRef pushes
@@ -338,19 +376,37 @@ export function LabRig({
     }
   });
 
-  // Double-click a resolved beat to enter its detail route.
+  // Click a resolved chapter to open its route. The cursor's preview card is
+  // handed to the window (see lib/panel-handoff.ts) so it grows out of the
+  // card; the token rides in the URL so only this navigation adopts it.
   useEffect(() => {
     const el = gl.domElement;
-    const onDoubleClick = () => {
-      const beat = BEATS[lastBeat.current];
-      if (beat?.route && resolveAmount(useStoryStore.getState().storyT) > 0.8) {
-        sound.enter();
-        router.push(beat.route);
-      }
+    const prefetch = () => {
+      const route = cloudSignal.preview?.route;
+      if (cloudSignal.hot && route) router.prefetch(route);
     };
-    el.addEventListener("dblclick", onDoubleClick);
-    return () => el.removeEventListener("dblclick", onDoubleClick);
-  }, [gl, router]);
+    const onClick = () => {
+      const beat = BEATS[lastBeat.current];
+      const preview = cloudSignal.preview;
+      if (
+        !cloudSignal.hot ||
+        !preview ||
+        beat?.route !== preview.route ||
+        resolveAmount(useStoryStore.getState().storyT) <= 0.8
+      )
+        return;
+      if (!reducedMotion && getHandoff()) return;
+      const token = beginHandoff(lastBeat.current, preview, reducedMotion);
+      sound.enter();
+      router.push(token ? `${preview.route}?rift=${token}` : preview.route, { scroll: false });
+    };
+    el.addEventListener("click", onClick);
+    window.addEventListener(CLOUD_HOT_EVENT, prefetch);
+    return () => {
+      el.removeEventListener("click", onClick);
+      window.removeEventListener(CLOUD_HOT_EVENT, prefetch);
+    };
+  }, [gl, router, reducedMotion]);
 
   return null;
 }

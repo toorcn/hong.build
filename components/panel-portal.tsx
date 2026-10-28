@@ -7,6 +7,8 @@ import { useLabStore } from "@/lib/store";
 import { usePanelStore, type PanelPayload } from "@/lib/panel-store";
 import { PanelAnchor, PanelEyebrow } from "@/components/panel-anchor";
 import { ReadingLight, ResolveIn } from "@/components/panel-motion";
+import { SceneNext } from "@/components/scene-next";
+import { clearHandoff, getHandoff } from "@/lib/panel-handoff";
 
 /**
  * Routes a content page either into the scene or onto a flat surface.
@@ -22,7 +24,9 @@ export function PanelPortal({
   sub,
   wide,
   children,
-}: Omit<PanelPayload, "body" | "beat"> & { children: ReactNode }) {
+}: Omit<PanelPayload, "body" | "beat" | "handoffToken" | "handoffPreview"> & {
+  children: ReactNode;
+}) {
   const checked = useLabStore((s) => s.webglChecked);
   const available = useLabStore((s) => s.webglAvailable);
   const reducedMotion = useLabStore((s) => s.reducedMotion);
@@ -31,7 +35,8 @@ export function PanelPortal({
 
   // Which room this route belongs to — the same mapping the rig uses to hold
   // the chapter, so panel and camera can never disagree about where we are.
-  const beat = beatForRoute(usePathname());
+  const pathname = usePathname();
+  const beat = beatForRoute(pathname);
   const inScene = checked && available && !reducedMotion && beat !== null;
 
   useEffect(() => {
@@ -39,9 +44,25 @@ export function PanelPortal({
       // Capability flipped (reduced motion toggled, WebGL lost) while a plane
       // was up — retire it, or it would hang in the room behind the flat page.
       beginClose();
+      clearHandoff();
       return;
     }
-    setPanel({ beat: beat!, title, sub, wide, body: children });
+    // Adopt the cursor's preview card only if it was opened for this route
+    // and this is the navigation it started (the URL carries its token).
+    const handoff = getHandoff();
+    const token = Number(new URLSearchParams(window.location.search).get("rift"));
+    const adopt =
+      handoff?.token === token && handoff.beat === beat && handoff.preview.route === pathname;
+    if (handoff && !adopt) clearHandoff(handoff.token);
+    setPanel({
+      beat: beat!,
+      handoffToken: adopt ? handoff.token : undefined,
+      handoffPreview: adopt ? handoff.preview : undefined,
+      title,
+      sub,
+      wide,
+      body: children,
+    });
     // The plane owns scrolling, so the document must not also scroll.
     document.documentElement.dataset.inScene = "1";
     return () => {
@@ -50,7 +71,7 @@ export function PanelPortal({
       beginClose();
       delete document.documentElement.dataset.inScene;
     };
-  }, [inScene, beat, title, sub, wide, children, setPanel, beginClose]);
+  }, [inScene, beat, pathname, title, sub, wide, children, setPanel, beginClose]);
 
   // The scene owns the presentation; nothing to lay out here. Rendered as a
   // bare marker so the route still has a main landmark for assistive tech.
@@ -93,6 +114,11 @@ export function PanelPortal({
           <div className="panel-threshold" aria-hidden="true" />
         </ResolveIn>
         <div className="mt-10">{children}</div>
+        {beat !== null && (
+          <div className="scene-next-dock scene-next-dock-flat">
+            <SceneNext beat={beat} />
+          </div>
+        )}
       </div>
       <ReadingLight />
       <PanelAnchor />

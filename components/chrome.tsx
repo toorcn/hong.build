@@ -28,7 +28,7 @@ export function Chrome() {
   };
 
   return (
-    <header className="lab-chrome pointer-events-none fixed inset-x-0 top-0 z-20">
+    <header className="lab-chrome pointer-events-none">
       <div className="flex items-start justify-between px-5 py-4 sm:px-8 sm:py-6">
         <Link
           href="/"
@@ -48,12 +48,20 @@ export function Chrome() {
             owns the frame — sound arrives with the rest of the app. */}
         <div className="entrance-hide pointer-events-auto flex items-center gap-4">
           {onHome ? (
-            <Link
-              href="/contact"
-              className="focus-ring hidden border border-line px-3.5 py-2 font-mono text-[11px] uppercase tracking-[0.18em] text-type-dim transition-colors hover:border-accent hover:text-type sm:block"
-            >
-              Contact
-            </Link>
+            <>
+              <Link
+                href="/agents"
+                className="focus-ring hidden px-1 py-2 font-mono text-[11px] uppercase tracking-[0.18em] text-type-faint transition-colors hover:text-accent sm:block"
+              >
+                For agents
+              </Link>
+              <Link
+                href="/contact"
+                className="focus-ring hidden border border-line px-3.5 py-2 font-mono text-[11px] uppercase tracking-[0.18em] text-type-dim transition-colors hover:border-accent hover:text-type sm:block"
+              >
+                Contact
+              </Link>
+            </>
           ) : (
             <Link
               href="/"
@@ -105,7 +113,7 @@ export function Chrome() {
                   aria-label={`${beat.year} — ${beat.label}`}
                   aria-current={on ? "step" : undefined}
                   style={{ left: `${(BEAT_T[beat.id] ?? 0) * 100}%` }}
-                  className="focus-ring absolute top-0 flex h-7 w-6 -translate-x-1/2 items-center justify-center"
+                  className="focus-ring absolute -top-2 flex h-11 w-7 -translate-x-1/2 items-center justify-center"
                 >
                   <span
                     className={`block w-px transition-all duration-300 ${

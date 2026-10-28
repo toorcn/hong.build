@@ -23,7 +23,8 @@ export default function ContactPage() {
 
       <div className="mt-12">
         <a
-          href={`mailto:${SITE.email}`}
+          // Pre-filled so the first line is already written for them.
+          href={`mailto:${SITE.email}?subject=hi&body=${encodeURIComponent("(what are you building?)\n\n")}`}
           className="focus-ring inline-block border border-accent bg-accent px-6 py-4 font-mono text-sm tracking-[0.12em] text-void transition-colors hover:bg-transparent hover:text-accent"
         >
           {SITE.email}
@@ -31,19 +32,19 @@ export default function ContactPage() {
       </div>
 
       <dl className="panel-rows mt-14 max-w-xl">
-        <LiveRow className="grid gap-1 px-5 py-4 sm:grid-cols-[140px_1fr] sm:gap-6">
+        <LiveRow className="grid gap-1 px-3 py-4 sm:grid-cols-[140px_1fr] sm:gap-6 sm:px-5">
           <dt className="font-mono text-[10px] uppercase tracking-[0.18em] text-type-faint">
             location
           </dt>
           <dd className="text-sm text-type-dim">{SITE.location}</dd>
         </LiveRow>
-        <LiveRow className="grid gap-1 px-5 py-4 sm:grid-cols-[140px_1fr] sm:gap-6">
+        <LiveRow className="grid gap-1 px-3 py-4 sm:grid-cols-[140px_1fr] sm:gap-6 sm:px-5">
           <dt className="font-mono text-[10px] uppercase tracking-[0.18em] text-type-faint">
             right now
           </dt>
           <dd className="text-sm text-type-dim">{SITE.status}</dd>
         </LiveRow>
-        <LiveRow className="grid gap-1 px-5 py-4 sm:grid-cols-[140px_1fr] sm:gap-6">
+        <LiveRow className="grid gap-1 px-3 py-4 sm:grid-cols-[140px_1fr] sm:gap-6 sm:px-5">
           <dt className="font-mono text-[10px] uppercase tracking-[0.18em] text-type-faint">
             elsewhere
           </dt>

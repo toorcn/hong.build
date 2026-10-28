@@ -24,7 +24,7 @@ export default function WorkPage() {
             <LiveRow
               href={`/work/${p.frontmatter.slug}`}
               delay={i * 80}
-              className="focus-ring group flex items-baseline justify-between gap-6 px-5 py-6 sm:px-7"
+              className="focus-ring group flex items-baseline justify-between gap-4 px-3 py-6 sm:gap-6 sm:px-7"
             >
               <div className="min-w-0">
                 <div className="flex items-baseline gap-4">

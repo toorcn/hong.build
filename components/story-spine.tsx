@@ -1,9 +1,17 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEntranceStore } from "@/lib/entrance";
-import { beatT, nearestBeat } from "@/lib/story";
+import { scrollToY } from "@/lib/smooth-scroll";
+import { sound } from "@/lib/sound";
+import {
+  SAY_HI_PULL,
+  beatT,
+  nearestBeat,
+  scrollForStory,
+  storyFromScroll,
+} from "@/lib/story";
 import { useLabStore } from "@/lib/store";
 import { useStoryStore } from "@/lib/story-store";
 
@@ -35,10 +43,17 @@ const MAGNET_DIST_FOR_MAX = 0.08;
  */
 const ORIGIN_HOLD_MS = 450;
 
+/** End pull below which the magnet stays out of the outro. */
+const OUTRO_MAGNET_EPS = 0.06;
+
+/** "Next chapter" travel: long enough to read the rooms going past. */
+const CHAPTER_TRAVEL_MS = 1700;
+
 /**
  * The scroll spine — a tall, invisible region whose scrollY drives storyT.
  * Rendered as a sibling of the canvas so the page actually scrolls while
- * the 3D canvas stays fixed. N = BEAT_COUNT viewport-heights of scroll.
+ * the 3D canvas stays fixed. BEAT_COUNT * 96vh of journey, then a 100vh
+ * outro whose pull hands the visitor to /contact.
  *
  * When the visitor stops mid-dissolve, a soft magnet pulls them to the
  * nearest chapter so the silhouette reads cleanly instead of hanging as
@@ -47,7 +62,10 @@ const ORIGIN_HOLD_MS = 450;
 export function StorySpine({ children }: { children: React.ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
+  const router = useRouter();
   const setStoryT = useStoryStore((s) => s.setStoryT);
+  const setEndPull = useStoryStore((s) => s.setEndPull);
+  const pendingJourney = useStoryStore((s) => s.pendingJourney);
 
   // The route change lands before PageTransition swaps content, so the spine
   // outlives the journey by a beat. Ignore scroll once we're leaving —
@@ -69,11 +87,14 @@ export function StorySpine({ children }: { children: React.ReactNode }) {
     let pendingSnap: number | null = null;
     // Skip the settle that follows an originT restore.
     let suppressSettle = false;
+    // Re-armed once the pull falls back, so the outro only fires once per
+    // approach rather than on every scroll event past the threshold.
+    let sayHiArmed = true;
 
-    const storyTFromScroll = () => {
+    const readScroll = () => {
       const total = el.offsetHeight - window.innerHeight;
       const y = Math.min(Math.max(window.scrollY - el.offsetTop, 0), total);
-      return total > 0 ? y / total : 0;
+      return storyFromScroll(y, total);
     };
 
     /**
@@ -89,13 +110,15 @@ export function StorySpine({ children }: { children: React.ReactNode }) {
       // Always park the camera on the chapter — never let a zero-height
       // frame write storyT back to ORIGIN over this.
       setStoryT(originT);
+      setEndPull(0);
 
       const total = el.offsetHeight - window.innerHeight;
       if (total <= 0) return false;
 
       suppressSettle = true;
       pendingSnap = null;
-      window.scrollTo(0, el.offsetTop + originT * total);
+      sayHiArmed = true;
+      scrollToY(scrollForStory(originT, el.offsetTop, total));
 
       if (!releaseTimer) {
         releaseTimer = window.setTimeout(() => {
@@ -117,7 +140,20 @@ export function StorySpine({ children }: { children: React.ReactNode }) {
         raf = 0;
         return;
       }
-      setStoryT(storyTFromScroll());
+      const { storyT, endPull } = readScroll();
+      setStoryT(storyT);
+      setEndPull(endPull);
+      if (endPull < SAY_HI_PULL * 0.5) sayHiArmed = true;
+      if (
+        sayHiArmed &&
+        endPull >= SAY_HI_PULL &&
+        useEntranceStore.getState().phase === "done" &&
+        document.documentElement.dataset.inScene !== "1"
+      ) {
+        sayHiArmed = false;
+        sound.enter();
+        router.push("/contact");
+      }
       raf = 0;
     };
 
@@ -135,7 +171,12 @@ export function StorySpine({ children }: { children: React.ReactNode }) {
       const lab = useLabStore.getState();
       if (!lab.webglAvailable || lab.reducedMotion) return;
 
-      const t = storyTFromScroll();
+      const { storyT: t, endPull } = readScroll();
+      // The outro is its own gesture — don't magnet the visitor back out of it.
+      if (endPull > OUTRO_MAGNET_EPS) {
+        pendingSnap = null;
+        return;
+      }
       const beat = nearestBeat(t);
       if (Math.abs(t - beatT(beat)) < SNAP_EPS) {
         pendingSnap = null;
@@ -192,7 +233,44 @@ export function StorySpine({ children }: { children: React.ReactNode }) {
       // Don't clear releaseTimer's originT on unmount — the remount needs it.
       if (releaseTimer) window.clearTimeout(releaseTimer);
     };
-  }, [setStoryT, active]);
+  }, [setStoryT, setEndPull, active, router]);
+
+  // "Next chapter" from a content route: once the return to the origin
+  // chapter has landed, travel the journey to the next one and open it.
+  useEffect(() => {
+    if (!active || !pendingJourney) return;
+    const el = ref.current;
+    if (!el) return;
+    const { fromBeat, toBeat, route } = pendingJourney;
+    let done = false;
+    let raf = 0;
+    const tick = () => {
+      if (done) return;
+      const total = el.offsetHeight - window.innerHeight;
+      if (
+        total <= 0 ||
+        (useStoryStore.getState().originT !== null &&
+          Math.abs(
+            window.scrollY - scrollForStory(beatT(fromBeat), el.offsetTop, total),
+          ) > 4)
+      ) {
+        raf = requestAnimationFrame(tick);
+        return;
+      }
+      done = true;
+      useStoryStore.getState().setOriginT(null);
+      useStoryStore.getState().clearJourney();
+      useStoryStore.getState().goToBeat(toBeat, {
+        duration: CHAPTER_TRAVEL_MS,
+        onComplete: () => router.push(route),
+      });
+    };
+    raf = requestAnimationFrame(tick);
+    return () => {
+      done = true;
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [active, pendingJourney, router]);
 
   return (
     <div ref={ref} id="story-spine" className="relative">

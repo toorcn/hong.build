@@ -15,6 +15,36 @@
 export const BEAT_COUNT = 11;
 
 /**
+ * The spine is BEAT_COUNT * 96vh of journey followed by a 100vh outro. This
+ * is the share of the spine's scroll range the journey itself occupies; the
+ * rest is the "end pull" — scrolling past the last chapter toward hello.
+ */
+function journeyShare(): number {
+  return (96 * BEAT_COUNT) / (96 * BEAT_COUNT + 100);
+}
+
+/** storyT and end pull from a scroll offset within the spine. */
+export function storyFromScroll(
+  scrolled: number,
+  range: number,
+): { storyT: number; endPull: number } {
+  if (range <= 0) return { storyT: 0, endPull: 0 };
+  const f = Math.min(Math.max(scrolled / range, 0), 1);
+  const share = journeyShare();
+  return f <= share
+    ? { storyT: share > 0 ? f / share : 0, endPull: 0 }
+    : { storyT: 1, endPull: 1 - share > 0 ? (f - share) / (1 - share) : 1 };
+}
+
+/** The scrollY that puts storyT on screen — the inverse of storyFromScroll. */
+export function scrollForStory(t: number, top: number, range: number): number {
+  return top + Math.min(Math.max(t, 0), 1) * journeyShare() * range;
+}
+
+/** End pull past which the outro hands the visitor to /contact. */
+export const SAY_HI_PULL = 0.48;
+
+/**
  * Beat positions along storyT. Uneven on purpose — see the note above.
  * Gaps: .20 .12 .10 .09 .09 .08 .08 .08 .08 .08 — tightening, then holding.
  *
@@ -58,6 +88,12 @@ export interface Beat {
   route?: string;
   /** Route label. */
   routeLabel?: string;
+  /** Title the cursor preview and in-scene window show for the route. */
+  routeTitle?: string;
+  /** One-line excerpt for the cursor preview. */
+  routePreview?: string;
+  /** NDC nudge for the dormant tablet so it clears this beat's artifact. */
+  gateBias?: [number, number];
 }
 
 /**
@@ -76,20 +112,20 @@ export const BEATS: readonly Beat[] = [
   {
     id: 0,
     code: "00",
-    label: "HG748",
+    label: "THE FIRST THING",
     year: "2017",
     when: "dec 2017",
     silhouette: 0, // the whitelist gate, built from blocks
     azimuthDeg: 0,
     elevationDeg: 10,
     distance: 11,
-    line: "I was twelve, playing Minecraft, and I wanted to control who got into my server. So I learned Java.",
-    turn: "Two plugins. 1,595 strangers ran them. The server had a donation link. Then I stopped for four years.",
+    line: "I was twelve, and I wanted to build things for my Minecraft server. So I learned to code.",
+    turn: "Two plugins. 1,595 strangers downloaded them. Then I stopped for four years.",
   },
   {
     id: 1,
     code: "01",
-    label: "FIRST FIVE",
+    label: "THE LOSSES",
     year: "22–23",
     when: "oct 2022 — oct 2023",
     silhouette: 1, // five entries, every result slot empty
@@ -102,14 +138,14 @@ export const BEATS: readonly Beat[] = [
   {
     id: 2,
     code: "02",
-    label: "SOMEONE ELSE'S WIN",
+    label: "THE HAND-OFF",
     year: "2023",
     when: "nov 2023",
     silhouette: 2, // the trophy crossing to the other podium
     azimuthDeg: 96,
     elevationDeg: 8,
     distance: 12,
-    line: "The sixth one I didn't compete in. I mentored a team called INSLABBY, and they took the national championship.",
+    line: "I was invited to mentor high school team INSLABBY. They won $4,000+ in grants at the national championship. I was so proud.",
     turn: "I could see it before I could do it.",
   },
   {
@@ -126,26 +162,30 @@ export const BEATS: readonly Beat[] = [
     turn: "Ten months later, my own Top 1. Then another one in December.",
     route: "/process",
     routeLabel: "how I build",
+    routeTitle: "How I build",
+    routePreview: "The loop I actually trust, and the stance on AI it produced.",
   },
   {
     id: 4,
     code: "04",
-    label: "JOINED, THEN BUILT",
+    label: "THE TURN",
     year: "2024",
     when: "feb 2024 — 2025",
     silhouette: 4, // a controller with a prompt where the logo goes
     azimuthDeg: 188,
     elevationDeg: 12,
     distance: 12,
-    line: "I joined the esports club because I play. I ended up being the one who wrote its software.",
-    turn: "Anime society the same way — secretary, then VP, then president. Being into something runs out of room, and then you build it.",
+    line: "I kept building for the people I played with. Coaching the university team came out of that.",
+    turn: "Anime society ran the same way — secretary, then VP, then president. Build for a room, and it makes space for you.",
     route: "/work",
     routeLabel: "what came out of it",
+    routeTitle: "Selected work",
+    routePreview: "Three things I built that taught me the most.",
   },
   {
     id: 5,
     code: "05",
-    label: "KIYOKOCON",
+    label: "THE GATHERING",
     year: "2025",
     when: "2025",
     silhouette: 5, // a stage and the room in front of it
@@ -156,11 +196,15 @@ export const BEATS: readonly Beat[] = [
     turn: "Event of the Year, gold. The build was never the point — the room was.",
     route: "/work/kiyokocon",
     routeLabel: "the convention",
+    routeTitle: "KiyokoCon",
+    routePreview:
+      "Malaysia's largest student-organised convention — 1,700 attendees, 50 booths, 35 partners.",
+    gateBias: [0, -0.32],
   },
   {
     id: 6,
     code: "06",
-    label: "ELEVEN TERMS",
+    label: "ALL AT ONCE",
     year: "24–26",
     when: "feb 2024 — now",
     silhouette: 6, // the terms as bars on a real time axis, overlapping
@@ -171,6 +215,9 @@ export const BEATS: readonly Beat[] = [
     turn: "Six started in 2025 alone. I meant all of them, and I never finished one before starting the next.",
     route: "/about",
     routeLabel: "the human",
+    routeTitle: "Hong Bing",
+    routePreview: "I build interfaces where AI, design systems, and code meet.",
+    gateBias: [0, -0.38],
   },
   {
     id: 7,
@@ -182,23 +229,27 @@ export const BEATS: readonly Beat[] = [
     azimuthDeg: 312,
     elevationDeg: 10,
     distance: 12,
-    line: "Student champion at the ASEAN AI Summit buildathon. A managing partner from 500 Global was watching, and pulled us into the residency.",
+    line: "Student champion at the ASEAN AI Summit buildathon. A managing partner from 500 Global was watching, and pulled me into the residency.",
     turn: "Same month, I co-founded a place for the people who would have been in that room.",
   },
   {
     id: 8,
     code: "08",
-    label: "NINETEEN CAMPUSES",
+    label: "THE NETWORK",
     year: "25–26",
     when: "aug 2025 — now",
     silhouette: 8, // one hub, eighteen campuses, all wired
     azimuthDeg: 356,
     elevationDeg: 13,
     distance: 12,
-    line: "AI Hackerdorm. Five hundred students across nineteen campuses, and we co-ran Cursor × Anthropic Malaysia with $410,000 on the table.",
-    turn: "Then HackHarvard. OpenAI. Macau. Singapore. MIT. Nobody announced the venues getting bigger — they just did.",
+    line: "AI Hackerdorm. Four chapters, four hundred-plus members nationwide. We co-organised Cursor × Anthropic Malaysia — $410,000 on the table.",
+    turn: "Then HackMIT. HackHarvard. Macau. Hong Kong. Vietnam, Singapore. OpenAI. Nobody announced the venues getting bigger — they just did.",
     route: "/work/ai-hackerdorm",
     routeLabel: "the dorm",
+    routeTitle: "AI Hackerdorm",
+    routePreview:
+      "A student-first builder community — four chapters and 400+ members nationwide.",
+    gateBias: [0, -0.34],
   },
   {
     id: 9,
@@ -206,19 +257,23 @@ export const BEATS: readonly Beat[] = [
     label: "THE RUN",
     year: "22–26",
     when: "2022 — 2026",
-    silhouette: 9, // thirty-three entries, plotted by year
+    silhouette: 9, // thirty entries, plotted by year
     azimuthDeg: 40,
     elevationDeg: 11,
     distance: 12,
-    line: "Thirty-three events across five years. Twenty results — and nine that gave me nothing at all.",
+    line: "Thirty-three events across five years. Eighteen I placed in, eight I wasn't competing, and seven gave me nothing at all.",
     turn: "The blanks stay in the log. They are the part that explains the rest.",
     route: "/notes",
     routeLabel: "the run log",
+    routeTitle: "Run log",
+    routePreview:
+      "Every event since October 2022 — including the ones that produced nothing.",
+    gateBias: [0, -0.4],
   },
   {
     id: 10,
     code: "10",
-    label: "HONG BING",
+    label: "NOW",
     year: "now",
     when: "now",
     silhouette: 10, // the wordmark — earned, not announced
@@ -229,12 +284,21 @@ export const BEATS: readonly Beat[] = [
     turn: "Say hi.",
     route: "/contact",
     routeLabel: "say hi",
+    routeTitle: "Say hi",
+    routePreview: "That's the whole story. Thanks for scrolling it.",
+    gateBias: [0, -0.52],
   },
 ] as const;
 
 /** storyT position of a beat. Uneven — reads from BEAT_T. */
 export function beatT(id: number): number {
   return BEAT_T[Math.min(Math.max(id, 0), BEAT_COUNT - 1)] ?? 0;
+}
+
+/** The next beat after `id` that opens a route — where "next chapter" leads. */
+export function nextRouteBeat(id: number): Beat | null {
+  for (const b of BEATS) if (b.id > id && b.route) return b;
+  return null;
 }
 
 /**
@@ -293,6 +357,17 @@ export function nearestBeat(t: number): number {
 }
 
 /**
+ * The chapter ahead of storyT — the trail cursor's destination. Mid-dissolve
+ * that is the segment's far end; parked on a beat it is the one after.
+ */
+export function upcomingBeat(t: number): number | null {
+  const { from, to, mix } = storyPosition(t);
+  if (mix > 0.08 && mix < 0.92) return to;
+  const next = (mix <= 0.08 ? from : to) + 1;
+  return next < BEAT_COUNT ? next : null;
+}
+
+/**
  * How "resolved" the cloud is at storyT — 1 at a beat center, 0 midway
  * between two beats. Because `mix` is normalised per segment, a long
  * segment simply means a longer, slower dissolve. The four quiet years
@@ -317,6 +392,41 @@ export function fidelity(t: number): number {
   const clamped = Math.min(Math.max(t, 0), 1);
   // Eased so the early gain is visible rather than all of it arriving late.
   return 0.35 + 0.65 * clamped * clamped;
+}
+
+/**
+ * Half-extent (NDC) of the clear zone the cloud keeps open around the copy
+ * at a framing pull of 1.
+ */
+export const CLEAR_RADIUS = 0.82;
+
+const NO_FRAMING = { pull: 1, liftNdc: 0 };
+
+/**
+ * How far the camera pulls back so an artifact clears the chrome on this
+ * viewport, and how far (NDC) it lifts to stay above the caption band.
+ * Narrow and short viewports pull back more; phones lift further because
+ * the caption sits higher.
+ */
+export function framingFor(
+  width: number,
+  height: number,
+): { pull: number; liftNdc: number } {
+  if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0)
+    return NO_FRAMING;
+  const top = Math.min(96 / height, 0.35);
+  const bottom = Math.min((width < 640 ? 280 : 150) / height, 0.45);
+  return {
+    pull: Math.min(
+      2.6,
+      Math.max(
+        1,
+        CLEAR_RADIUS / ((width / height) * 0.9),
+        0.7266666666666667 / Math.max(1 - top - bottom, 0.2),
+      ),
+    ),
+    liftNdc: Math.max(0, bottom - top - 0.06),
+  };
 }
 
 export interface CameraPose {

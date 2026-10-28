@@ -1,0 +1,350 @@
+{
+  "name": "Hong Bing Sim",
+  "title": "Founder, building in stealth",
+  "location": "Kuala Lumpur (UTC+8) · San Francisco (PT)",
+  "thesis": "Meaning is found in the absurdity of our perception.",
+  "status": "Founder, building in stealth. AI engineering at YTL AI Labs since Apr 2026.",
+  "email": "hi@hong.build",
+  "links": {
+    "LinkedIn": "https://linkedin.com/in/hong-bing",
+    "Instagram": "https://instagram.com/h.0.n.4",
+    "X": "https://x.com/leapinghong",
+    "GitHub": "https://github.com/toorcn",
+    "Tack": "https://tack.im",
+    "AI Hackerdorm": "https://aihackerdorm.com"
+  },
+  "facts": {
+    "role.founder": "Founder — building in stealth",
+    "role.current": "AI engineering, API & console — YTL AI Labs",
+    "role.previous": "SWE, research lab — SF-based startup ($3.2M pre-seed)",
+    "built": "Tack (tack.im), real-time AI meeting moderator",
+    "study": "Computer science & psychology, Taylor's University",
+    "community": "Co-founder & VP — AI Hackerdorm (4 chapters, 400+ members)",
+    "side": "\"Chief Reality Officer\" — Polytera, seeded entirely by hackathon winnings",
+    "graphics": "First Malaysian student showcase @ ACM SIGGRAPH Asia"
+  },
+  "work": [
+    {
+      "slug": "tack",
+      "title": "Tack",
+      "tagline": "An AI meeting moderator that intervenes while the conversation is still alive.",
+      "year": 2026,
+      "role": "Founder — design, engineering, product",
+      "stack": [
+        "Next.js",
+        "TypeScript",
+        "LLM orchestration",
+        "Realtime audio",
+        "WebAudio"
+      ],
+      "kind": "AI",
+      "outcome": "Launched on Product Hunt; waitlist open at tack.im",
+      "order": 1,
+      "url": "https://hong.build/work/tack.md"
+    },
+    {
+      "slug": "kiyokocon",
+      "title": "KiyokoCon",
+      "tagline": "Malaysia's largest student-organised convention — 1,700 attendees, 50 booths, 35 partners.",
+      "year": 2025,
+      "role": "Founder & organising chairman",
+      "stack": [
+        "Event systems",
+        "Partnerships",
+        "Ops",
+        "Team leadership"
+      ],
+      "kind": "EVENT",
+      "outcome": "Event of the Year 2025 — Gold (Taylor's Student Development)",
+      "order": 2,
+      "url": "https://hong.build/work/kiyokocon.md"
+    },
+    {
+      "slug": "ai-hackerdorm",
+      "title": "AI Hackerdorm",
+      "tagline": "A student-first builder community — 4 chapters, 400+ members nationwide.",
+      "year": 2025,
+      "role": "Co-founder & vice-president",
+      "stack": [
+        "Community",
+        "Curriculum",
+        "Partnerships",
+        "Ecosystem"
+      ],
+      "kind": "COMMUNITY",
+      "outcome": "Co-organiser, Cursor × Anthropic Hackathon Malaysia 2025 ($410k USD)",
+      "order": 3,
+      "url": "https://hong.build/work/ai-hackerdorm.md"
+    }
+  ],
+  "runLog": {
+    "entered": 33,
+    "placed": 18,
+    "noPlacement": 7,
+    "wonOutright": 6,
+    "events": [
+      {
+        "year": 2026,
+        "month": "aug",
+        "event": "TalentLabs DevLeague",
+        "result": "Mentor",
+        "org": "TalentLabs",
+        "mentored": true
+      },
+      {
+        "year": 2026,
+        "month": "jul",
+        "event": "Codex Community Hackathon 2026 (OpenAI Build Week)",
+        "result": "Mentor · Technical",
+        "org": "OpenAI",
+        "mentored": true
+      },
+      {
+        "year": 2026,
+        "month": "jun",
+        "event": "'Sup × OpenAI Hackathon, Singapore",
+        "result": "Champion — Overall",
+        "org": "OpenAI, 'Sup, Carousell",
+        "note": "AUNTIE — trust-first AI copilot for SEA live commerce. 550+ international sign-ups.",
+        "linkedin": "https://www.linkedin.com/posts/hong-bing_sup-won-%F0%9D%97%99%F0%9D%97%B6%F0%9D%97%BF%F0%9D%98%80%F0%9D%98%81-%F0%9D%97%BD%F0%9D%97%B9%F0%9D%97%AE%F0%9D%97%B0%F0%9D%97%B2-at-the-%F0%9D%97%A6-activity-7487729044659249152-H7z1"
+      },
+      {
+        "year": 2026,
+        "month": "may",
+        "event": "Beyond Hack 2026, Macau",
+        "result": "2nd — Innovation & Creativity",
+        "org": "Beyond Expo",
+        "linkedin": "https://www.linkedin.com/posts/hong-bing_openclaw-codex-clawcon-activity-7472445350163886080-CE4B"
+      },
+      {
+        "year": 2026,
+        "month": "may",
+        "event": "Lovable Vibeathon KL",
+        "result": "Mentor · Preliminary Judge",
+        "org": "Lovable",
+        "mentored": true
+      },
+      {
+        "year": 2026,
+        "month": "may",
+        "event": "OpenAI × January Capital × Jelawang Capital",
+        "result": "3rd — $5k credits + 1y Pro",
+        "org": "OpenAI",
+        "linkedin": "https://www.linkedin.com/posts/hong-bing_sup-won-an-openai-hackathon-solo-7k-activity-7460677775901888512-ARHi"
+      },
+      {
+        "year": 2026,
+        "month": "may",
+        "event": "ImagineHack 2026",
+        "result": "Workshop Speaker",
+        "org": "Taylor's Agents Of Tech",
+        "mentored": true,
+        "note": "https://hackathon.polytera.dev"
+      },
+      {
+        "year": 2026,
+        "month": "mar",
+        "event": "LotusHacks × HackHarvard",
+        "result": "Top 5% of 210 teams · 4 track placements",
+        "org": "LotusHacks & HackHarvard",
+        "note": "3rd Edtech (Etest Vietnam) · 1st Agora · 1st fal · 1st Exa",
+        "linkedin": "https://www.linkedin.com/posts/hong-bing_we-just-won-9-awards-at-%F0%9D%91%BD%F0%9D%92%8A%F0%9D%92%86%F0%9D%92%95%F0%9D%92%8F%F0%9D%92%82%F0%9D%92%8E%F0%9D%92%94-activity-7442494731399630848-zHjK"
+      },
+      {
+        "year": 2026,
+        "month": "mar",
+        "event": "KitaHack 2026",
+        "result": "Finalist",
+        "org": "KitaHack",
+        "mentored": true,
+        "linkedin": "https://www.linkedin.com/posts/hong-bing_kitahack2026-activity-7449275182059266048-E-XT"
+      },
+      {
+        "year": 2025,
+        "month": "dec",
+        "event": "Cursor × Anthropic Hackathon",
+        "result": "Preliminary Judge · Mentor · Organiser",
+        "org": "Cursor, Anthropic",
+        "mentored": true,
+        "linkedin": "https://www.linkedin.com/posts/hong-bing_i-stick-to-one-rule-say-yes-for-fundamental-activity-7404717003661406208-K24S"
+      },
+      {
+        "year": 2025,
+        "month": "oct",
+        "event": "Vortex XRJam: FuturScape 2025",
+        "result": "Champion",
+        "org": "Vortex XR Lab",
+        "note": "Mindspace — AR spatial organization companion.",
+        "linkedin": "https://www.linkedin.com/posts/hong-bing_hackathon-kiyokocon-kiyokocon-activity-7389121966659571713-bBwY"
+      },
+      {
+        "year": 2025,
+        "month": "sep",
+        "event": "Great Malaysia AI Hackathon 2025",
+        "result": "Finalist — Top 5 of 550",
+        "org": "MDEC, AWS, APU",
+        "linkedin": "https://www.linkedin.com/posts/hong-bing_top-2-tight-competition-and-learnt-so-much-activity-7383737320824426496-sRjz"
+      },
+      {
+        "year": 2025,
+        "month": "aug",
+        "event": "ASEAN AI Malaysia Summit (aaims25)",
+        "result": "Student Champion",
+        "org": "Ministry of Digital & AI Tinkerer",
+        "note": "AI CodeFest & AI Buildathon. A managing partner from 500 Global was watching — the residency invite came out of this room.",
+        "linkedin": "https://www.linkedin.com/posts/hong-bing_secured-my-14th-award-at-the-asean-ai-activity-7362339830074150912-BnRA"
+      },
+      {
+        "year": 2025,
+        "month": "aug",
+        "event": "CodeNection 2025",
+        "result": "Mentor",
+        "org": "CodeNection",
+        "mentored": true
+      },
+      {
+        "year": 2025,
+        "month": "jul",
+        "event": "iCube IGNITE 2025",
+        "result": "Finalist",
+        "org": "iCube International",
+        "linkedin": "https://www.linkedin.com/posts/hong-bing_my-first-hackathon-pitch-was-a-%F0%9D%92%85%F0%9D%92%8A%F0%9D%92%94%F0%9D%92%82%F0%9D%92%94-activity-7359524305593905153-W5cI"
+      },
+      {
+        "year": 2025,
+        "month": "jul",
+        "event": "Top Coders 2025, Taylor's University",
+        "result": "Top 2 — 1st runner-up",
+        "org": "Data Science Association",
+        "compCode": true,
+        "linkedin": "https://www.linkedin.com/posts/hong-bing_my-first-hackathon-pitch-was-a-%F0%9D%92%85%F0%9D%92%8A%F0%9D%92%94%F0%9D%92%82%F0%9D%92%94-activity-7359524305593905153-W5cI"
+      },
+      {
+        "year": 2025,
+        "month": "jul",
+        "event": "FutureHack! A.I. Battlefield",
+        "result": "Semi-finalist & Speaker",
+        "org": "Newell",
+        "linkedin": "https://www.linkedin.com/posts/hong-bing_my-first-hackathon-pitch-was-a-%F0%9D%92%85%F0%9D%92%8A%F0%9D%92%94%F0%9D%92%82%F0%9D%92%94-activity-7359524305593905153-W5cI"
+      },
+      {
+        "year": 2025,
+        "month": "jul",
+        "event": "Turboline × IIMS International Hackathon",
+        "result": "Special Recognition",
+        "org": "Turboline",
+        "linkedin": "https://www.linkedin.com/posts/hong-bing_my-first-hackathon-pitch-was-a-%F0%9D%92%85%F0%9D%92%8A%F0%9D%92%94%F0%9D%92%82%F0%9D%92%94-activity-7359524305593905153-W5cI"
+      },
+      {
+        "year": 2025,
+        "month": "apr–jul",
+        "event": "ViTrox Tech 4 Good 2025",
+        "result": "Grand Finalist",
+        "org": "ViTrox",
+        "linkedin": "https://www.linkedin.com/posts/hong-bing_finalist-problem-neurodivergent-activity-7319648261663862784-N4za"
+      },
+      {
+        "year": 2025,
+        "month": "jun",
+        "event": "ImagineHack 2025",
+        "result": "Best Technical Implementation",
+        "org": "Taylor's Agents Of Tech",
+        "linkedin": "https://www.linkedin.com/posts/hong-bing_my-first-hackathon-pitch-was-a-%F0%9D%92%85%F0%9D%92%8A%F0%9D%92%94%F0%9D%92%82%F0%9D%92%94-activity-7359524305593905153-W5cI"
+      },
+      {
+        "year": 2025,
+        "month": "—",
+        "event": "Loophole Hackathon 2025",
+        "result": "Judges' Favourite",
+        "org": "Build Club MY"
+      },
+      {
+        "year": 2024,
+        "month": "dec",
+        "event": "Top Coders 2024, Taylor's University",
+        "result": "Champion — Top 1",
+        "org": "Data Science Association",
+        "compCode": true,
+        "linkedin": "https://www.linkedin.com/posts/hong-bing_champion-coding-activity-7279750519869349888-h1JA"
+      },
+      {
+        "year": 2024,
+        "month": "nov",
+        "event": "PayNet PayHack 2024",
+        "result": "Semi-finalist",
+        "org": "PayNet"
+      },
+      {
+        "year": 2024,
+        "month": "oct",
+        "event": "UCSI Hackathon — Cybersecurity Beyond Thinkable",
+        "result": "Champion — Top 1",
+        "org": "UCSI & Palo Alto Networks",
+        "note": "The first one he won himself, two years after the first entry."
+      },
+      {
+        "year": 2024,
+        "month": "aug",
+        "event": "Google Workspace Hackathon 2024",
+        "result": "Finalist — Top 7 of 400 · Popularity Champion",
+        "org": "GDSC APU"
+      },
+      {
+        "year": 2024,
+        "month": "may",
+        "event": "UM Programming League National",
+        "result": null,
+        "compCode": true
+      },
+      {
+        "year": 2024,
+        "month": "feb",
+        "event": "Hilti IT Competition",
+        "result": null
+      },
+      {
+        "year": 2023,
+        "month": "nov",
+        "event": "Sime Darby Young Innovators Challenge — National Championship",
+        "result": "Winning team",
+        "org": "Sime Darby",
+        "mentored": true,
+        "note": "Mentored team INSLABBY. Coached someone else across the line a year before getting there himself."
+      },
+      {
+        "year": 2023,
+        "month": "oct",
+        "event": "UITM International C-PROM",
+        "result": null,
+        "compCode": true
+      },
+      {
+        "year": 2023,
+        "month": "may",
+        "event": "Taylor's Agents Of Tech ImagineHack",
+        "result": null
+      },
+      {
+        "year": 2023,
+        "month": "jan",
+        "event": "RHB Get Your Hack On: ASEAN",
+        "result": null,
+        "org": "RHB"
+      },
+      {
+        "year": 2022,
+        "month": "oct",
+        "event": "Hong Leong Bank Hackathon",
+        "result": null
+      },
+      {
+        "year": 2022,
+        "month": "oct",
+        "event": "UM Odyssey Hackfest",
+        "result": null,
+        "note": "The first one."
+      }
+    ]
+  },
+  "markdown": "https://hong.build/index.md"
+}

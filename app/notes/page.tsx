@@ -17,9 +17,17 @@ export const metadata: Metadata = {
     "Every event entered since October 2022 — including the ones that produced nothing.",
 };
 
+const OUT_LINK =
+  "focus-ring mt-2 inline-block font-mono text-[10px] uppercase tracking-[0.16em] text-type-faint underline decoration-line underline-offset-4 transition-colors hover:text-accent hover:decoration-accent";
+
+/** A note that is just a link renders as one. */
+function isUrl(s: string): boolean {
+  return /^https?:\/\//.test(s);
+}
+
 /** Three honest states, three glyphs. An empty result is data, not a gap. */
 function glyphFor(a: Award): { mark: string; className: string } {
-  if (a.mentored) return { mark: "◐ mentor", className: "text-type-dim" };
+  if (a.mentored) return { mark: "◐ mentor", className: "text-accent-dim" };
   if (a.result) return { mark: "● placed", className: "text-accent" };
   return { mark: "○", className: "text-type-faint" };
 }
@@ -51,7 +59,7 @@ export default function RunLogPage() {
         isn't the true story.
       </p>
 
-      <dl className="mt-10 grid grid-cols-2 gap-px border border-line bg-line sm:grid-cols-4">
+      <dl className="mt-12 grid grid-cols-2 gap-px border border-line bg-line sm:grid-cols-4">
         {stats.map((s, i) => (
           <ResolveIn key={s.k} delay={i * 90} className="bg-void px-5 py-4">
             <dt className="font-mono text-[10px] uppercase tracking-[0.18em] text-type-faint">
@@ -85,7 +93,7 @@ export default function RunLogPage() {
                       as="li"
                       key={`${a.event}-${a.month}`}
                       delay={Math.min(i, 6) * 55}
-                      className="grid gap-2 px-5 py-4 sm:grid-cols-[3.5rem_5.5rem_1fr_auto] sm:items-baseline sm:gap-5"
+                      className="grid gap-2 px-3 py-4 sm:grid-cols-[3.5rem_5.5rem_1fr_auto] sm:items-baseline sm:gap-5 sm:px-5"
                     >
                       <span className="font-mono text-[10px] lowercase tracking-[0.16em] text-type-faint">
                         {a.month}
@@ -107,8 +115,27 @@ export default function RunLogPage() {
                         {a.org ? (
                           <p className="mt-0.5 text-xs leading-relaxed text-type-faint">{a.org}</p>
                         ) : null}
-                        {a.note ? (
+                        {a.note && isUrl(a.note) ? (
+                          <a
+                            href={a.note}
+                            target="_blank"
+                            rel="noreferrer"
+                            className={OUT_LINK}
+                          >
+                            {new URL(a.note).host} ↗
+                          </a>
+                        ) : a.note ? (
                           <p className="mt-1 text-xs leading-relaxed text-type-dim">{a.note}</p>
+                        ) : null}
+                        {a.linkedin ? (
+                          <a
+                            href={a.linkedin}
+                            target="_blank"
+                            rel="noreferrer"
+                            className={OUT_LINK}
+                          >
+                            story on linkedin ↗
+                          </a>
                         ) : null}
                       </div>
                       <span
