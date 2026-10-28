@@ -5,7 +5,7 @@
   "description": "Hong Bing Sim — personal site: a scroll journey through one cloud of fragments, plus the Hackathon Crash Course.",
   "scripts": {
     "dev": "next dev",
-    "build": "npm run agent-docs && next build",
+    "build": "npm run fragments && npm run agent-docs && next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "deploy": "npm run build && wrangler deploy",

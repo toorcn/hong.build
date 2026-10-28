@@ -17,6 +17,7 @@ The human site at https://hong.build is a visual 3D scroll journey. This is the 
 - [About](https://hong.build/about.md)
 - [Process](https://hong.build/process.md)
 - [Hackathons](https://hong.build/hackathons.md)
+- [HackMIT](https://hong.build/hackmit.md)
 - [Contact](https://hong.build/contact.md)
 
 ## Work

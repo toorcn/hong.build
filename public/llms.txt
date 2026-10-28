@@ -10,6 +10,7 @@ Every page is also available as markdown: send `Accept: text/markdown`, or add `
 - [About](https://hong.build/about.md)
 - [Process](https://hong.build/process.md)
 - [Hackathons](https://hong.build/hackathons.md)
+- [HackMIT](https://hong.build/hackmit.md)
 - [Contact](https://hong.build/contact.md)
 - [Home](https://hong.build/index.md)
 

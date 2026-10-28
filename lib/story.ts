@@ -12,7 +12,9 @@
  * interstitials carry the narration rather than being dead scroll.
  */
 
-export const BEAT_COUNT = 11;
+import { HACKMIT } from "../content/hackmit";
+
+export const BEAT_COUNT = 12;
 
 /**
  * The spine is BEAT_COUNT * 96vh of journey followed by a 100vh outro. This
@@ -57,7 +59,7 @@ export const SAY_HI_PULL = 0.48;
  * eleven committee terms started in a single year.
  */
 export const BEAT_T = [
-  0, 0.2, 0.32, 0.42, 0.51, 0.6, 0.68, 0.76, 0.84, 0.92, 1.0,
+  0, 0.2, 0.32, 0.42, 0.51, 0.6, 0.68, 0.76, 0.84, 0.90, 0.95, 1.0,
 ] as const;
 
 export interface Beat {
@@ -97,7 +99,7 @@ export interface Beat {
 }
 
 /**
- * Eleven chapters, chronological, one claim each.
+ * Twelve chapters, one claim each.
  *
  * The club years used to be a single beat — seven committees, a 1,700-person
  * convention and a 19-campus network crushed into one breath. That was the
@@ -106,7 +108,7 @@ export interface Beat {
  * chapters (04–07): why he joined, what he built out of joining, the terms
  * themselves as a time axis, and the room that grew because of them.
  *
- * `silhouette` indices match beat ids — see assets/silhouettes.ts.
+ * `silhouette` selects the artifact independently of chapter order.
  */
 export const BEATS: readonly Beat[] = [
   {
@@ -257,7 +259,7 @@ export const BEATS: readonly Beat[] = [
     label: "THE RUN",
     year: "22–26",
     when: "2022 — 2026",
-    silhouette: 9, // thirty entries, plotted by year
+    silhouette: 9, // thirty-eight entries, plotted by year
     azimuthDeg: 40,
     elevationDeg: 11,
     distance: 12,
@@ -273,6 +275,24 @@ export const BEATS: readonly Beat[] = [
   {
     id: 10,
     code: "10",
+    label: "HACKMIT",
+    year: "2026",
+    when: "sep 2026",
+    silhouette: 11, // HARE: an expressive screen on a four-legged robot
+    azimuthDeg: 62,
+    elevationDeg: 12,
+    distance: 12,
+    line: HACKMIT.line,
+    turn: HACKMIT.turn,
+    route: "/hackmit",
+    routeLabel: "HackMIT",
+    routeTitle: "HARE / HackMIT",
+    routePreview: HACKMIT.description,
+    gateBias: [0, -0.4],
+  },
+  {
+    id: 11,
+    code: "11",
     label: "NOW",
     year: "now",
     when: "now",
@@ -481,7 +501,8 @@ export const ROOMS: readonly Room[] = [
   { center: [12, 7, -290], radius: 38 }, // 07 the room got bigger
   { center: [-14, 8, -352], radius: 44 }, // 08 nineteen campuses
   { center: [15, 9, -420], radius: 50 }, // 09 the run
-  { center: [0, 10, -496], radius: 60 }, // 10 hong bing — open space
+  { center: [-12, 10, -496], radius: 54 }, // 10 HackMIT
+  { center: [0, 11, -578], radius: 60 }, // 11 hong bing — open space
 ] as const;
 
 /**
@@ -494,7 +515,7 @@ export const ROOMS: readonly Room[] = [
  * lines of heavy display type need the ink to stay legible.
  */
 export const BEAT_ALLOCATIONS = [
-  480, 520, 600, 600, 620, 740, 700, 560, 640, 640, 900,
+  480, 480, 540, 540, 560, 680, 640, 520, 580, 580, 500, 900,
 ] as const;
 
 /** World-space hero camera position for beat k: room centre + authored orbit. */
@@ -554,7 +575,7 @@ export function pathLook(t: number): CameraPose {
 /* The track — the walk made visible.                                  */
 /*                                                                     */
 /* The corridor is real but it was invisible: the camera moved through */
-/* eleven rooms and nothing on screen said the rooms were connected,   */
+/* the rooms and nothing on screen said they were connected,          */
 /* or which way was forward. The track is a thread of dust running     */
 /* under the artifacts from the gate to the wordmark, with a bead      */
 /* where each chapter sits. It is drawn in components/lab-path.tsx;    */
