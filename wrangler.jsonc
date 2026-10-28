@@ -14,7 +14,7 @@
     {
       "binding": "DB",
       "database_name": "hong-build-hack",
-      "database_id": "REPLACE_WITH_ID_FROM_wrangler_d1_create",
+      "database_id": "cb01436d-96c7-4494-b435-cc062b0760d4",
       "migrations_dir": "migrations"
     }
   ],
