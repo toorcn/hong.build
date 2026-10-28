@@ -5,6 +5,8 @@ interface Env {
   DB: D1Database;
 }
 
+// Finite rotation pool for "surprise me". Custom single emojis are also accepted.
+const GUESTBOOK_EMOJIS = Array.from('😀😁😂😄😅😇🙂🙃😉😊😋😎😍🥰😘😗😙🥲😌🤓😏😴🤠🥳🤩🥸😺😸😹😻😽🙀😿😼🐶🐱🐭🐹🐰🦊🐻🐼🐨🐯🦁🐮🐷🐸🐵🐔🐧🐦🐤🦆🦉🦇🐺🐗🐴🦄🐝🪲🐛🦋🐌🐞🐜🪰🪱🐢🐍🦎🦂🦀🦞🦐🦑🐙🐬🐳🐋🦈🐊🦖🦕🐉🌵🌲🌳🌴🌱🌿🍀🍁🍄🌻🌼🌷🌹🌺🌸🌞🌝🌛🌜🌚🌙🌎🪐⭐🌟🌠☀☁🌈⛄🔥💧🌊🍎🍊🍋🍉🍓🍒🥝🍍🥥🥑🍕🍔🍟🍪🍩🍰🧁🍫🍯☕🍵🧋🎈🎉🎨🎭🎲🎸🎹🎺🎻🥁🎮🚀🛸🚲🛶⚓💡📚🔑🧩🧸🪴🪐');
 const questionIds = new Set(qaData.map((item) => item.id));
 const RATE_WINDOW_SECONDS = 60;
 const RATE_MAX = 30;
@@ -16,9 +18,13 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     const { pathname } = url;
-    if (pathname !== "/api/qa-votes" && pathname !== "/api/guestbook") return serveSite(request, env, url);
+    if (pathname !== "/api/qa-votes" && pathname !== "/api/guestbook" && pathname !== "/api/guestbook/emoji") return serveSite(request, env, url);
 
     try {
+      if (pathname === "/api/guestbook/emoji") {
+        if (request.method === "GET") return json(await suggestGuestbookEmoji(env));
+        return json({ error: "Method not allowed" }, 405, { Allow: "GET" });
+      }
       if (pathname === "/api/guestbook") {
         if (request.method === "GET") return json(await listGuestbook(env));
         if (request.method === "POST") return json(await addGuestbookEntry(request, env, url), 201);
@@ -100,14 +106,27 @@ class HttpError extends Error {
 
 async function listGuestbook(env: Env) {
   const { results } = await env.DB.prepare(
-    "SELECT id, name, message, emoji, created_at FROM guestbook_entries ORDER BY id DESC LIMIT 100",
-  ).all<{ id: number; name: string; message: string; emoji: string; created_at: string }>();
+    "SELECT id, name, message, emoji, source, created_at FROM guestbook_entries ORDER BY id DESC LIMIT 100",
+  ).all<{ id: number; name: string; message: string; emoji: string; source: string; created_at: string }>();
   return { entries: results };
+}
+
+async function usedGuestbookEmoji(env: Env) {
+  const { results } = await env.DB.prepare("SELECT DISTINCT emoji FROM guestbook_entries WHERE emoji <> ''").all<{ emoji: string }>();
+  return new Set(results.map(row => row.emoji));
+}
+
+async function suggestGuestbookEmoji(env: Env) {
+  const used = await usedGuestbookEmoji(env);
+  const available = [...new Set(GUESTBOOK_EMOJIS)].filter(emoji => !used.has(emoji));
+  const choices = available.length ? available : GUESTBOOK_EMOJIS;
+  const index = crypto.getRandomValues(new Uint32Array(1))[0]! % choices.length;
+  return { emoji: choices[index], repeatsAllowed: available.length === 0 };
 }
 
 async function addGuestbookEntry(request: Request, env: Env, url: URL) {
   const origin = request.headers.get("Origin");
-  if (origin !== url.origin) throw new HttpError(403, "Please post from this site");
+  if (origin && origin !== url.origin) throw new HttpError(403, "Please post from this site");
   if (request.headers.get("Content-Type")?.split(";")[0]?.trim().toLowerCase() !== "application/json") {
     throw new HttpError(415, "Expected JSON");
   }
@@ -125,14 +144,16 @@ async function addGuestbookEntry(request: Request, env: Env, url: URL) {
     text += decoder.decode(value, { stream: true });
   }
   text += decoder.decode();
-  let body: { name?: unknown; message?: unknown; emoji?: unknown; website?: unknown };
+  let body: { name?: unknown; message?: unknown; emoji?: unknown; source?: unknown; website?: unknown };
   try { body = JSON.parse(text); } catch { throw new HttpError(400, "Invalid message"); }
   if (!body || typeof body !== "object") throw new HttpError(400, "Invalid message");
   if (body.website) throw new HttpError(400, "Invalid message");
+  const source = body.source === "agent" ? "agent" : "human";
+  if (!origin && source !== "agent") throw new HttpError(403, "Please post from this site");
   const name = (typeof body.name === "string" ? body.name.trim().replace(/\s+/g, " ") : "") || "A visitor";
-  const emoji = typeof body.emoji === "string" ? body.emoji.trim() : "✨";
+  const emoji = typeof body.emoji === "string" ? body.emoji.trim() : "";
   const symbols = [...new Intl.Segmenter("en", { granularity: "grapheme" }).segment(emoji)];
-  if (emoji.length > 32 || symbols.length !== 1 || !/[\p{Extended_Pictographic}\p{Regional_Indicator}\u20e3]/u.test(emoji)) throw new HttpError(400, "Choose one emoji for your floating marker");
+  if (emoji && (emoji.length > 32 || symbols.length !== 1 || !/[\p{Extended_Pictographic}\p{Regional_Indicator}\u20e3]/u.test(emoji))) throw new HttpError(400, "Choose one emoji for your floating marker");
   const message = typeof body.message === "string" ? body.message.trim() : "";
   if (!name || name.length > 60 || !message || message.length > 500 || /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(name + message)) {
     throw new HttpError(400, "Keep your name under 60 characters and your message between 1 and 500 characters");
@@ -145,9 +166,17 @@ async function addGuestbookEntry(request: Request, env: Env, url: URL) {
   ).bind(key, bucket).first<{ hits: number }>();
   if ((count?.hits ?? 0) > 5) throw new HttpError(429, "Too many messages. Please try again later.");
   await env.DB.prepare("DELETE FROM guestbook_rate WHERE bucket < ?").bind(bucket - 2).run();
+  // The insert condition is checked by SQLite in the write statement itself,
+  // so two visitors cannot claim the same unused emoji at the same time.
+  const used = emoji ? await usedGuestbookEmoji(env) : new Set<string>();
+  const repeatsAllowed = emoji !== "" && GUESTBOOK_EMOJIS.every(candidate => used.has(candidate));
   const entry = await env.DB.prepare(
-    "INSERT INTO guestbook_entries (name, message, emoji) VALUES (?, ?, ?) RETURNING id, name, message, emoji, created_at",
-  ).bind(name, message, emoji).first();
+    `INSERT INTO guestbook_entries (name, message, emoji, source)
+     SELECT ?, ?, ?, ? WHERE ? = '' OR ? = 1 OR NOT EXISTS
+       (SELECT 1 FROM guestbook_entries WHERE emoji = ?)
+     RETURNING id, name, message, emoji, source, created_at`,
+  ).bind(name, message, emoji, source, emoji, repeatsAllowed ? 1 : 0, emoji).first();
+  if (!entry) throw new HttpError(409, "That emoji is already in the guestbook. Pick another or ask for a random one.");
   return { entry };
 }
 

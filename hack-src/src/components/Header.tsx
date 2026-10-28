@@ -7,11 +7,12 @@ export default function Header() {
           <span className="block font-display text-lg font-black leading-none tracking-tight text-type">
             HONG BING
           </span>
-          <span className="label mt-1 block transition-colors group-hover:text-accent">
+          <span className="label mt-1 hidden transition-colors group-hover:text-accent sm:block">
             Field manual / hackathons
           </span>
         </a>
-        <nav className="flex items-center gap-4">
+        <nav className="flex items-center gap-3 sm:gap-4">
+          <a href="/guestbook/sign" className="focus-ring border border-accent/40 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.08em] text-accent transition-colors hover:border-accent sm:text-[11px] sm:tracking-[0.14em]">Leave a note ↗</a>
           <a
             href="/notes"
             className="focus-ring hidden px-1 py-2 font-mono text-[11px] uppercase tracking-[0.18em] text-type-faint transition-colors hover:text-accent sm:block"
