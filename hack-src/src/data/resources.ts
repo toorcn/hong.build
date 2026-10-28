@@ -44,11 +44,20 @@ export const resources: ResourceLink[] = [
   },
 ]
 
-export const techStack = {
+export interface StackItem {
+  name: string
+  description: string
+  url?: string
+}
+
+export const techStack: Record<string, { title: string; items: StackItem[] }> = {
   frontend: {
     title: 'Frontend',
     items: [
       { name: 'React', description: 'The standard for building web apps. Used by hundreds of millions. Good enough for anything.' },
+      { name: 'Next.js', url: 'https://nextjs.org', description: 'React with routing, API routes and deployment built in. Pick it when you want a full web app in one project instead of wiring pieces together.' },
+      { name: 'React Native', url: 'https://expo.dev', description: 'For mobile app builders. Write React, ship to iOS and Android from one codebase. Use Expo so you can test on your own phone in minutes, with no Xcode or Android Studio setup.' },
+      { name: 'PWA (add-on)', description: 'Not sure you can ship a native app in 24 hours? Make your Next.js site a PWA instead: it installs from the browser to the phone home screen, works offline, and needs no App Store review. Judges can open it from a QR code, and you only maintain one codebase.' },
       { name: 'Tailwind CSS', description: 'Style library that lets you write CSS in plain English. No separate CSS files needed.' },
     ],
   },
@@ -71,21 +80,27 @@ export const techStack = {
     title: 'Deployment',
     items: [
       { name: 'Vercel', description: 'One command deploy. Free. The fastest way to make your app accessible to anyone.' },
+      { name: 'Cloudflare', url: 'https://developers.cloudflare.com/workers/', description: 'Generous free tier: static sites and a large amount of serverless traffic cost nothing, with a free database (D1) and file storage (R2) alongside. Deploy with one wrangler command, and your demo stays fast for judges anywhere. This site runs on it.' },
     ],
   },
   ai: {
     title: 'AI / APIs',
     items: [
       { name: 'Gemini API', description: 'Free tier with generous limits. Use for AI features in your project.' },
+      { name: 'ILMU', url: 'https://console.ilmu.ai', description: 'A Malaysian-built model API, with keys and usage on its own console at console.ilmu.ai. Worth trying when your project serves Malaysian users or needs Bahasa Malaysia.' },
+      { name: 'OpenRouter free models', url: 'https://openrouter.ai/models?q=free', description: 'One API key for many models, and plenty of them are free. Filter for the free ones to build and demo at no cost. They are rate-limited, so keep a second model ready as a backup before you go on stage.' },
     ],
   },
 }
 
-export const aiTools = [
+export const aiTools: { name: string; description: string; url: string; tag?: string }[] = [
   { name: 'Google AI Studio', description: 'Access Gemini models directly. Free, generous limits, and the fastest way to experiment with AI.', url: 'https://aistudio.google.com' },
   { name: 'Antigravity', description: 'AI-powered app builder. Go from idea to deployed app in minutes.', url: 'https://antigravity.com' },
   { name: 'Codex', description: 'OpenAI\'s coding agent. Describe what you want, it writes the code.', url: 'https://openai.com/codex' },
   { name: 'Cursor', description: 'AI code editor. Write code with AI assistance built in.', url: 'https://cursor.sh' },
+  { name: 'Claude Code', description: 'A coding agent that lives in your terminal. It reads your whole project, edits files and runs commands while you describe what you want.', url: 'https://claude.com/product/claude-code', tag: 'beyond the editor' },
+  { name: 'Devin', description: 'An autonomous AI software engineer that works in the cloud. Hand it a task, let it run on its own, and review what it comes back with.', url: 'https://devin.ai', tag: 'beyond the editor' },
+  { name: 'OpenCode', description: 'An open-source coding agent for the terminal that works with many model providers, so you can point it at a free model while you learn.', url: 'https://opencode.ai', tag: 'beyond the editor' },
 ]
 
 export const communityLinks = {
