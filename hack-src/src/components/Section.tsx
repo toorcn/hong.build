@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react'
 import { sections, type SectionId } from '../data/guide'
 import Art from './Art'
+import Sprite from './Sprite'
+import { sectionSprites } from '../data/sprites'
 
 export default function Section({
   id,
@@ -19,8 +21,9 @@ export default function Section({
   const n = sections.findIndex((s) => s.id === id) + 1
   return (
     <section id={id} aria-labelledby={`${id}-title`} className="border-t border-line pt-10 pb-20">
-      <p className="label">
-        {String(n).padStart(2, '0')} / {sections[n - 1].label}
+      <p className="label flex items-center gap-3">
+        <Sprite name={sectionSprites[id]} size={28} className="sprite-bob" />
+        <span>{String(n).padStart(2, '0')} / {sections[n - 1].label}</span>
       </p>
       <h2 id={`${id}-title`} className="mt-3 font-display text-3xl font-black tracking-tight text-type sm:text-4xl">
         {title}
