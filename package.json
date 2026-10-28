@@ -2,35 +2,35 @@
   "name": "hongbing-site",
   "version": "1.0.0",
   "private": true,
-  "description": "Hong Bing Sim — the Perception Lab. Nothing here means anything until you find the angle.",
+  "description": "Hong Bing Sim — personal site: a scroll journey through one cloud of fragments, plus the Hackathon Crash Course.",
   "scripts": {
     "dev": "next dev",
-    "agent-docs": "tsx scripts/generate-agent-docs.ts",
     "build": "npm run agent-docs && next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
+    "deploy": "npm run build && wrangler deploy",
+    "agent-docs": "tsx scripts/generate-agent-docs.ts",
     "fragments": "tsx scripts/generate-fragments.ts",
     "fragments:check": "tsx scripts/generate-fragments.ts --check",
     "verify:entrance": "node scripts/verify-cold-start.mjs",
     "verify:cursor": "node scripts/cursor-checks.mjs",
-    "shots:walk": "node scripts/walk-shots.mjs"
+    "shots:walk": "node scripts/walk-shots.mjs",
+    "check:walk": "tsx scripts/render-walk-checks.ts"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/toorcn/personal-site-creative-brief.git"
+    "url": "git+https://github.com/toorcn/hong-bing-site.git"
   },
-  "keywords": [],
-  "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/toorcn/personal-site-creative-brief/issues"
+    "url": "https://github.com/toorcn/hong-bing-site/issues"
   },
-  "homepage": "https://github.com/toorcn/personal-site-creative-brief#readme",
+  "homepage": "https://hong.build",
   "dependencies": {
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.7.0",
     "@react-three/postprocessing": "^3.0.4",
-    "gsap": "^3.15.0",
+    "its-fine": "^2.0.0",
     "lenis": "^1.3.26",
     "next": "^16.3.0",
     "next-mdx-remote": "^6.0.0",
@@ -53,6 +53,10 @@
     "sharp": "^0.35.3",
     "tailwindcss": "^4.3.3",
     "tsx": "^4.23.6",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "wrangler": "^4.154.0"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }

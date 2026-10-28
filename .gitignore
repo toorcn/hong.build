@@ -25,5 +25,14 @@ next-env.d.ts
 # local ambient listen/select pack (not for commit)
 /public/audio/candidates/
 
-node_modules/
 .wrangler/
+
+# local env and Cloudflare
+.env
+.env.*
+!.env.example
+.dev.vars
+
+# editors
+.vscode/
+.idea/
