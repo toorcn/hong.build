@@ -1,49 +1,50 @@
-import Navbar from './components/Navbar'
-import Hero from './components/Hero'
-import QASection from './components/QASection'
-import PlaybookSection from './components/PlaybookSection'
-import TechStackSection from './components/TechStackSection'
-import ResourcesSection from './components/ResourcesSection'
-import CommunitySection from './components/CommunitySection'
-import Footer from './components/Footer'
-import SectionDivider from './components/SectionDivider'
-import ScrollToTop from './components/ScrollToTop'
-import SmoothScrollProvider from './components/SmoothScrollProvider'
-import ScrollProgressRail from './components/ScrollProgressRail'
-import SituationPicker from './components/SituationPicker'
-import FrameworkSpotlight from './components/FrameworkSpotlight'
-import ScrollAtmosphere from './components/ScrollAtmosphere'
-import ParallaxManifesto from './components/ParallaxManifesto'
-import WorkshopVideoSection from './components/WorkshopVideoSection'
+import Header from './components/Header'
+import { SectionBar, Sidebar } from './components/Contents'
+import Start from './components/Start'
+import Rules from './components/Rules'
+import Workshop from './components/Workshop'
+import Questions from './components/Questions'
+import Playbook from './components/Playbook'
+import Stack from './components/Stack'
+import Links from './components/Links'
 
 export default function App() {
   return (
-    <SmoothScrollProvider>
-      <div className="min-h-screen bg-navy-900 transition-colors duration-300">
-        <ScrollAtmosphere />
-        <Navbar />
-        <ScrollProgressRail />
-        <Hero />
-        <SectionDivider variant="accent" />
-        <ParallaxManifesto />
-        <SectionDivider />
-        <WorkshopVideoSection />
-        <SectionDivider variant="accent" />
-        <SituationPicker />
-        <SectionDivider />
-        <QASection />
-        <FrameworkSpotlight />
-        <SectionDivider />
-        <PlaybookSection />
-        <SectionDivider variant="accent" />
-        <TechStackSection />
-        <SectionDivider />
-        <ResourcesSection />
-        <SectionDivider variant="accent" />
-        <CommunitySection />
-        <Footer />
-        <ScrollToTop />
+    <>
+      <a
+        href="#start"
+        className="focus-ring sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:bg-accent focus:px-4 focus:py-2 focus:font-mono focus:text-xs focus:text-void"
+      >
+        Skip to content
+      </a>
+      <div className="sticky top-0 z-30">
+        <Header />
+        <SectionBar />
       </div>
-    </SmoothScrollProvider>
+      <div className="mx-auto grid max-w-6xl gap-12 px-5 sm:px-8 lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-16">
+        <aside className="hidden pt-16 lg:block">
+          <Sidebar />
+        </aside>
+        <main className="min-w-0 max-w-3xl">
+          <Start />
+          <Rules />
+          <Workshop />
+          <Questions />
+          <Playbook />
+          <Stack />
+          <Links />
+        </main>
+      </div>
+      <footer className="border-t border-line">
+        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-5 py-8 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+          <p className="font-mono text-[11px] text-type-faint">{'// written for first-time teams. use what helps, skip the rest.'}</p>
+          <p className="flex gap-5 font-mono text-[11px] uppercase tracking-[0.16em]">
+            <a href="/" className="focus-ring text-type-dim hover:text-accent">hong.build</a>
+            <a href="/contact" className="focus-ring text-type-dim hover:text-accent">Contact</a>
+            <a href="#start" className="focus-ring text-type-dim hover:text-accent">Top ↑</a>
+          </p>
+        </div>
+      </footer>
+    </>
   )
 }
