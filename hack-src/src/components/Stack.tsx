@@ -6,6 +6,7 @@ export default function Stack() {
   return (
     <Section
       id="stack"
+      art="stack"
       title="Stack & tools"
       intro="Don't overthink the stack. Pick what works, learn it before the hackathon, and spend the event building, not deciding."
     >

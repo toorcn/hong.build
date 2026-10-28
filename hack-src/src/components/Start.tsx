@@ -2,6 +2,7 @@ import { situations } from '../data/guide'
 import { qaData } from '../data/qa'
 import { playbookData } from '../data/playbook'
 import { go, hrefFor } from '../lib/nav'
+import Art from './Art'
 
 const stats = [
   { n: '1', k: 'workshop recording' },
@@ -12,11 +13,12 @@ const stats = [
 
 export default function Start() {
   return (
-    <section id="start" aria-labelledby="start-title" className="pt-10 pb-20 sm:pt-16">
-      <p className="label">// Field manual · hackathons</p>
+    <section id="start" aria-labelledby="start-title" className="pt-6 pb-20 sm:pt-10">
+      <Art name="hall" className="-mx-5 aspect-[21/9] sm:mx-0" />
+      <p className="label relative -mt-6 sm:-mt-10">// Field manual · hackathons</p>
       <h1
         id="start-title"
-        className="mt-4 font-display text-5xl font-black leading-[0.95] tracking-tight text-type sm:text-7xl"
+        className="relative mt-4 font-display text-5xl font-black leading-[0.95] tracking-tight text-type sm:text-7xl"
       >
         Hackathon
         <br />

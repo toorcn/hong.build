@@ -1,15 +1,19 @@
 import type { ReactNode } from 'react'
 import { sections, type SectionId } from '../data/guide'
+import Art from './Art'
 
 export default function Section({
   id,
   title,
   intro,
+  art,
   children,
 }: {
   id: SectionId
   title: string
   intro?: ReactNode
+  /** Name of a banner in public/art. */
+  art?: string
   children: ReactNode
 }) {
   const n = sections.findIndex((s) => s.id === id) + 1
@@ -22,7 +26,8 @@ export default function Section({
         {title}
       </h2>
       {intro && <p className="mt-4 max-w-xl text-base leading-relaxed text-type-dim">{intro}</p>}
-      <div className="mt-10">{children}</div>
+      {art && <Art name={art} className="-mx-5 mt-8 aspect-[3/1] sm:mx-0" />}
+      <div className={art ? 'mt-4' : 'mt-10'}>{children}</div>
     </section>
   )
 }
