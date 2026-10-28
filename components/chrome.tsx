@@ -82,6 +82,8 @@ export function Chrome() {
         </div>
       </div>
 
+      {onHome && <Link href="/guestbook/sign" className="entrance-hide focus-ring pointer-events-auto fixed bottom-28 left-5 z-30 flex items-center gap-3 rounded-full border border-accent/40 bg-void/90 px-5 py-3 text-sm text-type backdrop-blur transition-colors hover:border-accent hover:text-accent sm:bottom-7 sm:left-8"><span aria-hidden="true">✦</span> Leave a message <span aria-hidden="true">↗</span></Link>}
+
       {/* Mobile chapter strip — bottom, only on the journey. Eleven evenly
           spaced dots would be an unreadable, untappable row, so this is the
           same proportional time axis as the desktop rail turned on its side,

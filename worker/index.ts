@@ -16,9 +16,14 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     const { pathname } = url;
-    if (pathname !== "/api/qa-votes") return serveSite(request, env, url);
+    if (pathname !== "/api/qa-votes" && pathname !== "/api/guestbook") return serveSite(request, env, url);
 
     try {
+      if (pathname === "/api/guestbook") {
+        if (request.method === "GET") return json(await listGuestbook(env));
+        if (request.method === "POST") return json(await addGuestbookEntry(request, env, url), 201);
+        return json({ error: "Method not allowed" }, 405, { Allow: "GET, POST" });
+      }
       if (request.method === "GET") return json(await getCounts(env));
       if (request.method === "POST") return json(await createVote(request, env));
       return json({ error: "Method not allowed" }, 405, { Allow: "GET, POST" });
@@ -91,6 +96,59 @@ class HttpError extends Error {
   ) {
     super(message);
   }
+}
+
+async function listGuestbook(env: Env) {
+  const { results } = await env.DB.prepare(
+    "SELECT id, name, message, emoji, created_at FROM guestbook_entries ORDER BY id DESC LIMIT 100",
+  ).all<{ id: number; name: string; message: string; emoji: string; created_at: string }>();
+  return { entries: results };
+}
+
+async function addGuestbookEntry(request: Request, env: Env, url: URL) {
+  const origin = request.headers.get("Origin");
+  if (origin !== url.origin) throw new HttpError(403, "Please post from this site");
+  if (request.headers.get("Content-Type")?.split(";")[0]?.trim().toLowerCase() !== "application/json") {
+    throw new HttpError(415, "Expected JSON");
+  }
+  const length = Number(request.headers.get("Content-Length") ?? 0);
+  if (length > 4096) throw new HttpError(413, "Message is too large");
+  if (!request.body) throw new HttpError(400, "Invalid message");
+  const reader = request.body.getReader();
+  const decoder = new TextDecoder();
+  let text = "", bytes = 0;
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    bytes += value.byteLength;
+    if (bytes > 4096) { await reader.cancel(); throw new HttpError(413, "Message is too large"); }
+    text += decoder.decode(value, { stream: true });
+  }
+  text += decoder.decode();
+  let body: { name?: unknown; message?: unknown; emoji?: unknown; website?: unknown };
+  try { body = JSON.parse(text); } catch { throw new HttpError(400, "Invalid message"); }
+  if (!body || typeof body !== "object") throw new HttpError(400, "Invalid message");
+  if (body.website) throw new HttpError(400, "Invalid message");
+  const name = (typeof body.name === "string" ? body.name.trim().replace(/\s+/g, " ") : "") || "A visitor";
+  const emoji = typeof body.emoji === "string" ? body.emoji.trim() : "✨";
+  const symbols = [...new Intl.Segmenter("en", { granularity: "grapheme" }).segment(emoji)];
+  if (emoji.length > 32 || symbols.length !== 1 || !/[\p{Extended_Pictographic}\p{Regional_Indicator}\u20e3]/u.test(emoji)) throw new HttpError(400, "Choose one emoji for your floating marker");
+  const message = typeof body.message === "string" ? body.message.trim() : "";
+  if (!name || name.length > 60 || !message || message.length > 500 || /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(name + message)) {
+    throw new HttpError(400, "Keep your name under 60 characters and your message between 1 and 500 characters");
+  }
+  const bucket = Math.floor(Date.now() / 600000);
+  const ip = request.headers.get("cf-connecting-ip") ?? "unknown";
+  const key = await hash(ip);
+  const count = await env.DB.prepare(
+    "INSERT INTO guestbook_rate (ip_hash, bucket, hits) VALUES (?, ?, 1) ON CONFLICT (ip_hash, bucket) DO UPDATE SET hits = hits + 1 RETURNING hits",
+  ).bind(key, bucket).first<{ hits: number }>();
+  if ((count?.hits ?? 0) > 5) throw new HttpError(429, "Too many messages. Please try again later.");
+  await env.DB.prepare("DELETE FROM guestbook_rate WHERE bucket < ?").bind(bucket - 2).run();
+  const entry = await env.DB.prepare(
+    "INSERT INTO guestbook_entries (name, message, emoji) VALUES (?, ?, ?) RETURNING id, name, message, emoji, created_at",
+  ).bind(name, message, emoji).first();
+  return { entry };
 }
 
 async function getCounts(env: Env) {
