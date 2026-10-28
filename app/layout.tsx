@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     template: `%s — ${SITE.shortName}`,
   },
   description:
-    "AI engineer and builder in Kuala Lumpur. Nothing here means anything until you find the angle. " +
+    "Founder and AI engineer in Kuala Lumpur and San Francisco. Nothing here means anything until you find the angle. " +
     "A scroll journey through one cloud of fragments.",
   metadataBase: new URL("https://hongbing.dev"),
   openGraph: {
