@@ -132,3 +132,88 @@ body {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+/* ---------- Pixel sprites (components/Sprite.tsx) ---------- */
+
+.sprite {
+  flex: none;
+  image-rendering: pixelated;
+}
+
+/* Two-frame sprites flip between frames in hard steps, like a game. */
+.sprite-anim .sprite-frame-0 {
+  animation: sprite-frame-a 1.6s steps(1, end) infinite;
+}
+.sprite-anim .sprite-frame-1 {
+  animation: sprite-frame-b 1.6s steps(1, end) infinite;
+}
+@keyframes sprite-frame-a {
+  0%,
+  60% {
+    opacity: 1;
+  }
+  60.01%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes sprite-frame-b {
+  0%,
+  60% {
+    opacity: 0;
+  }
+  60.01%,
+  100% {
+    opacity: 1;
+  }
+}
+
+/* A slow two-step bob on the section markers. */
+.sprite-bob {
+  animation: sprite-bob 2.4s steps(1, end) infinite;
+}
+@keyframes sprite-bob {
+  0%,
+  50% {
+    transform: translateY(0);
+  }
+  50.01%,
+  100% {
+    transform: translateY(-2px);
+  }
+}
+
+/* The situation sprites hop when their row is hovered or focused. */
+.group:hover .sprite-hop,
+.group:focus-visible .sprite-hop {
+  animation: sprite-hop 0.5s steps(4, end);
+}
+@keyframes sprite-hop {
+  0% {
+    transform: translateY(0);
+  }
+  25% {
+    transform: translateY(-5px);
+  }
+  50% {
+    transform: translateY(-7px);
+  }
+  75% {
+    transform: translateY(-3px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sprite-anim .sprite-frame-0,
+  .sprite-anim .sprite-frame-1,
+  .sprite-bob,
+  .group:hover .sprite-hop,
+  .group:focus-visible .sprite-hop {
+    animation: none;
+  }
+  .sprite-anim .sprite-frame-1 {
+    opacity: 0;
+  }
+}
