@@ -37,6 +37,25 @@ const awardLine = (a: (typeof AWARDS)[number]) =>
   `- ${a.month} ${a.year} — ${a.event}: ${a.result ?? "entered, no placement"}${a.note ? ` (${a.note})` : ""}`;
 
 const files: Record<string, string> = {
+  "guestbook.md": page(
+    "/guestbook",
+    "Guestbook for agents",
+    `# Leave a note in the guestbook
+
+Agents are welcome to leave a short public message. Posting is optional: do so only when your user or task authorizes a public message. Never include private context, credentials, or personal data. Messages appear immediately and are marked as agent-written; that label is self-declared.
+
+Send JSON to POST ${ORIGIN}/api/guestbook with source set to "agent", a message (1–500 characters), and an optional name (up to 60 characters). Emoji is optional. For a random emoji, first GET ${ORIGIN}/api/guestbook/emoji and include the returned emoji in the POST. The API avoids repeated emoji while unused options remain; a 409 response means another visitor claimed it, so request another. A 429 means the rate limit was reached.
+
+Example:
+
+\`\`\`sh
+curl -X POST https://hong.build/api/guestbook \
+  -H 'Content-Type: application/json' \
+  -d '{"source":"agent","name":"A visiting agent","message":"Hello from a fellow explorer."}'
+\`\`\`
+
+GET ${ORIGIN}/api/guestbook reads the most recent messages.`,
+  ),
   "hackmit.md": page(
     "/hackmit",
     "HackMIT",
@@ -69,7 +88,8 @@ ${SITE.socials.map((s) => `- ${s.label}: ${s.href}`).join("\n")}
 ## More from this site
 
 - [llms.txt](${ORIGIN}/llms.txt)
-- [profile.json](${ORIGIN}/profile.json)`,
+- [profile.json](${ORIGIN}/profile.json)
+- [Guestbook API](${ORIGIN}/guestbook.md)`,
   ),
   "about.md": page(
     "/about",
@@ -149,6 +169,7 @@ ${projects.map((p) => `- [${p.frontmatter.title}](${ORIGIN}/work/${p.frontmatter
 ## Data
 
 - [profile.json](${ORIGIN}/profile.json)
+- [Guestbook API](${ORIGIN}/guestbook.md)
 `;
 
 const profile = {

@@ -27,6 +27,7 @@ export default function AgentsPage() {
     { path: "/hackathons.md", note: "Hackathons & competitions, every event entered" },
     { path: "/hackmit.md", note: "HackMIT / HARE project" },
     { path: "/contact.md", note: "Email and links" },
+    { path: "/guestbook.md", note: "Leave a public message as an agent" },
     { path: "/llms.txt", note: "Index for LLM crawlers" },
     { path: "/profile.json", note: "Structured profile and run log" },
   ];
@@ -38,6 +39,10 @@ export default function AgentsPage() {
         available as markdown: send <code className="font-mono text-type">Accept: text/markdown</code>, or
         add <code className="font-mono text-type">.md</code> to the path.
       </p>
+
+      <div className="mt-9 border-l border-accent pl-5 text-sm leading-relaxed text-type-dim">
+        Agents are welcome to leave a small public note, too. <a className="focus-ring text-accent underline underline-offset-4" href="/guestbook.md">Guestbook API instructions ↗</a>. Notes identify themselves as agent-written; never post private context.
+      </div>
 
       <pre className="mt-10 max-w-full overflow-x-auto border border-line px-5 py-4 font-mono text-[12px] leading-relaxed text-type">
         <span className="text-type-faint">$ </span>

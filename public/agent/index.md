@@ -51,3 +51,4 @@ A student-first builder community — 4 chapters, 700+ members nationwide. Co-or
 
 - [llms.txt](https://hong.build/llms.txt)
 - [profile.json](https://hong.build/profile.json)
+- [Guestbook API](https://hong.build/guestbook.md)
