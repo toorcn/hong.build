@@ -1,0 +1,24 @@
+# Hong Bing Sim
+
+> AI engineer & builder, Kuala Lumpur, MY (UTC+8). AI engineering at YTL AI Labs since Apr 2026. Building Tack.
+
+Every page is also available as markdown: send `Accept: text/markdown`, or add `.md` to the path.
+
+## Pages
+
+- [Work](https://hong.build/work.md)
+- [About](https://hong.build/about.md)
+- [Process](https://hong.build/process.md)
+- [Run log](https://hong.build/notes.md)
+- [Contact](https://hong.build/contact.md)
+- [Home](https://hong.build/index.md)
+
+## Case studies
+
+- [Tack](https://hong.build/work/tack.md): An AI meeting moderator that intervenes while the conversation is still alive.
+- [KiyokoCon](https://hong.build/work/kiyokocon.md): Malaysia's largest student-organised convention — 1,700 attendees, 50 booths, 35 partners.
+- [AI Hackerdorm](https://hong.build/work/ai-hackerdorm.md): A student-first builder community — 500+ students across 19 campuses.
+
+## Data
+
+- [profile.json](https://hong.build/profile.json)

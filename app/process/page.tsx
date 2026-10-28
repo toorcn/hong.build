@@ -1,30 +1,12 @@
 import type { Metadata } from "next";
 import { ContentPanel } from "@/components/content-panel";
 import { LiveRow } from "@/components/panel-motion";
+import { PRINCIPLES } from "@/content/site";
 
 export const metadata: Metadata = {
   title: "Process",
   description: "How I build — and what RM25,000 of AI taught me about using it.",
 };
-
-const PRINCIPLES = [
-  {
-    k: "think.build.test.break.correct.repeat",
-    v: "Speed is not the same as progress. I'd rather run ten cheap loops than one expensive guess.",
-  },
-  {
-    k: "intent beats volume",
-    v: "Some of my best work came from the smallest prompts. Some of my worst came from throwing everything at the wall. Unclear prompts are usually unclear thinking.",
-  },
-  {
-    k: "ai is infrastructure, not magic",
-    v: "After RM25,000 of AI, the first good answer impresses me least. What matters is what happens after: can I give it context, tell when it's making something up, and turn the output into something that actually works?",
-  },
-  {
-    k: "the tool is never the point",
-    v: "Whether it's a meeting moderator or a convention, the build only matters if the room works. I optimize for the person, then the system.",
-  },
-] as const;
 
 export default function ProcessPage() {
   return (

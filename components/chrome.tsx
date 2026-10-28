@@ -48,12 +48,20 @@ export function Chrome() {
             owns the frame — sound arrives with the rest of the app. */}
         <div className="entrance-hide pointer-events-auto flex items-center gap-4">
           {onHome ? (
-            <Link
-              href="/contact"
-              className="focus-ring hidden border border-line px-3.5 py-2 font-mono text-[11px] uppercase tracking-[0.18em] text-type-dim transition-colors hover:border-accent hover:text-type sm:block"
-            >
-              Contact
-            </Link>
+            <>
+              <Link
+                href="/agents"
+                className="focus-ring hidden px-1 py-2 font-mono text-[11px] uppercase tracking-[0.18em] text-type-faint transition-colors hover:text-accent sm:block"
+              >
+                For agents
+              </Link>
+              <Link
+                href="/contact"
+                className="focus-ring hidden border border-line px-3.5 py-2 font-mono text-[11px] uppercase tracking-[0.18em] text-type-dim transition-colors hover:border-accent hover:text-type sm:block"
+              >
+                Contact
+              </Link>
+            </>
           ) : (
             <Link
               href="/"

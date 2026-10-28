@@ -1,0 +1,48 @@
+---
+title: Tack
+url: https://hong.build/work/tack
+---
+
+# Tack
+
+AI · 2026 · Founder — design, engineering, product
+
+An AI meeting moderator that intervenes while the conversation is still alive.
+
+Stack: Next.js, TypeScript, LLM orchestration, Realtime audio, WebAudio
+
+## Context
+
+Most AI meeting tools are historians. They arrive after the fact, transcribe what was said, and hand you a summary of a meeting that already drifted, a decision that already blurred, an owner who already left the room.
+
+I kept watching the same failure: a transcript can *document* a meeting that went off track, but it can't *save* one. By the time the notes land, the moment to intervene is gone.
+
+## The problem
+
+Meetings don't fail at the end. They fail in the middle — a tangent that runs too long, a decision that never quite gets named, an action item that evaporates because nobody wrote it down while it was still warm. The failure is live, so the fix has to be live too.
+
+## Role
+
+I founded Tack and built it end to end: the product thesis, the interface, the real-time pipeline, and the launch. I ran it in public — posting daily, testing one question at a time, and shipping the Product Hunt launch from a builder residency (Attention House, PetaniAI).
+
+## Process
+
+The first question wasn't technical, it was behavioral: **do teams want better notes, or do they want someone to drive the meeting live?** I treated that as a falsifiable bet and built the smallest thing that could answer it.
+
+From there the work was about restraint. A moderator that interrupts too much is worse than none at all. The hard part wasn't detecting a tangent — it was knowing which tangents are worth letting run.
+
+## Key decisions
+
+- **Intervene, don't record.** The unit of value is the nudge in the moment, not the artifact afterward. Everything about the pipeline optimizes for low-latency judgment, not completeness.
+- **Detect sustained drift, not single digressions.** A short aside is often where the good thinking happens. Tack only acts when a conversation has *sustained* off-topic momentum.
+- **Capture decisions and owners before the meeting ends.** The most perishable thing in a room is "so who's doing that?" — so that's captured live, not reconstructed later.
+
+## Implementation
+
+Tack listens to the live conversation, tracks topical momentum, and distinguishes a productive tangent from a derailing one. When it detects sustained drift it surfaces a gentle return-to-topic cue; when it hears a decision or a commitment, it captures it with its owner in real time.
+
+## Outcome
+
+Tack launched on Product Hunt with the waitlist open at [tack.im](https://tack.im). The strongest signal came from a reframe I kept hearing back: teams didn't want a smarter transcript. They wanted a driver.
+
+> A transcript can document a meeting that went off track — but it can't help save it in the moment.
