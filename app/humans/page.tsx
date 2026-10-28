@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 const PAGES = [
   { href: "/about", title: "About me", description: "The background, the day job, and the things I keep coming back to." },
   { href: "/process", title: "How I build", description: "The principles behind the work. Think, build, test, break, repeat." },
-  { href: "/notes", title: "Hackathons & competitions", description: "Every event entered, and what happened along the way." },
+  { href: "/hackathons", title: "Hackathons & competitions", description: "Every event entered, and what happened along the way." },
 ] as const;
 
 export default function HumansPage() {

@@ -78,24 +78,47 @@
     }
   ],
   "runLog": {
-    "entered": 33,
-    "placed": 18,
-    "noPlacement": 7,
+    "entered": 38,
+    "placed": 20,
+    "noPlacement": 9,
     "wonOutright": 6,
     "events": [
       {
         "year": 2026,
-        "month": "aug",
-        "event": "TalentLabs DevLeague",
+        "month": "oct",
+        "event": "MIT Hacking Medicine Malaysia 2026",
         "result": "Mentor",
-        "org": "TalentLabs",
+        "org": "MIT",
         "mentored": true
       },
       {
         "year": 2026,
+        "month": "sep",
+        "event": "HackMIT 2026",
+        "result": "#1 Hardware — Special Prize",
+        "org": "HackMIT",
+        "note": "HARE — a prototype robot learning companion for preschoolers.",
+        "linkedin": "https://www.linkedin.com/feed/update/urn:li:activity:7513761391082729472/"
+      },
+      {
+        "year": 2026,
+        "month": "sep",
+        "event": "CodeNection 2026",
+        "result": "Mentor",
+        "mentored": true
+      },
+      {
+        "year": 2026,
+        "month": "aug",
+        "event": "Devin KL Hackathon 2026",
+        "result": "Finalist",
+        "org": "Cognition"
+      },
+      {
+        "year": 2026,
         "month": "jul",
-        "event": "Codex Community Hackathon 2026 (OpenAI Build Week)",
-        "result": "Mentor · Technical",
+        "event": "Codex Community Hackathon 2026 (OpenAI Build Week), Kuala Lumpur",
+        "result": "Technical mentor",
         "org": "OpenAI",
         "mentored": true
       },
@@ -237,14 +260,6 @@
       },
       {
         "year": 2025,
-        "month": "apr–jul",
-        "event": "ViTrox Tech 4 Good 2025",
-        "result": "Grand Finalist",
-        "org": "ViTrox",
-        "linkedin": "https://www.linkedin.com/posts/hong-bing_finalist-problem-neurodivergent-activity-7319648261663862784-N4za"
-      },
-      {
-        "year": 2025,
         "month": "jun",
         "event": "ImagineHack 2025",
         "result": "Best Technical Implementation",
@@ -253,10 +268,18 @@
       },
       {
         "year": 2025,
-        "month": "—",
+        "month": "jun",
         "event": "Loophole Hackathon 2025",
         "result": "Judges' Favourite",
         "org": "Build Club MY"
+      },
+      {
+        "year": 2025,
+        "month": "apr–jul",
+        "event": "ViTrox Tech 4 Good 2025",
+        "result": "Grand Finalist",
+        "org": "ViTrox",
+        "linkedin": "https://www.linkedin.com/posts/hong-bing_finalist-problem-neurodivergent-activity-7319648261663862784-N4za"
       },
       {
         "year": 2024,
@@ -273,6 +296,18 @@
         "event": "PayNet PayHack 2024",
         "result": "Semi-finalist",
         "org": "PayNet"
+      },
+      {
+        "year": 2024,
+        "month": "nov",
+        "event": "Deriv AI Hackathon",
+        "result": null
+      },
+      {
+        "year": 2024,
+        "month": "oct",
+        "event": "IIUM I-Hax",
+        "result": null
       },
       {
         "year": 2024,

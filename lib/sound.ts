@@ -25,6 +25,18 @@ class LabSound {
   /** False until the entrance (or a returning visit) releases the bed. */
   private ambientAllowed = false;
 
+  private isFocused(): boolean {
+    return document.visibilityState === "visible" && document.hasFocus();
+  }
+
+  /** Suspend the audio clock so the music resumes from the same position. */
+  private syncFocus = (): void => {
+    if (!this.ctx) return;
+    const operation = this.isFocused() ? this.ctx.resume() : this.ctx.suspend();
+    // Autoplay rules may require another gesture before resuming.
+    void operation.catch(() => {});
+  };
+
   setMuted(muted: boolean): void {
     this.muted = muted;
     this.syncAmbient();
@@ -55,8 +67,14 @@ class LabSound {
       this.ambientGain = this.ctx.createGain();
       this.ambientGain.gain.value = 0.0001;
       this.ambientGain.connect(this.ctx.destination);
+
+      // The sound singleton lives for the page's lifetime; bind only once.
+      window.addEventListener("blur", this.syncFocus);
+      window.addEventListener("focus", this.syncFocus);
+      document.addEventListener("visibilitychange", this.syncFocus);
+      this.syncFocus();
     }
-    if (this.ctx.state === "suspended") {
+    if (this.ctx.state === "suspended" && this.isFocused()) {
       await this.ctx.resume();
     }
     await this.ensureAmbient();
@@ -135,7 +153,7 @@ class LabSound {
   }
 
   private play(name: SoundName): void {
-    if (this.muted || !this.ctx || !this.master) return;
+    if (this.muted || !this.ctx || !this.master || !this.isFocused()) return;
     const now = this.ctx.currentTime;
     // Fade master up quickly for the gesture, then it's left hot.
     this.master.gain.cancelScheduledValues(now);
