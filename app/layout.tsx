@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   description:
     "Founder and AI engineer in Kuala Lumpur and San Francisco. Nothing here means anything until you find the angle. " +
     "A scroll journey through one cloud of fragments.",
-  metadataBase: new URL("https://hongbing.dev"),
+  metadataBase: new URL("https://hong.build"),
   openGraph: {
     title: `${SITE.name} — ${SITE.title}`,
     description: "Nothing here means anything until you find the angle.",
