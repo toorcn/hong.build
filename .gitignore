@@ -26,3 +26,4 @@ next-env.d.ts
 /public/audio/candidates/
 
 node_modules/
+.wrangler/

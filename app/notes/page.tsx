@@ -39,7 +39,7 @@ export default function RunLogPage() {
     list.push(a);
     byYear.set(a.year, list);
   }
-  const years = [...byYear.keys()].sort((a, b) => b - a);
+  const years = [...byYear.keys()].sort((a, b) => a - b);
 
   const stats: readonly { n: number; k: string }[] = [
     { n: EVENT_COUNT, k: "entered" },
