@@ -14,6 +14,7 @@ import { join } from "node:path";
 import { AWARDS, CHAMPION_COUNT, EVENT_COUNT, NO_PLACEMENT_COUNT, PLACEMENT_COUNT } from "../content/awards";
 import { ABOUT_FACTS, NAV, PRINCIPLES, SITE } from "../content/site";
 import { getAllProjects } from "../lib/mdx";
+import { HACKMIT } from "../content/hackmit";
 
 const ORIGIN = "https://hong.build";
 const OUT = join(process.cwd(), "public", "agent");
@@ -36,6 +37,11 @@ const awardLine = (a: (typeof AWARDS)[number]) =>
   `- ${a.month} ${a.year} — ${a.event}: ${a.result ?? "entered, no placement"}${a.note ? ` (${a.note})` : ""}`;
 
 const files: Record<string, string> = {
+  "hackmit.md": page(
+    "/hackmit",
+    "HackMIT",
+    `# HackMIT / ${HACKMIT.name}\n\n${HACKMIT.description}\n\n${AWARDS.filter((a) => a.event === "HackMIT 2026").map(awardLine).join("\n")}\n\n## ${HACKMIT.question}\n\n${HACKMIT.sections.map((s) => `### ${s.title}\n\n${s.body}`).join("\n\n")}\n\n[Original story and photos](${HACKMIT.source})\n\n[All hackathons & competitions](${ORIGIN}/hackathons.md)`,
+  ),
   "index.md": page(
     "/",
     SITE.name,

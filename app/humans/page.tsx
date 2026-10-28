@@ -12,6 +12,7 @@ const PAGES = [
   { href: "/about", title: "About me", description: "The background, the day job, and the things I keep coming back to." },
   { href: "/process", title: "How I build", description: "The principles behind the work. Think, build, test, break, repeat." },
   { href: "/hackathons", title: "Hackathons & competitions", description: "Every event entered, and what happened along the way." },
+  { href: "/hackmit", title: "HackMIT", description: "A closer look at the HackMIT chapter." },
 ] as const;
 
 export default function HumansPage() {

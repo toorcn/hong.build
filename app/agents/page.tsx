@@ -25,6 +25,7 @@ export default function AgentsPage() {
     })),
     { path: "/process.md", note: "How I build" },
     { path: "/hackathons.md", note: "Hackathons & competitions, every event entered" },
+    { path: "/hackmit.md", note: "HackMIT / HARE project" },
     { path: "/contact.md", note: "Email and links" },
     { path: "/llms.txt", note: "Index for LLM crawlers" },
     { path: "/profile.json", note: "Structured profile and run log" },
