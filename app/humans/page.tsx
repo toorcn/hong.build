@@ -82,6 +82,10 @@ export default function HumansPage() {
                 <p className="mt-2 max-w-sm text-sm leading-relaxed text-type-dim">{page.description}</p>
               </Link>
             ))}
+            <a href="https://www.malaysian.ai/residents/hong-bing" className="focus-ring group border-t border-line py-6">
+              <h3 className="flex items-baseline justify-between gap-4 text-lg font-semibold text-type group-hover:text-accent">Malaysian AI <span aria-hidden="true">↗</span></h3>
+              <p className="mt-2 max-w-sm text-sm leading-relaxed text-type-dim">My resident profile on Malaysian AI.</p>
+            </a>
           </nav>
         </section>
 
