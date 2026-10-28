@@ -36,20 +36,20 @@ export type EntrancePhase =
   | "done";
 
 /**
- * Phase durations in ms. Total after download is ~2.5s, and every phase is
+ * Phase durations in ms. The full sequence takes about 4.8s after load, and every phase is
  * skippable — see ColdStart's skip gestures.
  */
 export const ENTRANCE_TIMING = {
-  boot: 120,
+  boot: 150,
   /** Floor on the load phase so a warm cache doesn't flash it. */
-  loadMin: 200,
-  arrival: 680,
-  wrong: 460,
-  snap: 920,
+  loadMin: 300,
+  arrival: 850,
+  wrong: 850,
+  snap: 1150,
   /** Resolved mark alone — chrome stays hidden through this beat. */
-  hold: 1100,
+  hold: 1450,
   /** No-WebGL path: the SVG wordmark wipes in over this instead of snapping. */
-  wipe: 760,
+  wipe: 950,
 } as const;
 
 /**
