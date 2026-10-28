@@ -39,7 +39,7 @@ export function Chrome() {
           <span className="block font-display text-lg font-black leading-none tracking-tight text-type">
             {SITE.shortName}
           </span>
-          <span className="mt-1 block font-mono text-[10px] uppercase tracking-[0.18em] text-type-faint transition-colors group-hover:text-accent">
+          <span className="mt-1 block max-w-[140px] font-mono text-[10px] uppercase tracking-[0.18em] text-type-faint transition-colors group-hover:text-accent sm:max-w-none">
             {SITE.title}
           </span>
         </Link>
@@ -47,6 +47,13 @@ export function Chrome() {
         {/* Whole chrome cluster stays behind entrance-hide so the cold start
             owns the frame — sound arrives with the rest of the app. */}
         <div className="entrance-hide pointer-events-auto flex items-center gap-4">
+          <Link
+            href="/humans"
+            aria-current={pathname === "/humans" ? "page" : undefined}
+            className="focus-ring whitespace-nowrap px-1 py-2 font-mono text-[11px] uppercase tracking-[0.12em] text-type-dim transition-colors hover:text-accent aria-[current=page]:text-accent sm:tracking-[0.18em]"
+          >
+            For humans
+          </Link>
           {onHome ? (
             <>
               <Link
