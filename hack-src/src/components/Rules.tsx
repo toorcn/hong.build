@@ -1,10 +1,18 @@
 import { frameworks, rules } from '../data/guide'
+import type { JSX } from 'react'
+import { DemoStack, EventTimeline, RubricGap } from './Diagrams'
 import Section, { SubHeading } from './Section'
+
+const figures: Record<string, () => JSX.Element> = {
+  'Rubric level 4 to 5': RubricGap,
+  'Demo resilience stack': DemoStack,
+}
 
 export default function Rules() {
   return (
     <Section
       id="rules"
+      art="rules"
       title="The short version"
       intro="Most teams lose before they start building. They skip the thinking, build too much, then try to explain a messy product in five minutes. If you remember nothing else, remember these."
     >
@@ -20,17 +28,22 @@ export default function Rules() {
           </li>
         ))}
       </ol>
+      <EventTimeline />
 
       <div className="mt-14">
         <SubHeading>Four frameworks</SubHeading>
         <div className="grid gap-px border border-line bg-line sm:grid-cols-2">
-          {frameworks.map((f) => (
-            <article key={f.title} className="bg-void p-6">
-              <h4 className="font-display text-lg font-bold tracking-tight text-type">{f.title}</h4>
-              <p className="mt-2 text-[15px] leading-relaxed text-type">{f.summary}</p>
-              <p className="mt-3 text-sm leading-relaxed text-type-dim">{f.detail}</p>
-            </article>
-          ))}
+          {frameworks.map((f) => {
+            const Figure = figures[f.title]
+            return (
+              <article key={f.title} className="bg-void p-6">
+                <h4 className="font-display text-lg font-bold tracking-tight text-type">{f.title}</h4>
+                <p className="mt-2 text-[15px] leading-relaxed text-type">{f.summary}</p>
+                <p className="mt-3 text-sm leading-relaxed text-type-dim">{f.detail}</p>
+                {Figure && <Figure />}
+              </article>
+            )
+          })}
         </div>
       </div>
 

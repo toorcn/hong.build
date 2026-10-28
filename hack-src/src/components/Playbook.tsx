@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { mostFrequentPattern, pitchPolishFramework, playbookData, type PlaybookItem } from '../data/playbook'
+import { PitchClock } from './Diagrams'
 import Section, { SubHeading } from './Section'
 
 export default function Playbook() {
   return (
     <Section
       id="playbook"
+      art="pitch"
       title="Pitch playbook"
       intro="The problems I saw again and again mentoring KitaHack 2025 finalists. Each one stands alone, so start with your weakest area."
     >
@@ -18,6 +20,7 @@ export default function Playbook() {
           </li>
         ))}
       </ol>
+      <PitchClock />
 
       <div className="mt-8 border-l-2 border-accent bg-void-raised px-5 py-5">
         <p className="label">Most common feedback</p>
