@@ -9,10 +9,11 @@ Hong Bing Sim builds interfaces where AI, design systems and code meet. Computer
 
 ## Facts
 
+- **role.founder**: Founder — building in stealth
 - **role.current**: AI engineering, API & console — YTL AI Labs
-- **role.research**: SWE, research lab — SF-based startup ($3.2M pre-seed)
-- **role.founder**: Founder — Tack (tack.im), real-time AI meeting moderator
+- **role.previous**: SWE, research lab — SF-based startup ($3.2M pre-seed)
+- **built**: Tack (tack.im), real-time AI meeting moderator
 - **study**: Computer science & psychology, Taylor's University
-- **community**: Co-founder & VP — AI Hackerdorm (500+ students, 19 campuses)
+- **community**: Co-founder & VP — AI Hackerdorm (4 chapters, 400+ members)
 - **side**: "Chief Reality Officer" — Polytera, seeded entirely by hackathon winnings
 - **graphics**: First Malaysian student showcase @ ACM SIGGRAPH Asia

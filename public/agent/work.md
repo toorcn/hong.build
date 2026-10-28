@@ -22,6 +22,6 @@ Full case study: https://hong.build/work/kiyokocon.md
 ### [AI Hackerdorm](https://hong.build/work/ai-hackerdorm)
 COMMUNITY · 2025 · Co-founder & vice-president
 
-A student-first builder community — 500+ students across 19 campuses. Co-organisers, Cursor × Anthropic Hackathon Malaysia 2025 ($410k USD).
+A student-first builder community — 4 chapters, 400+ members nationwide. Co-organiser, Cursor × Anthropic Hackathon Malaysia 2025 ($410k USD).
 
 Full case study: https://hong.build/work/ai-hackerdorm.md
