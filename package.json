@@ -5,7 +5,8 @@
   "description": "Hong Bing Sim — the Perception Lab. Nothing here means anything until you find the angle.",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "agent-docs": "tsx scripts/generate-agent-docs.ts",
+    "build": "npm run agent-docs && next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "fragments": "tsx scripts/generate-fragments.ts",

@@ -14,8 +14,9 @@ const json = (body: unknown, status = 200, headers: HeadersInit = {}) =>
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
-    const { pathname } = new URL(request.url);
-    if (pathname !== "/api/qa-votes") return env.ASSETS.fetch(request);
+    const url = new URL(request.url);
+    const { pathname } = url;
+    if (pathname !== "/api/qa-votes") return serveSite(request, env, url);
 
     try {
       if (request.method === "GET") return json(await getCounts(env));
@@ -27,6 +28,52 @@ export default {
     }
   },
 } satisfies ExportedHandler<Env>;
+
+/** Pages with a markdown twin in public/agent/ (see scripts/generate-agent-docs.ts). */
+function markdownAsset(pathname: string, wantsMarkdown: boolean): string | null {
+  if (pathname.endsWith(".md")) return `/agent${pathname}`;
+  if (!wantsMarkdown || /\.[a-z0-9]+$/i.test(pathname)) return null;
+  const clean = pathname.replace(/\/+$/, "");
+  return `/agent/${clean === "" ? "index" : clean.slice(1)}.md`;
+}
+
+/** True when the client asks for markdown ahead of HTML (or HTML isn't listed). */
+function prefersMarkdown(accept: string | null): boolean {
+  if (!accept) return false;
+  const md = accept.indexOf("text/markdown");
+  if (md === -1) return false;
+  const html = accept.indexOf("text/html");
+  return html === -1 || md < html;
+}
+
+async function serveSite(request: Request, env: Env, url: URL): Promise<Response> {
+  const readOnly = request.method === "GET" || request.method === "HEAD";
+  const accept = request.headers.get("accept");
+  const target = readOnly ? markdownAsset(url.pathname, prefersMarkdown(accept)) : null;
+
+  if (target) {
+    const doc = await env.ASSETS.fetch(new Request(new URL(target, url), request));
+    if (doc.ok) {
+      const headers = new Headers(doc.headers);
+      headers.set("Content-Type", "text/markdown; charset=utf-8");
+      headers.set("Vary", "Accept");
+      headers.set("Cache-Control", "public, max-age=300");
+      return new Response(doc.body, { status: 200, headers });
+    }
+  }
+
+  const res = await env.ASSETS.fetch(request);
+  const type = res.headers.get("content-type") ?? "";
+  if (!readOnly || !type.includes("text/html")) return res;
+
+  // Advertise the agent surface on every HTML page, and keep caches honest
+  // about the Accept-based switch above.
+  const headers = new Headers(res.headers);
+  headers.append("Vary", "Accept");
+  headers.append("Link", '</llms.txt>; rel="alternate"; type="text/plain"');
+  headers.append("Link", '</profile.json>; rel="alternate"; type="application/json"');
+  return new Response(res.body, { status: res.status, statusText: res.statusText, headers });
+}
 
 class HttpError extends Error {
   constructor(
