@@ -330,6 +330,7 @@ export function beatForRoute(pathname: string | null | undefined): number | null
   // Callers inside drei's <Html> get a null pathname when the router context
   // hasn't been bridged, and a crash there takes the whole Canvas subtree out.
   if (!pathname) return null;
+  if (pathname === "/guestbook/orbit-live" || pathname === "/guestbook/press-live") return BEAT_COUNT - 1;
   let best: Beat | null = null;
   for (const b of BEATS) {
     if (!b.route) continue;

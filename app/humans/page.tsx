@@ -91,6 +91,7 @@ export default function HumansPage() {
         </section>
 
         <section id="contact" aria-labelledby="contact-title" className="mt-12 scroll-mt-28 border-t border-line pt-10 sm:mt-16">
+          <Link href="/guestbook/sign" className="focus-ring mb-6 inline-block text-accent">Leave a little hello in the guestbook ↗</Link>
           <h2 id="contact-title" className="font-display text-3xl font-bold tracking-tight text-type">Say hello.</h2>
           <a href={`mailto:${SITE.email}`} className="focus-ring mt-5 inline-block break-all text-2xl text-accent underline decoration-accent/30 underline-offset-8 hover:decoration-accent">{SITE.email}</a>
           <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2">
