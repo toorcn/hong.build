@@ -30,6 +30,21 @@ export default function Stack() {
                     <span className="font-medium text-type">{item.name}</span>
                   )}{' '}
                   — {item.description}
+                  {item.links && (
+                    <span className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+                      {item.links.map((l) => (
+                        <a
+                          key={l.url}
+                          href={l.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="focus-ring font-mono text-[11px] uppercase tracking-[0.14em] text-accent-dim transition-colors hover:text-accent"
+                        >
+                          {l.label} ↗
+                        </a>
+                      ))}
+                    </span>
+                  )}
                 </p>
               ))}
             </dd>
