@@ -82,7 +82,7 @@ export function Chrome() {
         </div>
       </div>
 
-      {onHome && <Link href="/guestbook/sign" className="entrance-hide focus-ring pointer-events-auto fixed bottom-28 left-5 z-30 flex items-center gap-3 rounded-full border border-accent/40 bg-void/90 px-5 py-3 text-sm text-type backdrop-blur transition-colors hover:border-accent hover:text-accent sm:bottom-7 sm:left-8"><span aria-hidden="true">✦</span> Sign my guestbook <span aria-hidden="true">↗</span></Link>}
+      {onHome && <Link href="/guestbook/sign" className="entrance-hide focus-ring pointer-events-auto fixed bottom-28 left-5 z-30 hidden items-center gap-3 rounded-full border border-accent/40 bg-void/90 px-5 py-3 text-sm text-type backdrop-blur transition-colors hover:border-accent hover:text-accent sm:bottom-7 sm:left-8 sm:flex"><span aria-hidden="true">✦</span> Sign my guestbook <span aria-hidden="true">↗</span></Link>}
 
       {/* Mobile chapter strip — bottom, only on the journey. Eleven evenly
           spaced dots would be an unreadable, untappable row, so this is the
@@ -95,11 +95,16 @@ export function Chrome() {
           style={{ "--reveal-delay": "120ms" } as React.CSSProperties}
           className="entrance-hide pointer-events-auto fixed inset-x-0 bottom-0 z-20 border-t border-line bg-void/85 px-5 pb-3 pt-2 backdrop-blur sm:hidden"
         >
-          <p className="mb-1 text-center font-mono text-[9px] uppercase tracking-[0.2em] text-type-faint">
-            <span className="text-accent">{active?.year}</span>
-            <span className="mx-2 text-line">/</span>
-            {active?.label}
-          </p>
+          <div className="mb-1 flex min-h-11 items-center justify-between gap-3">
+            <p className="min-w-0 font-mono text-[9px] uppercase tracking-[0.2em] text-type-faint">
+              <span className="text-accent">{active?.year}</span>
+              <span className="mx-2 text-line">/</span>
+              {active?.label}
+            </p>
+            <Link href="/guestbook/sign" className="focus-ring flex min-h-11 shrink-0 items-center gap-1.5 font-mono text-[10px] text-accent">
+              <span aria-hidden="true">✦</span> Sign my guestbook <span aria-hidden="true">↗</span>
+            </Link>
+          </div>
           <div className="relative h-7">
             <div aria-hidden className="absolute inset-x-0 top-1/2 h-px bg-line" />
             <div
