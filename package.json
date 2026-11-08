@@ -14,7 +14,7 @@
     "verify:entrance": "node scripts/verify-cold-start.mjs",
     "verify:cursor": "node scripts/cursor-checks.mjs",
     "shots:walk": "node scripts/walk-shots.mjs",
-    "test:worker": "vitest run --config vitest.config.ts",
+    "test:worker": "vitest run --config vitest.config.mts",
     "typecheck:worker": "tsc -p worker/tsconfig.json",
     "events:build": "npm --prefix events-src run build"
   },

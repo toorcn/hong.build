@@ -35,6 +35,19 @@ describe("parseIso", () => {
     expect(parseIso("2026-11-11T19:00")).toBe(Date.parse("2026-11-11T11:00:00Z") / 1000);
   });
 
+  it("rejects impossible calendar dates instead of rolling them over", () => {
+    expect(parseIso("2026-02-30T19:00:00+08:00")).toBeNull();
+    expect(parseIso("2026-02-29T19:00:00+08:00")).toBeNull();
+    expect(parseIso("2026-11-31T19:00")).toBeNull();
+    expect(parseIso("2026-11-11T24:00")).toBeNull();
+    expect(parseIso("2026-11-11T19:60")).toBeNull();
+    expect(parseIso("2026-11-11T19:00:60+08:00")).toBeNull();
+  });
+
+  it("accepts a real leap day", () => {
+    expect(parseIso("2028-02-29T10:00:00+08:00")).toBe(Date.parse("2028-02-29T02:00:00Z") / 1000);
+  });
+
   it("rejects things that are not ISO date-times", () => {
     expect(parseIso("tomorrow 7pm")).toBeNull();
     expect(parseIso("2026-11-11")).toBeNull();
