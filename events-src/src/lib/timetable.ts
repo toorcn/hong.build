@@ -1,4 +1,5 @@
 import type { PublicEvent } from "../types";
+import { isActive } from "./status";
 import { mytDateKey } from "./time";
 
 export interface Day {
@@ -16,6 +17,8 @@ export function buildTimetable(events: PublicEvent[], nowMs: number): Day[] {
   const today = mytDateKey(nowMs);
   const days = new Map<string, PublicEvent[]>([[today, []]]);
   for (const e of events) {
+    // Earlier-dated events stay only while they are still running or open; finished ones are dropped.
+    if (e.date < today && !isActive(e, nowMs)) continue;
     const key = e.date < today ? today : e.date;
     const list = days.get(key) ?? [];
     list.push(e);
