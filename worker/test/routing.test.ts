@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import worker from "../index";
-import { makeEnv } from "./helpers/events";
+import { ev, makeEnv } from "./helpers/events";
 
 function env() {
   const assets = {
@@ -47,6 +47,33 @@ describe("events routing", () => {
     expect(getIngest.headers.get("allow")).toBe("POST");
     const postApi = await call("https://events.hong.build/api/events", { method: "POST" });
     expect(postApi.status).toBe(405);
+  });
+
+  it("accepts an authenticated ingest push", async () => {
+    const start = new Date(Date.now() + 30 * 86400_000).toISOString();
+    const res = await call("https://events.hong.build/api/events/ingest", {
+      method: "POST",
+      headers: { authorization: "Bearer test-token", "content-type": "application/json" },
+      body: JSON.stringify({ events: [ev(1, { start, date_text: undefined })] }),
+    });
+    expect(res.status).toBe(200);
+    expect((await res.json() as { added: number }).added).toBe(1);
+  });
+
+  it("serves the subscription feed at /events.ics", async () => {
+    const res = await call("https://hong.build/events.ics");
+    expect(res.headers.get("content-type")).toMatch(/^text\/calendar/);
+  });
+
+  it("404s an unknown single-event calendar file", async () => {
+    const res = await call("https://hong.build/e/ffffffffffffffff.ics");
+    expect(res.status).toBe(404);
+  });
+
+  it("answers the API on the events subdomain", async () => {
+    const res = await call("https://events.hong.build/api/events");
+    expect(res.status).toBe(200);
+    expect(Array.isArray(((await res.json()) as { events: unknown }).events)).toBe(true);
   });
 
   it("leaves the main site alone", async () => {

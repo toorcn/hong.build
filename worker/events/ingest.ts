@@ -6,7 +6,7 @@ import type { NormalizedEvent } from "./types";
 const MAX_BYTES = 1_000_000;
 const MAX_EVENTS = 1000;
 const PRUNE_AFTER_S = 30 * DAY_S;
-const BATCH = 50;
+const ID_CHUNK = 90; // bound parameters per UPDATE stay well under D1's limit
 
 export interface IngestReport {
   dry_run: boolean;
@@ -38,21 +38,26 @@ async function authorized(request: Request, token: string | undefined): Promise<
   return diff === 0 && given.length > 0;
 }
 
-async function logIngest(
-  env: EventsEnv,
-  entry: { at: number; source: string | null; status: LogStatus; dryRun: boolean; counts?: Omit<IngestReport, "dry_run" | "rejected" | "warnings"> & { rejected: number }; detail: unknown },
-) {
+type LogEntry = {
+  at: number;
+  source: string | null;
+  status: LogStatus;
+  dryRun: boolean;
+  counts?: Omit<IngestReport, "dry_run" | "rejected" | "warnings"> & { rejected: number };
+  detail: unknown;
+};
+
+/** The ingest-log INSERT as a statement, so a push can include it in its atomic batch. */
+function ingestLog(env: EventsEnv, entry: LogEntry): D1PreparedStatement {
   const c = entry.counts ?? { received: 0, added: 0, updated: 0, removed: 0, rejected: 0 };
-  await env.DB.prepare(
+  return env.DB.prepare(
     `INSERT INTO event_ingests (at, source, status, dry_run, received, added, updated, removed, rejected, detail)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-  )
-    .bind(entry.at, entry.source, entry.status, entry.dryRun ? 1 : 0, c.received, c.added, c.updated, c.removed, c.rejected, JSON.stringify(entry.detail))
-    .run();
+  ).bind(entry.at, entry.source, entry.status, entry.dryRun ? 1 : 0, c.received, c.added, c.updated, c.removed, c.rejected, JSON.stringify(entry.detail));
 }
 
 async function invalid(env: EventsEnv, nowMs: number, status: number, error: string, source: string | null = null) {
-  await logIngest(env, { at: nowMs, source, status: "invalid", dryRun: false, detail: { error } });
+  await ingestLog(env, { at: nowMs, source, status: "invalid", dryRun: false, detail: { error } }).run();
   return json({ error }, status);
 }
 
@@ -131,35 +136,43 @@ export async function handleIngest(request: Request, env: EventsEnv, nowMs = Dat
 
   const shrinking = events.length === 0 || (visibleIds.size >= 4 && acceptedUpcoming < visibleIds.size * 0.5);
   if (shrinking && b.allow_shrink !== true) {
-    await logIngest(env, {
+    await ingestLog(env, {
       at: nowMs, source, status: "shrink_guard", dryRun,
       counts: { received: b.events.length, added: 0, updated: 0, removed: 0, rejected: rejected.length },
       detail: { rejected, warnings, current: visibleIds.size, accepted: acceptedUpcoming },
-    });
+    }).run();
     return json({ error: "shrink_guard", current: visibleIds.size, accepted: acceptedUpcoming }, 409);
   }
 
   const existing = await env.DB.prepare("SELECT id FROM events").all<{ id: string }>();
   const existingIds = new Set(existing.results.map((r) => r.id));
   const added = events.filter((e) => !existingIds.has(e.id)).length;
-  const removed = [...visibleIds].filter((id) => !accepted.has(id)).length;
+  // Hide by id, not by timestamp, so two pushes sharing a clock reading still behave.
+  const toRemove = [...visibleIds].filter((id) => !accepted.has(id));
+  const removed = toRemove.length;
   const report: IngestReport = {
     dry_run: dryRun, received: b.events.length, added, updated: events.length - added, removed, rejected, warnings,
   };
+  const counts = { received: report.received, added, updated: report.updated, removed, rejected: rejected.length };
+  const log = ingestLog(env, {
+    at: nowMs, source, status: dryRun ? "dry_run" : "ok", dryRun, counts, detail: { rejected, warnings },
+  });
 
-  if (!dryRun) {
-    const statements = events.map((e) => upsert(env.DB, e, nowMs));
-    for (let i = 0; i < statements.length; i += BATCH) await env.DB.batch(statements.slice(i, i + BATCH));
-    await env.DB.batch([
-      env.DB.prepare("UPDATE events SET removed = 1 WHERE removed = 0 AND start_at >= ? AND last_seen < ?").bind(todayStart, nowMs),
-      env.DB.prepare("DELETE FROM events WHERE start_at < ?").bind(nowS - PRUNE_AFTER_S),
-    ]);
+  if (dryRun) {
+    await log.run();
+    return json(report);
   }
 
-  await logIngest(env, {
-    at: nowMs, source, status: dryRun ? "dry_run" : "ok", dryRun,
-    counts: { received: report.received, added, updated: report.updated, removed, rejected: rejected.length },
-    detail: { rejected, warnings },
-  });
+  // One batch is one transaction on D1: the whole push lands or nothing does.
+  const statements: D1PreparedStatement[] = events.map((e) => upsert(env.DB, e, nowMs));
+  for (let i = 0; i < toRemove.length; i += ID_CHUNK) {
+    const chunk = toRemove.slice(i, i + ID_CHUNK);
+    statements.push(
+      env.DB.prepare(`UPDATE events SET removed = 1 WHERE id IN (${chunk.map(() => "?").join(", ")})`).bind(...chunk),
+    );
+  }
+  statements.push(env.DB.prepare("DELETE FROM events WHERE COALESCE(end_at, start_at) < ?").bind(nowS - PRUNE_AFTER_S));
+  statements.push(log);
+  await env.DB.batch(statements);
   return json(report);
 }
