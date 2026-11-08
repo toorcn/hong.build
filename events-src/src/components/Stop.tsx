@@ -3,6 +3,7 @@ import { LINES } from "../lib/lines";
 import { eventStatus } from "../lib/status";
 import { timeLabel } from "../lib/time";
 import type { PublicEvent } from "../types";
+import { Icon } from "./Icon";
 
 interface Props {
   event: PublicEvent;
@@ -31,7 +32,7 @@ export function Stop({ event, now, kept, branch, onOpen }: Props) {
       data-event-id={event.id}
     >
       {status.kind === "live" && <i className="pulse" aria-hidden="true" />}
-      {kept && <em className="kb" aria-label="kept">🎟</em>}
+      {kept && <Icon name="bookmark" size={12} className="kb filled" aria-label="kept" aria-hidden={false} role="img" />}
       <b>{event.name}</b>
       <span>
         {event.place_tag && <i className={`rg ${tagClass(event)}`}>{event.place_tag}</i>}

@@ -2,6 +2,7 @@ import { useEffect, useRef, type CSSProperties } from "react";
 import { LINES } from "../lib/lines";
 import { dayShort, timeLabel } from "../lib/time";
 import type { PublicEvent } from "../types";
+import { Icon } from "./Icon";
 
 /** The server refuses plan.ics requests for more tickets than this. */
 const MAX_EXPORT = 200;
@@ -18,7 +19,7 @@ export function Wallet({ events, onOpen }: Props) {
   }, []);
   return (
     <div className="wl" data-testid="wallet">
-      <h2 ref={heading} tabIndex={-1}>🎟 My Journey</h2>
+      <h2 ref={heading} tabIndex={-1}><Icon name="ticket" size={16} /> My Journey</h2>
       {events.length === 0 ? (
         <p className="wl-empty">No tickets yet. Tap a station and press <b>Keep</b>.</p>
       ) : (

@@ -47,7 +47,7 @@ test.describe("on a long timetable", () => {
   test("Back to now appears after scrolling away and returns to today", async ({ page }) => {
     await page.goto("./");
     await page.locator(".tx-map").evaluate((el) => el.scrollTo({ top: 600 }));
-    const back = page.getByRole("button", { name: "↑ Back to now" });
+    const back = page.getByRole("button", { name: "Back to now" });
     await expect(back).toBeVisible();
     await back.click();
     await expect(page.getByTestId("pids")).toContainText("NOW · SAT 7 NOV");

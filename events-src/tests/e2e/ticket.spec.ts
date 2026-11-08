@@ -21,8 +21,8 @@ test("a station opens its ticket with sign-up and calendar links", async ({ page
   const ticket = page.getByTestId("ticket");
   await expect(ticket).toContainText("AI LINE");
   await expect(ticket.getByRole("heading", { name: "AI Tinker Night" })).toBeFocused();
-  await expect(ticket.getByRole("link", { name: "Sign up ↗" })).toHaveAttribute("href", "https://luma.com/tinker");
-  await expect(ticket.getByRole("link", { name: "+ Calendar" })).toHaveAttribute("href", "/e/a000000000000004.ics");
+  await expect(ticket.getByRole("link", { name: "Sign up" })).toHaveAttribute("href", "https://luma.com/tinker");
+  await expect(ticket.getByRole("link", { name: "Calendar" })).toHaveAttribute("href", "/e/a000000000000004.ics");
   await expect(page).toHaveURL(/#e=a000000000000004$/);
 });
 
@@ -42,7 +42,7 @@ test("kept tickets are stamped, counted, remembered and exportable", async ({ pa
   const stop = page.getByRole("button", { name: /AI Tinker Night/ });
   await centre(stop);
   await stop.click();
-  await page.getByRole("button", { name: "🎟 Keep" }).click();
+  await page.getByRole("button", { name: "Keep" }).click();
   await expect(page.getByTestId("ticket")).toHaveClass(/kept/);
   await expect(page.getByRole("button", { name: "My Journey, 1 kept" })).toBeVisible();
   await page.keyboard.press("Escape");

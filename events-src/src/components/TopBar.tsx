@@ -1,3 +1,5 @@
+import { Icon } from "./Icon";
+
 interface Props {
   night: boolean;
   sound: boolean;
@@ -20,10 +22,11 @@ export function TopBar({ night, sound, keptCount, bump, onNight, onSound, onWall
         </div>
       </div>
       <div className="tx-icons">
-        <button type="button" onClick={onNight} aria-pressed={night} aria-label="Night service">{night ? "☀️" : "🌙"}</button>
-        <button type="button" onClick={onSound} aria-pressed={sound} aria-label="Station chime">{sound ? "🔔" : "🔇"}</button>
+        <button type="button" onClick={onNight} aria-pressed={night} aria-label="Night service"><Icon name={night ? "sun" : "moon"} /></button>
+        <button type="button" onClick={onSound} aria-pressed={sound} aria-label="Station chime"><Icon name={sound ? "bell" : "bell-off"} /></button>
         <button key={bump} type="button" className={bump ? "bump" : undefined} onClick={onWallet} aria-label={`My Journey, ${keptCount} kept`}>
-          🎟 <span>{keptCount}</span>
+          <Icon name="ticket" />
+          <span>{keptCount}</span>
         </button>
       </div>
     </header>
