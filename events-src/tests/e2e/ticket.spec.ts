@@ -88,3 +88,41 @@ test("desktop shows the ticket beside the line and can copy a link", async ({ pa
   await expect(page.getByRole("status", { name: "Notification" })).toHaveText("Link copied");
   expect(await page.evaluate(() => navigator.clipboard.readText())).toBe("https://events.hong.build/#e=a000000000000003");
 });
+
+test("the phone sheet traps focus and hands it back on Escape", async ({ page }, info) => {
+  test.skip(info.project.name !== "phone", "phone sheet only");
+  await page.goto("./");
+  const stop = page.getByRole("button", { name: /AI Tinker Night/ });
+  await centre(stop);
+  await stop.click();
+  const inDialog = () => page.evaluate(() => !!document.activeElement?.closest('[role="dialog"]'));
+  for (let i = 0; i < 6; i++) {
+    await page.keyboard.press("Tab");
+    expect(await inDialog()).toBe(true);
+  }
+  for (let i = 0; i < 6; i++) {
+    await page.keyboard.press("Shift+Tab");
+    expect(await inDialog()).toBe(true);
+  }
+  await page.keyboard.press("Escape");
+  await expect(stop).toBeFocused();
+});
+
+test("a failed copy says so", async ({ page }, info) => {
+  test.skip(info.project.name !== "desktop", "desktop layout only");
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "share", { value: undefined, configurable: true });
+    Object.defineProperty(navigator, "clipboard", { value: { writeText: () => Promise.reject(new Error("denied")) }, configurable: true });
+  });
+  await page.goto("./");
+  await page.getByRole("button", { name: /Builders Demo Night/ }).click();
+  await page.getByRole("button", { name: "Share this event" }).click();
+  await expect(page.getByRole("status", { name: "Notification" })).toHaveText("Couldn't copy the link");
+});
+
+test("the chime preference survives a reload", async ({ page }) => {
+  await page.goto("./");
+  await page.getByRole("button", { name: "Station chime" }).click();
+  await page.reload();
+  await expect(page.getByRole("button", { name: "Station chime" })).toHaveAttribute("aria-pressed", "true");
+});
