@@ -10,6 +10,7 @@ const extra = Array.from({ length: 12 }, (_, i) => {
 test("arrow keys move the train a day at a time", async ({ page }) => {
   await page.goto("./");
   const train = page.getByRole("slider", { name: "Train: choose a day" });
+  await expect(train).toHaveAttribute("aria-orientation", "vertical");
   await train.focus();
   await page.keyboard.press("ArrowDown");
   await expect(page.getByTestId("pids")).toContainText("STATION · MON 9 NOV");

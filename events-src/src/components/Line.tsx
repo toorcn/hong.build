@@ -123,6 +123,7 @@ export function Line({
           className={`tx-train${dragY !== null ? " drag" : ""}${used ? " used" : ""}`}
           style={{ top: dragY ?? restY, ...(placed ? null : { transition: "none" }) }}
           role="slider"
+          aria-orientation="vertical"
           tabIndex={0}
           aria-label="Train: choose a day"
           aria-valuemin={0}

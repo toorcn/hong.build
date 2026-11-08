@@ -1,4 +1,17 @@
+import { fixture } from "./fixture";
 import { centre, expect, test } from "./setup";
+
+/** n extra meetups across December, all kept, so the wallet is long. */
+function many(n: number) {
+  const events = Array.from({ length: n }, (_, i) => {
+    const day = String((i % 28) + 1).padStart(2, "0");
+    return { ...fixture.events[3]!, id: `c${String(i).padStart(15, "0")}`, name: `Kept Meetup ${i + 1}`, date: `2026-12-${day}`, start: `2026-12-${day}T11:00:00.000Z` };
+  });
+  return { events, ids: events.map((e) => e.id) };
+}
+const lots = many(40);
+const tooMany = many(201);
+
 
 test("a station opens its ticket with sign-up and calendar links", async ({ page }) => {
   await page.goto("./");
@@ -168,4 +181,37 @@ test("a share that fails for another reason falls back to copying the link", asy
   expect(await page.evaluate(() => (window as unknown as { __copied: string[] }).__copied)).toEqual([
     "https://events.hong.build/#e=a000000000000003",
   ]);
+});
+
+test.describe("a long wallet", () => {
+  test.use({ timetable: { ...fixture, events: [...fixture.events, ...lots.events] } });
+  test("scrolls inside the phone sheet so the last ticket can be reached", async ({ page }, info) => {
+    test.skip(info.project.name !== "phone", "phone sheet only");
+    await page.addInitScript((ids) => localStorage.setItem("builderline.kept", JSON.stringify(ids)), lots.ids);
+    await page.goto("./");
+    await page.getByRole("button", { name: "My Journey, 40 kept" }).click();
+    const wallet = page.getByTestId("wallet");
+    const last = wallet.getByRole("button", { name: /Kept Meetup 40/ });
+    await last.scrollIntoViewIfNeeded();
+    const sheet = page.locator(".tx-sheet");
+    const box = (await sheet.boundingBox())!;
+    const viewport = page.viewportSize()!;
+    expect(box.y).toBeGreaterThanOrEqual(0);
+    expect(box.y + box.height).toBeLessThanOrEqual(viewport.height);
+    await last.click();
+    await expect(page.getByTestId("ticket")).toContainText("Kept Meetup 40");
+  });
+});
+
+test.describe("an oversized wallet", () => {
+  test.use({ timetable: { ...fixture, events: [...fixture.events, ...tooMany.events] } });
+  test("offers the subscription instead of a calendar file the server would refuse", async ({ page }) => {
+    await page.addInitScript((ids) => localStorage.setItem("builderline.kept", JSON.stringify(ids)), tooMany.ids);
+    await page.goto("./");
+    await page.getByRole("button", { name: "My Journey, 201 kept" }).click();
+    const wallet = page.getByTestId("wallet");
+    await expect(wallet.getByRole("link", { name: /^Add \d+ to my calendar/ })).toHaveCount(0);
+    await expect(wallet).toContainText("Too many to export in one file");
+    await expect(wallet.getByRole("link", { name: "Subscribe to the whole line" })).toBeVisible();
+  });
 });
