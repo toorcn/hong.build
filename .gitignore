@@ -27,3 +27,6 @@ next-env.d.ts
 
 node_modules/
 .wrangler/
+
+# brainstorm companion mockups
+.superpowers/
