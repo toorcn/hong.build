@@ -45,6 +45,8 @@
   "exclude": [
     "node_modules",
     "hack-src",
-    "worker"
+    "events-src",
+    "worker",
+    "docs"
   ]
 }

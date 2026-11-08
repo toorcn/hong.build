@@ -16,7 +16,10 @@
     "verify:cursor": "node scripts/cursor-checks.mjs",
     "shots:walk": "node scripts/walk-shots.mjs",
     "check:walk": "tsx scripts/render-walk-checks.ts",
-    "readme:art": "node scripts/generate-readme-art.mjs"
+    "readme:art": "node scripts/generate-readme-art.mjs",
+    "test:worker": "vitest run --config vitest.config.ts",
+    "typecheck:worker": "tsc -p worker/tsconfig.json",
+    "events:build": "npm --prefix events-src run build"
   },
   "repository": {
     "type": "git",
@@ -42,6 +45,7 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260702.1",
     "@next/mdx": "^16.3.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^26.1.2",
@@ -55,6 +59,7 @@
     "tailwindcss": "^4.3.3",
     "tsx": "^4.23.6",
     "typescript": "^7.0.2",
+    "vitest": "^4.1.12",
     "wrangler": "^4.154.0"
   },
   "engines": {

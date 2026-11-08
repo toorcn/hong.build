@@ -39,3 +39,6 @@ next-env.d.ts
 
 # brainstorm companion mockups
 .superpowers/
+
+# local Worker secrets for `wrangler dev`
+.dev.vars
