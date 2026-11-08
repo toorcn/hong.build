@@ -151,3 +151,24 @@ describe("POST /api/events/ingest", () => {
     expect(env.DB.raw.prepare("SELECT COUNT(*) AS n FROM event_ingests WHERE status = 'ok'").get()).toEqual({ n: 0 });
   });
 });
+
+describe("batch size", () => {
+  it("lands a 1000-event push in at most 6 statements", async () => {
+    const env = makeEnv();
+    const sizes: number[] = [];
+    const batch = env.DB.batch.bind(env.DB);
+    env.DB.batch = (async (statements: unknown[]) => {
+      sizes.push(statements.length);
+      return batch(statements as never);
+    }) as typeof env.DB.batch;
+    const events = Array.from({ length: 1000 }, (_, i) => ev(i));
+    const res = await ingest(env, { events });
+    expect(res.status).toBe(200);
+    expect(rows(env)).toHaveLength(1000);
+    // second push removes some and updates the rest
+    await ingest(env, { events: events.slice(0, 600) });
+    expect(rows(env).filter((r) => r.removed === 1)).toHaveLength(400);
+    expect(sizes).toHaveLength(2);
+    for (const n of sizes) expect(n).toBeLessThanOrEqual(6);
+  });
+});

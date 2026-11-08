@@ -39,6 +39,20 @@ describe("GET /api/events", () => {
   });
 });
 
+describe("running events", () => {
+  it("keeps a timed event with no end that started before midnight, until the day after", async () => {
+    const env = makeEnv();
+    // Fri 6 Nov 23:30 MYT (15:30Z)
+    await ingest(env, { events: [ev(1, { start: "2026-11-06T23:30:00+08:00" }), ev(2)] });
+    const names = async (iso: string) =>
+      ((await (await handleEventsApi(env, Date.parse(iso))).json()) as EventsResponse).events.map((e) => e.name);
+    // Sat 00:30 MYT: still running for the client's 3 h window
+    expect(await names("2026-11-06T16:30:00Z")).toContain("Event 1");
+    // Sun 00:30 MYT: long over
+    expect(await names("2026-11-07T16:30:00Z")).not.toContain("Event 1");
+  });
+});
+
 describe("calendar endpoints", () => {
   it("serves the subscription feed", async () => {
     const env = await seeded();
@@ -67,6 +81,19 @@ describe("calendar endpoints", () => {
     expect(res.status).toBe(200);
     expect((await res.text()).match(/BEGIN:VEVENT/g)).toHaveLength(2);
     const bad = await handlePlanIcs(new URL("https://events.hong.build/api/events/plan.ics?ids=nope"), env, NOW);
+    expect(bad.status).toBe(400);
+  });
+
+  it("accepts up to 200 ids and rejects more with 400", async () => {
+    const env = await seeded();
+    const body = (await (await handleEventsApi(env, NOW)).json()) as EventsResponse;
+    const real = body.events.map((e) => e.id);
+    const filler = Array.from({ length: 198 }, (_, i) => i.toString(16).padStart(16, "0"));
+    const ok = await handlePlanIcs(new URL(`https://events.hong.build/api/events/plan.ics?ids=${[...real, ...filler].join(",")}`), env, NOW);
+    expect(ok.status).toBe(200);
+    expect((await ok.text()).match(/BEGIN:VEVENT/g)).toHaveLength(2);
+    const more = Array.from({ length: 201 }, (_, i) => i.toString(16).padStart(16, "0"));
+    const bad = await handlePlanIcs(new URL(`https://events.hong.build/api/events/plan.ics?ids=${more.join(",")}`), env, NOW);
     expect(bad.status).toBe(400);
   });
 });

@@ -6,7 +6,6 @@ import type { NormalizedEvent } from "./types";
 const MAX_BYTES = 1_000_000;
 const MAX_EVENTS = 1000;
 const PRUNE_AFTER_S = 30 * DAY_S;
-const ID_CHUNK = 90; // bound parameters per UPDATE stay well under D1's limit
 
 export interface IngestReport {
   dry_run: boolean;
@@ -61,12 +60,21 @@ async function invalid(env: EventsEnv, nowMs: number, status: number, error: str
   return json({ error }, status);
 }
 
-function upsert(db: D1Database, e: NormalizedEvent, nowMs: number) {
+/** Every upsert in ONE statement over a JSON parameter: D1 counts each statement against its per-invocation query limit. */
+function upsertAll(db: D1Database, events: NormalizedEvent[], nowMs: number) {
+  const rows = events.map((e) => ({
+    id: e.id, name: e.name, start_at: e.startAt, end_at: e.endAt, all_day: e.allDay ? 1 : 0, date_local: e.dateLocal,
+    region: e.region, place_tag: e.placeTag, topic: e.topic, kind: e.kind, location_text: e.locationText,
+    signup_url: e.signupUrl, organizer: e.organizer, price: e.price, image_url: e.imageUrl, raw: e.raw,
+  }));
+  const col = (name: string) => `json_extract(value, '$.${name}')`;
   return db
     .prepare(
       `INSERT INTO events (id, name, start_at, end_at, all_day, date_local, region, place_tag, topic, kind,
          location_text, signup_url, organizer, price, image_url, raw, first_seen, last_seen, removed)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
+       SELECT ${["id", "name", "start_at", "end_at", "all_day", "date_local", "region", "place_tag", "topic", "kind",
+         "location_text", "signup_url", "organizer", "price", "image_url", "raw"].map(col).join(", ")}, ?, ?, 0
+       FROM json_each(?) WHERE true
        ON CONFLICT(id) DO UPDATE SET
          name = excluded.name, start_at = excluded.start_at, end_at = excluded.end_at,
          all_day = excluded.all_day, date_local = excluded.date_local, region = excluded.region,
@@ -75,10 +83,7 @@ function upsert(db: D1Database, e: NormalizedEvent, nowMs: number) {
          organizer = excluded.organizer, price = excluded.price, image_url = excluded.image_url,
          raw = excluded.raw, last_seen = excluded.last_seen, removed = 0`,
     )
-    .bind(
-      e.id, e.name, e.startAt, e.endAt, e.allDay ? 1 : 0, e.dateLocal, e.region, e.placeTag, e.topic, e.kind,
-      e.locationText, e.signupUrl, e.organizer, e.price, e.imageUrl, e.raw, nowMs, nowMs,
-    );
+    .bind(nowMs, nowMs, JSON.stringify(rows));
 }
 
 function signupOf(raw: unknown): string | null {
@@ -164,11 +169,11 @@ export async function handleIngest(request: Request, env: EventsEnv, nowMs = Dat
   }
 
   // One batch is one transaction on D1: the whole push lands or nothing does.
-  const statements: D1PreparedStatement[] = events.map((e) => upsert(env.DB, e, nowMs));
-  for (let i = 0; i < toRemove.length; i += ID_CHUNK) {
-    const chunk = toRemove.slice(i, i + ID_CHUNK);
+  const statements: D1PreparedStatement[] = [];
+  if (events.length > 0) statements.push(upsertAll(env.DB, events, nowMs));
+  if (toRemove.length > 0) {
     statements.push(
-      env.DB.prepare(`UPDATE events SET removed = 1 WHERE id IN (${chunk.map(() => "?").join(", ")})`).bind(...chunk),
+      env.DB.prepare("UPDATE events SET removed = 1 WHERE id IN (SELECT value FROM json_each(?))").bind(JSON.stringify(toRemove)),
     );
   }
   statements.push(env.DB.prepare("DELETE FROM events WHERE COALESCE(end_at, start_at) < ?").bind(nowS - PRUNE_AFTER_S));

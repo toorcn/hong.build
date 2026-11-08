@@ -32,6 +32,7 @@ export function foldLine(line: string): string {
 
 const utc = (ms: number) => new Date(ms).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
 const compactDate = (date: string) => date.replace(/-/g, "");
+const mytDate = (ms: number) => new Date(ms + 8 * 3600_000).toISOString().slice(0, 10);
 function nextDay(date: string): string {
   const d = new Date(`${date}T00:00:00Z`);
   d.setUTCDate(d.getUTCDate() + 1);
@@ -46,7 +47,9 @@ export function buildCalendar(events: PublicEvent[], nowMs: number, name = "Buil
   for (const e of events) {
     lines.push("BEGIN:VEVENT", `UID:${e.id}@events.hong.build`, `DTSTAMP:${utc(nowMs)}`);
     if (e.all_day) {
-      lines.push(`DTSTART;VALUE=DATE:${compactDate(e.date)}`, `DTEND;VALUE=DATE:${compactDate(nextDay(e.date))}`);
+      // DTEND is exclusive: the day after the last day, using the explicit end when there is one.
+      const lastDay = e.end ? mytDate(Date.parse(e.end)) : e.date;
+      lines.push(`DTSTART;VALUE=DATE:${compactDate(e.date)}`, `DTEND;VALUE=DATE:${compactDate(nextDay(lastDay < e.date ? e.date : lastDay))}`);
     } else {
       const start = Date.parse(e.start);
       const end = e.end ? Date.parse(e.end) : start + HOURS_3;
