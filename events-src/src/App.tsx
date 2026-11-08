@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { BackToNow } from "./components/BackToNow";
 import { Line } from "./components/Line";
 import { PlatformDisplay } from "./components/PlatformDisplay";
 import { TopBar } from "./components/TopBar";
@@ -55,6 +56,7 @@ export default function App() {
           reduced={reduced}
           scrollRef={scrollRef}
           onSelectDay={setCurrent}
+          onPassDay={setCurrent}
           onOpen={() => undefined}
           emptyMessage={
             load.data.events.length === 0 ? (
@@ -73,6 +75,13 @@ export default function App() {
         {load.state === "cached" && (
           <button type="button" className="retry" onClick={refresh}>Retry</button>
         )}
+        <BackToNow
+          scrollRef={scrollRef}
+          onBack={() => {
+            scrollRef.current?.scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" });
+            setCurrent(0);
+          }}
+        />
       </main>
       <aside className="aside" aria-label="Ticket" />
     </div>
