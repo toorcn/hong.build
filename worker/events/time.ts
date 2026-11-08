@@ -45,6 +45,11 @@ export function parseDateText(text: string): string | null {
 export function parseIso(text: string): number | null {
   const m = /^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2})(:\d{2}(?:\.\d+)?)?(Z|[+-]\d{2}:?\d{2})?$/.exec(text.trim());
   if (!m) return null;
+  const [y, mo, d] = m[1]!.split("-").map(Number) as [number, number, number];
+  if (isoDate(y, mo, d) === null) return null;
+  const [hh, mm] = m[2]!.split(":").map(Number) as [number, number];
+  const ss = m[3] ? Number(m[3].slice(1, 3)) : 0;
+  if (hh > 23 || mm > 59 || ss > 59) return null;
   let zone = m[4] ?? "+08:00";
   if (/^[+-]\d{4}$/.test(zone)) zone = `${zone.slice(0, 3)}:${zone.slice(3)}`;
   const ms = Date.parse(`${m[1]}T${m[2]}${m[3] ?? ":00"}${zone}`);

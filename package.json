@@ -17,7 +17,7 @@
     "shots:walk": "node scripts/walk-shots.mjs",
     "check:walk": "tsx scripts/render-walk-checks.ts",
     "readme:art": "node scripts/generate-readme-art.mjs",
-    "test:worker": "vitest run --config vitest.config.ts",
+    "test:worker": "vitest run --config vitest.config.mts",
     "typecheck:worker": "tsc -p worker/tsconfig.json",
     "events:build": "npm --prefix events-src run build"
   },
