@@ -126,3 +126,46 @@ test("the chime preference survives a reload", async ({ page }) => {
   await page.reload();
   await expect(page.getByRole("button", { name: "Station chime" })).toHaveAttribute("aria-pressed", "true");
 });
+
+test("cancelling the share sheet is silent and copies nothing", async ({ page }, info) => {
+  test.skip(info.project.name !== "desktop", "desktop layout only");
+  await page.addInitScript(() => {
+    (window as unknown as { __copied: string[] }).__copied = [];
+    Object.defineProperty(navigator, "share", {
+      value: () => Promise.reject(new DOMException("cancelled", "AbortError")),
+      configurable: true,
+    });
+    Object.defineProperty(navigator, "clipboard", {
+      value: { writeText: (t: string) => ((window as unknown as { __copied: string[] }).__copied.push(t), Promise.resolve()) },
+      configurable: true,
+    });
+  });
+  await page.goto("./");
+  await page.getByRole("button", { name: /Builders Demo Night/ }).click();
+  await page.getByRole("button", { name: "Share this event" }).click();
+  await page.waitForTimeout(1000);
+  await expect(page.getByRole("status", { name: "Notification" })).toHaveText("");
+  expect(await page.evaluate(() => (window as unknown as { __copied: string[] }).__copied)).toEqual([]);
+});
+
+test("a share that fails for another reason falls back to copying the link", async ({ page }, info) => {
+  test.skip(info.project.name !== "desktop", "desktop layout only");
+  await page.addInitScript(() => {
+    (window as unknown as { __copied: string[] }).__copied = [];
+    Object.defineProperty(navigator, "share", {
+      value: () => Promise.reject(new DOMException("blocked", "NotAllowedError")),
+      configurable: true,
+    });
+    Object.defineProperty(navigator, "clipboard", {
+      value: { writeText: (t: string) => ((window as unknown as { __copied: string[] }).__copied.push(t), Promise.resolve()) },
+      configurable: true,
+    });
+  });
+  await page.goto("./");
+  await page.getByRole("button", { name: /Builders Demo Night/ }).click();
+  await page.getByRole("button", { name: "Share this event" }).click();
+  await expect(page.getByRole("status", { name: "Notification" })).toHaveText("Link copied");
+  expect(await page.evaluate(() => (window as unknown as { __copied: string[] }).__copied)).toEqual([
+    "https://events.hong.build/#e=a000000000000003",
+  ]);
+});
