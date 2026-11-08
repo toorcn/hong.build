@@ -3,6 +3,9 @@ import { LINES } from "../lib/lines";
 import { dayShort, timeLabel } from "../lib/time";
 import type { PublicEvent } from "../types";
 
+/** The server refuses plan.ics requests for more tickets than this. */
+const MAX_EXPORT = 200;
+
 interface Props {
   events: PublicEvent[];
   onOpen(id: string): void;
@@ -30,9 +33,13 @@ export function Wallet({ events, onOpen }: Props) {
               </li>
             ))}
           </ul>
-          <a className="wl-cta" href={`/api/events/plan.ics?ids=${events.map((e) => e.id).join(",")}`} download>
-            Add {events.length} to my calendar
-          </a>
+          {events.length > MAX_EXPORT ? (
+            <p className="wl-empty">Too many to export in one file ({events.length}). Subscribe to the whole line instead.</p>
+          ) : (
+            <a className="wl-cta" href={`/api/events/plan.ics?ids=${events.map((e) => e.id).join(",")}`} download>
+              Add {events.length} to my calendar
+            </a>
+          )}
         </>
       )}
       <a className="wl-sub" href="webcal://events.hong.build/events.ics">Subscribe to the whole line</a>
