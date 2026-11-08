@@ -27,6 +27,13 @@ describe("buildTimetable", () => {
     expect(buildTimetable([running], NOW)[0]!.main).toEqual([running]);
   });
 
+  it("drops earlier-dated events that have already finished", () => {
+    const finished = e({ name: "Finished", date: "2026-11-06", start: "2026-11-06T01:00:00.000Z", end: "2026-11-06T04:00:00.000Z" });
+    const running = e({ name: "Running", date: "2026-11-06", start: "2026-11-06T01:00:00.000Z", end: "2026-11-08T10:00:00.000Z" });
+    const days = buildTimetable([finished, running], NOW);
+    expect(days[0]!.main.map((x) => x.name)).toEqual(["Running"]);
+  });
+
   it("names branches by what they carry", () => {
     expect(spurLabel([e({ region: "sg" })])).toBe("OVERSEAS LINK");
     expect(spurLabel([e({ region: "online" })])).toBe("ONLINE LINK");

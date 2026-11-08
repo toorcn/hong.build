@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { eventStatus } from "../../src/lib/status";
+import { eventStatus, isActive } from "../../src/lib/status";
 import type { PublicEvent } from "../../src/types";
 
 const NOW = Date.parse("2026-11-07T10:52:00Z"); // 18:52 MYT
@@ -33,5 +33,25 @@ describe("eventStatus", () => {
     expect(eventStatus(d, NOW)).toEqual({ label: "CLOSES IN 13D", kind: "board", chip: true });
     expect(eventStatus(e({ kind: "deadline", start: "2026-11-07T15:59:00.000Z" }), NOW).label).toBe("CLOSES TODAY");
     expect(eventStatus(e({ kind: "deadline", start: "2026-11-07T09:00:00.000Z" }), NOW).label).toBe("CLOSED");
+  });
+});
+
+describe("isActive", () => {
+  const NOW_MS = Date.parse("2026-11-07T10:52:00Z");
+  it("keeps timed events until their end, defaulting to three hours", () => {
+    expect(isActive(e({ start: "2026-11-07T07:53:00.000Z" }), NOW_MS)).toBe(true);
+    expect(isActive(e({ start: "2026-11-07T07:52:00.000Z" }), NOW_MS)).toBe(false);
+    expect(isActive(e({ start: "2026-11-07T02:00:00.000Z", end: "2026-11-07T11:00:00.000Z" }), NOW_MS)).toBe(true);
+    expect(isActive(e({ start: "2026-11-07T02:00:00.000Z", end: "2026-11-07T10:00:00.000Z" }), NOW_MS)).toBe(false);
+  });
+  it("keeps all-day events until their end or midnight", () => {
+    expect(isActive(e({ all_day: true, date: "2026-11-07", start: "2026-11-06T16:00:00.000Z" }), NOW_MS)).toBe(true);
+    expect(isActive(e({ all_day: true, date: "2026-11-06", start: "2026-11-05T16:00:00.000Z" }), NOW_MS)).toBe(false);
+    expect(isActive(e({ all_day: true, date: "2026-11-06", start: "2026-11-05T16:00:00.000Z", end: "2026-11-08T00:00:00.000Z" }), NOW_MS)).toBe(true);
+  });
+  it("keeps deadlines until they close", () => {
+    expect(isActive(e({ kind: "deadline", date: "2026-11-20", start: "2026-11-20T15:59:00.000Z" }), NOW_MS)).toBe(true);
+    expect(isActive(e({ kind: "deadline", start: "2026-11-07T09:00:00.000Z" }), NOW_MS)).toBe(false);
+    expect(isActive(e({ kind: "deadline", all_day: true, date: "2026-11-07", start: "2026-11-06T16:00:00.000Z" }), NOW_MS)).toBe(true);
   });
 });

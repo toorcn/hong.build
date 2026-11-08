@@ -41,6 +41,12 @@ describe("loadTimetable", () => {
   it("reports an error with no saved copy", async () => {
     expect(await loadTimetable(down)).toEqual({ state: "error" });
   });
+  it("rejects a malformed cache the same way it rejects a malformed response", async () => {
+    writePref("timetable", { events: "not a list" });
+    expect(await loadTimetable(down)).toEqual({ state: "error" });
+    const wrongShape = (async () => Response.json({ nope: true })) as typeof fetch;
+    expect(await loadTimetable(wrongShape)).toEqual({ state: "error" });
+  });
 });
 
 describe("staleDays", () => {
