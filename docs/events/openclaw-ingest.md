@@ -51,7 +51,7 @@ Luma pages show the start time, host and cover image — include them when avail
 | Option | Use |
 |---|---|
 | `"dry_run": true` | Validate and report without saving. Use while setting up. |
-| `"allow_shrink": true` | Only when intentionally clearing most of the timetable. Without it, a push that would hide more than half the upcoming events (or contains none) is refused with `409` and nothing changes. |
+| `"allow_shrink": true` | Only when intentionally clearing most of the timetable. Without it, a push is refused with `409` (and nothing changes) when it has zero accepted events, or when at least 4 upcoming events are currently visible and the push would keep fewer than half of them. |
 
 An event you leave out of a push is hidden by its id (the `signup_url`), and comes back if a later push includes it again. Events are deleted for good 30 days after they end (or after they start, if no end is given).
 
@@ -61,7 +61,7 @@ An event you leave out of a push is hidden by its id (the `signup_url`), and com
 | `200` | Saved (or dry-run report). Body: `added`, `updated`, `removed`, `rejected[]`, `warnings[]`. | Fix each `rejected[].reason` and `warnings[].message` in the next push. |
 | `401` | Token missing or wrong. | Check `EVENTS_INGEST_TOKEN`. |
 | `400` | Body isn't JSON or has no `events` array. | Fix the payload. |
-| `409` | Shrink guard: the push looked broken. Body: `current`, `accepted`. | Check the scrape; resend the full list. |
+| `409` | Shrink guard: the push had zero accepted events, or at least 4 upcoming events are visible and it would keep fewer than half of them. Body: `current` (visible events), `accepted` (upcoming events in this push). | Check the scrape; resend the full list. |
 | `413` | Over 1 MB or over 1000 events. | Send only upcoming events. |
 
 Each push is saved all-or-nothing: if it fails part-way (for example a `5xx`), nothing from it is kept, so it is safe to send the same push again.
