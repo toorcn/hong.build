@@ -6,14 +6,17 @@
   "scripts": {
     "dev": "next dev",
     "agent-docs": "tsx scripts/generate-agent-docs.ts",
-    "build": "npm run agent-docs && next build",
+    "build": "npm run fragments && npm run agent-docs && next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "fragments": "tsx scripts/generate-fragments.ts",
     "fragments:check": "tsx scripts/generate-fragments.ts --check",
     "verify:entrance": "node scripts/verify-cold-start.mjs",
     "verify:cursor": "node scripts/cursor-checks.mjs",
-    "shots:walk": "node scripts/walk-shots.mjs"
+    "shots:walk": "node scripts/walk-shots.mjs",
+    "test:worker": "vitest run --config vitest.config.ts",
+    "typecheck:worker": "tsc -p worker/tsconfig.json",
+    "events:build": "npm --prefix events-src run build"
   },
   "repository": {
     "type": "git",
@@ -41,6 +44,7 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260702.1",
     "@next/mdx": "^16.3.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^26.1.2",
@@ -53,6 +57,7 @@
     "sharp": "^0.35.3",
     "tailwindcss": "^4.3.3",
     "tsx": "^4.23.6",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.12"
   }
 }
