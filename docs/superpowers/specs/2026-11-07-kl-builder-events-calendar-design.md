@@ -162,12 +162,13 @@ CREATE TABLE IF NOT EXISTS event_ingests (
 }
 ```
 
-Returns non-removed events from the start of today (MYT) to +180 days, sorted by `start_at`.
+Returns non-removed events starting from the start of today (MYT) to +180 days, plus multi-day events that started earlier but have not ended yet, sorted by `start_at`. Also sends `Access-Control-Allow-Origin: *` so others can reuse the data.
 
 ### 3.8 Calendar files
 
 - `/events.ics` — VCALENDAR of non-removed events from −30 to +180 days; `X-WR-CALNAME:Builder Line — KL builder events`; offered as `webcal://events.hong.build/events.ics`.
 - `/e/<id>.ics` — single VEVENT, `Content-Disposition: attachment`. 404 if unknown.
+- `/api/events/plan.ics?ids=<id>,<id>…` — the kept tickets as one calendar file (≤ 50 ids, 16-hex each; 400 if none valid). Used by My Journey's "Add all to my calendar".
 - `UID:<id>@events.hong.build`; all-day → `DTSTART;VALUE=DATE`; timed → UTC `…Z`; `URL` = signup url; RFC 5545 escaping and 75-octet line folding.
 
 ## 4. The page (events-src/)
@@ -198,7 +199,7 @@ Vite + React + TypeScript + Tailwind v4, `base: '/events/'`, `outDir: '../public
 | `Spur` | For days with non-KV events only: teal branch curving off the main line beneath that day's station, running right, then down past its stations to a terminus bar; label `OVERSEAS LINK` / `ONLINE LINK` / `OVERSEAS & ONLINE LINK`. Stops on it mirror to the right with `place_tag` chips (SG = rounded-square station; ONLINE = dashed). A small teal train runs along it when the main train arrives (CSS `offset-path`). |
 | `Train` | Pointer-draggable along the rail with edge auto-scroll; live-updates the display while passing days; snaps to nearest day on release; glides on day click. Keyboard: `role="slider"`, ↑/↓ = previous/next day, `aria-valuetext` = day label. "drag me ↕" hint until first drag. |
 | `TicketSheet` | Bottom sheet (mobile) / side panel (≥ 900 px). Topic-coloured band with line name + status; name; date, time (`MYT`/`SGT` labels), station, host; perforation; **Sign up ↗** (opens `url` in new tab, `rel="noopener"`), **+ Calendar** (`/e/<id>.ics`), **Keep** (stamp animation), **Share** (`navigator.share`, else copy `https://events.hong.build/#e=<id>`). |
-| `JourneyWallet` | Kept tickets list; **Add all to my calendar** (client-built `.ics` download); **Subscribe to the whole line** (`webcal://…/events.ics`). |
+| `JourneyWallet` | Kept tickets list; **Add all to my calendar** (`/api/events/plan.ics?ids=…`); **Subscribe to the whole line** (`webcal://…/events.ics`). |
 | `BackToNow` | Pill shown once scrolled past today; scrolls up and sends the train to today. |
 
 ### 4.3 Status (computed client-side from `now`, MYT)
