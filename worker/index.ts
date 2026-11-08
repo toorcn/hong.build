@@ -1,8 +1,13 @@
 import { qaData } from "../hack-src/src/data/qa";
+import { handleEventIcs, handleEventsApi, handleFeedIcs, handlePlanIcs } from "./events/api";
+import { handleIngest } from "./events/ingest";
+
+const EVENTS_HOST = "events.hong.build";
 
 interface Env {
   ASSETS: Fetcher;
   DB: D1Database;
+  EVENTS_INGEST_TOKEN?: string;
 }
 
 // Finite rotation pool for "surprise me". Custom single emojis are also accepted.
@@ -17,6 +22,8 @@ const json = (body: unknown, status = 200, headers: HeadersInit = {}) =>
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
+    const events = await routeEvents(request, env, url);
+    if (events) return events;
     const { pathname } = url;
     if (pathname !== "/api/qa-votes" && pathname !== "/api/guestbook" && pathname !== "/api/guestbook/emoji") return serveSite(request, env, url);
 
@@ -39,6 +46,41 @@ export default {
     }
   },
 } satisfies ExportedHandler<Env>;
+
+/** Event endpoints (any host) and the events.hong.build app. Returns null when not ours. */
+async function routeEvents(request: Request, env: Env, url: URL): Promise<Response | null> {
+  const { pathname } = url;
+  if (pathname === "/api/events/ingest") {
+    return request.method === "POST"
+      ? handleIngest(request, env)
+      : json({ error: "Method not allowed" }, 405, { Allow: "POST" });
+  }
+  const readOnly = request.method === "GET" || request.method === "HEAD";
+  const isEventsPath =
+    pathname === "/api/events" || pathname === "/api/events/plan.ics" || pathname === "/events.ics" || pathname.startsWith("/e/");
+  if (!readOnly) {
+    return url.hostname === EVENTS_HOST || isEventsPath
+      ? json({ error: "Method not allowed" }, 405, { Allow: "GET, HEAD" })
+      : null;
+  }
+  if (pathname === "/api/events") return handleEventsApi(env);
+  if (pathname === "/api/events/plan.ics") return handlePlanIcs(url, env);
+  if (pathname === "/events.ics") return handleFeedIcs(env);
+  const single = /^\/e\/([0-9a-f]{16})\.ics$/.exec(pathname);
+  if (single) return handleEventIcs(single[1]!, env);
+  if (url.hostname === EVENTS_HOST) return serveEventsApp(request, env, url);
+  if (pathname === "/events" || pathname === "/events/") return Response.redirect(`https://${EVENTS_HOST}/`, 308);
+  return null;
+}
+
+/** The events app is a single page: its files live under /events/, every other path gets the shell. */
+async function serveEventsApp(request: Request, env: Env, url: URL): Promise<Response> {
+  if (url.pathname.startsWith("/events/") && url.pathname !== "/events/") return env.ASSETS.fetch(request);
+  const shell = await env.ASSETS.fetch(new Request(new URL("/events/", url), request));
+  const headers = new Headers(shell.headers);
+  headers.set("Cache-Control", "public, max-age=0, must-revalidate");
+  return new Response(shell.body, { status: shell.status, headers });
+}
 
 /** Pages with a markdown twin in public/agent/ (see scripts/generate-agent-docs.ts). */
 function markdownAsset(pathname: string, wantsMarkdown: boolean): string | null {

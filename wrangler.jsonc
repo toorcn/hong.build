@@ -20,6 +20,7 @@
   ],
   "routes": [
     { "pattern": "hong.build", "custom_domain": true },
-    { "pattern": "www.hong.build", "custom_domain": true }
+    { "pattern": "www.hong.build", "custom_domain": true },
+    { "pattern": "events.hong.build", "custom_domain": true }
   ]
 }
