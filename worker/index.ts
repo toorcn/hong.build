@@ -123,7 +123,7 @@ async function serveSite(request: Request, env: Env, url: URL): Promise<Response
 
   const res = await env.ASSETS.fetch(request);
   if (readOnly && res.status === 404 && url.pathname !== "/") {
-    return Response.redirect(new URL("/", url), 302);
+    return Response.redirect(new URL("/", url).toString(), 302);
   }
   const type = res.headers.get("content-type") ?? "";
   if (!readOnly || !type.includes("text/html")) return res;
