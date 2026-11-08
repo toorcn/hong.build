@@ -36,4 +36,11 @@ describe("ics", () => {
     expect(cal).toContain("DTSTART:20261111T110000Z\r\n");
     expect(cal).toContain("DTEND:20261111T140000Z\r\n");
   });
+
+  it("ends a multi-day all-day event the day after its last date", () => {
+    // end 12 Nov 00:00 MYT = 2026-11-11T16:00Z
+    const cal = buildCalendar([{ ...base, end: "2026-11-11T16:00:00.000Z" }], NOW);
+    expect(cal).toContain("DTSTART;VALUE=DATE:20261111\r\n");
+    expect(cal).toContain("DTEND;VALUE=DATE:20261113\r\n");
+  });
 });

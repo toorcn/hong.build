@@ -26,7 +26,7 @@ async function listEvents(db: D1Database, fromS: number, toS: number): Promise<P
   const { results } = await db
     .prepare(
       `SELECT ${COLUMNS} FROM events
-       WHERE removed = 0 AND start_at < ? AND (start_at >= ? OR (end_at IS NOT NULL AND end_at > ?))
+       WHERE removed = 0 AND start_at < ? AND (start_at >= ? OR COALESCE(end_at, CASE WHEN all_day = 1 THEN start_at + 86400 ELSE start_at + 10800 END) > ?)
        ORDER BY start_at, name`,
     )
     .bind(toS, fromS, fromS)
@@ -73,16 +73,16 @@ export async function handleEventIcs(id: string, env: EventsEnv, nowMs = Date.no
   return calendarResponse(buildCalendar([rowToPublic(row)], nowMs, row.name), `${id}.ics`, true);
 }
 
+const MAX_PLAN_IDS = 200;
+
 export async function handlePlanIcs(url: URL, env: EventsEnv, nowMs = Date.now()): Promise<Response> {
-  const ids = (url.searchParams.get("ids") ?? "")
-    .split(",")
-    .filter((id) => /^[0-9a-f]{16}$/.test(id))
-    .slice(0, 50);
+  const ids = (url.searchParams.get("ids") ?? "").split(",").filter((id) => /^[0-9a-f]{16}$/.test(id));
   if (ids.length === 0) return new Response("No valid event ids.", { status: 400 });
+  if (ids.length > MAX_PLAN_IDS) return new Response(`At most ${MAX_PLAN_IDS} events per file.`, { status: 400 });
   const { results } = await env.DB.prepare(
-    `SELECT ${COLUMNS} FROM events WHERE removed = 0 AND id IN (${ids.map(() => "?").join(", ")}) ORDER BY start_at`,
+    `SELECT ${COLUMNS} FROM events WHERE removed = 0 AND id IN (SELECT value FROM json_each(?)) ORDER BY start_at`,
   )
-    .bind(...ids)
+    .bind(JSON.stringify(ids))
     .all<EventRow>();
   return calendarResponse(buildCalendar(results.map(rowToPublic), nowMs, "My Journey — Builder Line"), "my-journey.ics", true);
 }
