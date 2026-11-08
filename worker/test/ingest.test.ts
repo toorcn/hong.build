@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ev, ingest, makeEnv, NOW_S } from "./helpers/events";
+import { ev, ingest, makeEnv, NOW_S, type TestEnv } from "./helpers/events";
 
 const rows = (env: ReturnType<typeof makeEnv>) =>
   env.DB.raw.prepare("SELECT id, name, removed FROM events ORDER BY name").all() as {
@@ -61,6 +61,7 @@ describe("POST /api/events/ingest", () => {
     const env = makeEnv();
     await ingest(env, { events: [1, 2, 3, 4, 5].map((n) => ev(n)) });
     await ingest(env, { events: [1, 2, 3, 4].map((n) => ev(n)) });
+    expect(rows(env).find((r) => r.name === "Event 5")?.removed).toBe(1);
     await ingest(env, { events: [1, 2, 3, 4, 5].map((n) => ev(n)) });
     expect(rows(env).every((r) => r.removed === 0)).toBe(true);
   });
@@ -121,5 +122,32 @@ describe("POST /api/events/ingest", () => {
       .run(NOW_S - 31 * 86400);
     await ingest(env, { events: [ev(1)] });
     expect(rows(env).map((r) => r.name)).toEqual(["Event 1"]);
+  });
+
+  it("prunes by end time, so a long event still running is kept", async () => {
+    const env = makeEnv();
+    const insert = env.DB.raw.prepare(
+      `INSERT INTO events (id, name, start_at, end_at, all_day, date_local, region, topic, location_text, signup_url, raw, first_seen, last_seen)
+       VALUES (?, ?, ?, ?, 0, '2026-10-01', 'kv', 'community', 'KL', ?, '{}', 0, 0)`,
+    );
+    insert.run("long0000000000000", "Long running", NOW_S - 31 * 86400, NOW_S + 86400, "https://luma.com/long");
+    insert.run("recent0000000000", "Recent", NOW_S - 10 * 86400, null, "https://luma.com/recent");
+    await ingest(env, { events: [ev(1)] });
+    expect(rows(env).map((r) => r.name)).toEqual(["Event 1", "Long running", "Recent"]);
+  });
+
+  it("publishes a push all-or-nothing", async () => {
+    const env = makeEnv();
+    const real = env.DB;
+    // The same D1 look-alike, except every batch carries one statement that fails when it runs.
+    const failing = {
+      prepare: (sql: string) => real.prepare(sql),
+      batch: (stmts: Parameters<typeof real.batch>[0]) =>
+        real.batch([...stmts, real.prepare("INSERT INTO no_such_table (x) VALUES (1)")]),
+    };
+    const broken = { ...env, DB: failing } as unknown as TestEnv;
+    await expect(ingest(broken, { events: [ev(1), ev(2)] })).rejects.toThrow();
+    expect(rows(env)).toHaveLength(0);
+    expect(env.DB.raw.prepare("SELECT COUNT(*) AS n FROM event_ingests WHERE status = 'ok'").get()).toEqual({ n: 0 });
   });
 });
