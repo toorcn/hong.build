@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 
 interface Props {
   open: boolean;
@@ -9,15 +9,32 @@ interface Props {
   children: ReactNode;
 }
 
+const FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
 export function Sheet({ open, variant, label, onClose, children }: Props) {
+  const dialog = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
+      if (e.key !== "Tab" || variant !== "sheet" || !dialog.current) return;
+      // The background is inert, so wrap Tab around inside the dialog instead of leaving the page.
+      const items = [...dialog.current.querySelectorAll<HTMLElement>(FOCUSABLE)];
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (!first || !last) return;
+      const active = document.activeElement;
+      if (e.shiftKey && (active === first || !dialog.current.contains(active) || active === dialog.current.querySelector("h2"))) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
+  }, [open, onClose, variant]);
 
   if (variant === "panel") {
     return (
@@ -29,7 +46,7 @@ export function Sheet({ open, variant, label, onClose, children }: Props) {
   return (
     <>
       <div className={`tx-scrim${open ? " show" : ""}`} onClick={onClose} aria-hidden="true" />
-      <div className={`tx-sheet${open ? " show" : ""}`} role="dialog" aria-modal="true" aria-label={label} inert={!open}>
+      <div ref={dialog} className={`tx-sheet${open ? " show" : ""}`} role="dialog" aria-modal="true" aria-label={label} inert={!open}>
         {open && children}
       </div>
     </>

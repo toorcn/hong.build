@@ -83,8 +83,18 @@ export default function App() {
   const closePanel = useCallback(() => {
     setPanel(null);
     history.replaceState(null, "", location.pathname);
-    opener.current?.focus({ preventScroll: true });
   }, []);
+
+  // Return focus to whatever opened the panel, after the background is no longer inert.
+  const wasOpen = useRef(false);
+  const isOpen = panel !== null;
+  useEffect(() => {
+    if (isOpen) wasOpen.current = true;
+    else if (wasOpen.current) {
+      wasOpen.current = false;
+      opener.current?.focus({ preventScroll: true });
+    }
+  }, [isOpen]);
 
   const selectDay = (i: number) => {
     setCurrent(i);
@@ -108,15 +118,20 @@ export default function App() {
 
   const share = async (e: PublicEvent) => {
     const url = `https://events.hong.build/#e=${e.id}`;
-    try {
-      if (typeof navigator.share === "function") {
+    if (typeof navigator.share === "function") {
+      try {
         await navigator.share({ title: e.name, url });
         return;
+      } catch (err) {
+        // Dismissing the share sheet is a choice, not a failure.
+        if (err instanceof DOMException && err.name === "AbortError") return;
       }
+    }
+    try {
       await navigator.clipboard.writeText(url);
       setToast("Link copied");
     } catch {
-      // The person closed the share sheet, or the clipboard is blocked: nothing to undo.
+      setToast("Couldn't copy the link");
     }
   };
 
@@ -184,6 +199,7 @@ export default function App() {
   return (
     <div className="shell">
       <main className="tx">
+        <div className="bg" style={{ display: "contents" }} inert={!desktop && panel !== null}>
         <Line
           days={days}
           todayKey={todayKey}
@@ -230,6 +246,7 @@ export default function App() {
             selectDay(0);
           }}
         />
+        </div>
         {!desktop && sheet}
         <Toast message={toast} />
       </main>
