@@ -36,6 +36,7 @@ test.describe("when OpenClaw has gone quiet", () => {
   test("the display admits the timetable is old", async ({ page }) => {
     await page.goto("./");
     await expect(page.getByTestId("pids")).toContainText("TIMETABLE UPDATED 3D AGO");
+    await expect(page.getByRole("status", { name: "Service notice" })).toContainText("TIMETABLE UPDATED 3D AGO");
   });
 });
 
@@ -47,6 +48,14 @@ test("falls back to the saved timetable when the API is down", async ({ page }) 
   await expect(page.getByTestId("pids")).toContainText("SERVICE DISRUPTION · SHOWING SAVED TIMETABLE");
   await expect(page.getByRole("button", { name: /AI Tinker Night/ })).toBeVisible();
   await expect(page.getByRole("button", { name: "Retry" })).toBeVisible();
+  await expect(page.getByRole("status", { name: "Service notice" })).toContainText("SERVICE DISRUPTION");
+
+  await page.route("**/api/events", (route) => route.fulfill({ json: fixture }));
+  await page.getByRole("button", { name: "Retry" }).click();
+  await expect(page.getByTestId("pids")).toContainText("NOW · SAT 7 NOV");
+  await expect(page.getByTestId("pids")).not.toContainText("SERVICE DISRUPTION");
+  await expect(page.getByRole("status", { name: "Service notice" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Retry" })).toHaveCount(0);
 });
 
 test("shows a friendly error with no saved copy", async ({ page }) => {
@@ -54,4 +63,13 @@ test("shows a friendly error with no saved copy", async ({ page }) => {
   await page.goto("./");
   await expect(page.getByText("We can’t reach the timetable right now.")).toBeVisible();
   await expect(page.getByRole("button", { name: "Try again" })).toBeVisible();
+});
+
+test("recovers from the error screen when the API comes back", async ({ page }) => {
+  await page.route("**/api/events", (route) => route.abort());
+  await page.goto("./");
+  await expect(page.getByText("We can’t reach the timetable right now.")).toBeVisible();
+  await page.route("**/api/events", (route) => route.fulfill({ json: fixture }));
+  await page.getByRole("button", { name: "Try again" }).click();
+  await expect(page.getByRole("button", { name: "Sat 7 Nov, today: 3 events" })).toBeVisible();
 });

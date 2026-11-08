@@ -67,6 +67,9 @@ export default function App() {
         <div className="tx-fade" aria-hidden="true" />
         <TopBar />
         <PlatformDisplay day={days[at]} todayKey={todayKey} now={now} reduced={reduced} notice={notice} fallback={fallback} onOpen={() => undefined} />
+        {notice && (
+          <div role="status" aria-label="Service notice" className="sr-only">{notice}</div>
+        )}
         {load.state === "cached" && (
           <button type="button" className="retry" onClick={refresh}>Retry</button>
         )}
