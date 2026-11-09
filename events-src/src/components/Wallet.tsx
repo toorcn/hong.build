@@ -28,6 +28,7 @@ export function Wallet({ events, onOpen }: Props) {
             {events.map((e) => (
               <li key={e.id}>
                 <button type="button" className="wl-t" style={{ "--c": LINES[e.topic].color } as CSSProperties} onClick={() => onOpen(e.id)}>
+                  <Icon name={LINES[e.topic].icon} size={13} className="wl-ic" />
                   <b>{e.name}</b>
                   <small>{dayShort(e.date)} · {e.all_day ? "All day" : timeLabel(e.start)} · {e.location}</small>
                 </button>

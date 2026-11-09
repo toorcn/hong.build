@@ -39,7 +39,7 @@ export function Ticket({ event, now, kept, onToggleKeep, onShare, onClose }: Pro
     <article className={`tk${kept ? " kept" : ""}`} style={{ "--c": line.color } as CSSProperties} data-testid="ticket">
       <header className="tk-top">
         <span className="tk-line">
-          <i className="tk-code" aria-hidden="true">{line.code}</i>
+          <i className="tk-code" aria-hidden="true"><Icon name={line.icon} size={11} /></i>
           <span>
             {line.name.toUpperCase()}
             {event.place_tag ? ` · ${event.place_tag}` : ""}

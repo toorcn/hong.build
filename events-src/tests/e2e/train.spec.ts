@@ -44,6 +44,21 @@ test("tapping a day sends the train there and runs its branch", async ({ page })
 
 test.describe("on a long timetable", () => {
   test.use({ timetable: { ...fixture, events: [...fixture.events, ...extra] } });
+  test("the train rides along the top of the view while scrolling", async ({ page }) => {
+    await page.goto("./");
+    const train = page.getByRole("slider", { name: "Train: choose a day" });
+    await expect(train).toHaveAttribute("aria-valuetext", "Sat 7 Nov");
+    const map = page.locator(".tx-map");
+    const box = (await map.boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.wheel(0, 400);
+    await expect(train).not.toHaveAttribute("aria-valuetext", "Sat 7 Nov");
+    // Measure once the short glide to the new position has finished.
+    await expect.poll(async () => (await train.boundingBox())!.y - box.y).toBeGreaterThan(120);
+    await expect.poll(async () => (await train.boundingBox())!.y - box.y).toBeLessThan(220);
+    await expect(page.getByTestId("pids")).toContainText("STATION ·");
+  });
+
   test("Back to now appears after scrolling away and returns to today", async ({ page }) => {
     await page.goto("./");
     await page.locator(".tx-map").evaluate((el) => el.scrollTo({ top: 600 }));

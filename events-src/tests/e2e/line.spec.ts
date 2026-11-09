@@ -27,7 +27,7 @@ test.describe("with nothing scheduled", () => {
     await page.goto("./");
     await expect(page.getByTestId("pids")).toContainText("NO SERVICE SCHEDULED");
     await expect(page.getByText("No departures yet.")).toBeVisible();
-    await expect(page.getByRole("link", { name: "Subscribe" })).toHaveAttribute("href", "webcal://events.hong.build/events.ics");
+    await expect(page.getByRole("link", { name: "Subscribe", exact: true })).toHaveAttribute("href", "webcal://events.hong.build/events.ics");
   });
 });
 
@@ -72,4 +72,13 @@ test("recovers from the error screen when the API comes back", async ({ page }) 
   await page.route("**/api/events", (route) => route.fulfill({ json: fixture }));
   await page.getByRole("button", { name: "Try again" }).click();
   await expect(page.getByRole("button", { name: "Sat 7 Nov, today: 3 events" })).toBeVisible();
+});
+
+test("the end of the line credits the timetable and its maker", async ({ page }) => {
+  await page.goto("./");
+  const credits = page.getByRole("region", { name: "Credits" });
+  await expect(credits).toContainText("END OF LINE");
+  await expect(credits).toContainText("OpenClaw");
+  await expect(credits.getByRole("link", { name: "Hong Bing" })).toHaveAttribute("href", "https://hong.build");
+  await expect(credits.getByRole("link", { name: "hi@hong.build" })).toHaveAttribute("href", /^mailto:hi@hong\.build/);
 });
