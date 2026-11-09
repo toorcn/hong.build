@@ -86,3 +86,9 @@ test("the end of the line credits the timetable and its maker", async ({ page })
   await expect(credits.getByRole("link", { name: "hong.build", exact: true })).toHaveAttribute("href", "https://hong.build");
   await expect(credits.getByRole("link", { name: "hi@hong.build" })).toHaveAttribute("href", /^mailto:hi@hong\.build/);
 });
+
+test("the display counts down to the next departure", async ({ page }) => {
+  await page.goto("./");
+  // 18:52 now; Builders Demo Night leaves at 19:30.
+  await expect(page.getByTestId("pids")).toContainText("NEXT IN 00:38:00");
+});

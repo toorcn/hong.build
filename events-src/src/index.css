@@ -247,3 +247,9 @@ a { color: inherit; }
 .gd code { font-family: ui-monospace, Menlo, monospace; font-size: 10.5px; background: var(--hover); border: 1px solid var(--line); border-radius: 5px; padding: 1px 5px; overflow-wrap: anywhere; }
 .gd a { color: var(--fg); text-underline-offset: 3px; }
 .gd-foot { margin: 16px 0 0; padding-top: 12px; border-top: 1px dashed var(--line); color: var(--mut); font-size: 11px; }
+
+/* countdown to the next departure, on the display's top row */
+.pids-k { gap: 10px; }
+.pids-k > span:first-child { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pids-cd { white-space: nowrap; color: #ffb627aa; }
+.pids-cd b { color: #ffb627; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: .08em; }

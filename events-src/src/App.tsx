@@ -239,7 +239,7 @@ export default function App() {
             setPanel({ kind: "wallet" });
           }}
         />
-        <PlatformDisplay day={days[at]} todayKey={todayKey} now={now} reduced={reduced} notice={notice} fallback={fallback} onOpen={openTicket} />
+        <PlatformDisplay day={days[at]} todayKey={todayKey} now={now} reduced={reduced} notice={notice} fallback={fallback} onOpen={openTicket} events={load.data.events} />
         {notice && (
           <div role="status" aria-label="Service notice" className="sr-only">{notice}</div>
         )}
