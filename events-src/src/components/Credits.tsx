@@ -19,12 +19,12 @@ export function Credits() {
       <dl className="tx-credit-rows">
         <div>
           <dt>Timetable</dt>
-          <dd>Gathered and refreshed daily by OpenClaw, an AI agent run by Hong Bing</dd>
+          <dd>Gathered and refreshed daily by OpenClaw, an AI agent run by <a href="https://www.linkedin.com/in/hong-bing" target="_blank" rel="noopener noreferrer">Hong Bing</a></dd>
         </div>
         <div>
           <dt>Built by</dt>
           <dd>
-            <a href="https://hong.build">Hong Bing</a> · <a href="https://hong.build/hack/">Hackathon field manual</a>
+            <a href="https://www.linkedin.com/in/hong-bing" target="_blank" rel="noopener noreferrer">Hong Bing</a> · <a href="https://hong.build">hong.build</a> · <a href="https://hong.build/hack/">Hackathon field manual</a>
           </dd>
         </div>
         <div>
@@ -43,7 +43,7 @@ export function Credits() {
         Subscribe to the whole line
       </a>
       <p className="tx-credit-fine">
-        A transit map in spirit only, not affiliated with Rapid KL, Prasarana or MRT Corp. © {new Date().getFullYear()} Hong Bing.
+        A transit map in spirit only, not affiliated with Rapid KL, Prasarana or MRT Corp. © {new Date().getFullYear()} <a href="https://www.linkedin.com/in/hong-bing" target="_blank" rel="noopener noreferrer">Hong Bing</a>.
       </p>
     </section>
   );

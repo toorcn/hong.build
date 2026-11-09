@@ -215,3 +215,15 @@ test.describe("an oversized wallet", () => {
     await expect(wallet.getByRole("link", { name: "Subscribe to the whole line" })).toBeVisible();
   });
 });
+
+test("the info button opens a guide that explains keeping and subscribing", async ({ page }) => {
+  await page.goto("./");
+  await page.getByRole("button", { name: "Guide: how Builder Line works" }).click();
+  const guide = page.getByTestId("guide");
+  await expect(guide.getByRole("heading", { name: "How to ride the Builder Line" })).toBeFocused();
+  await expect(guide).toContainText("Keep events, then add them all at once");
+  await expect(guide).toContainText("https://events.hong.build/events.ics");
+  await expect(guide.getByRole("img", { name: /event ticket/ })).toHaveAttribute("src", /\/events\/guide\/ticket\.jpg$/);
+  await page.keyboard.press("Escape");
+  await expect(page.getByTestId("guide")).toHaveCount(0);
+});

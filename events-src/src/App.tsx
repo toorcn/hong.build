@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BackToNow } from "./components/BackToNow";
+import { Guide } from "./components/Guide";
 import { Line } from "./components/Line";
 import { PlatformDisplay } from "./components/PlatformDisplay";
 import { Sheet } from "./components/Sheet";
@@ -16,7 +17,7 @@ import { dayLabel, mytDateKey } from "./lib/time";
 import { buildTimetable, dayEvents } from "./lib/timetable";
 import type { PublicEvent } from "./types";
 
-type Panel = { kind: "ticket"; id: string } | { kind: "wallet" } | null;
+type Panel = { kind: "ticket"; id: string } | { kind: "wallet" } | { kind: "guide" } | null;
 
 const prefersDark = () => typeof matchMedia === "function" && matchMedia("(prefers-color-scheme: dark)").matches;
 
@@ -178,10 +179,12 @@ export default function App() {
     <Sheet
       open={panel !== null}
       variant={desktop ? "panel" : "sheet"}
-      label={panel?.kind === "wallet" ? "My Journey" : (openEvent?.name ?? "Ticket")}
+      label={panel?.kind === "wallet" ? "My Journey" : panel?.kind === "guide" ? "Guide" : (openEvent?.name ?? "Ticket")}
       onClose={closePanel}
     >
-      {panel?.kind === "wallet" ? (
+      {panel?.kind === "guide" ? (
+        <Guide onClose={closePanel} />
+      ) : panel?.kind === "wallet" ? (
         <Wallet events={keptEvents} onOpen={openTicket} />
       ) : openEvent ? (
         <Ticket
@@ -227,6 +230,10 @@ export default function App() {
           bump={bump}
           onNight={toggleNight}
           onSound={toggleSound}
+          onGuide={() => {
+            opener.current = document.activeElement as HTMLElement | null;
+            setPanel({ kind: "guide" });
+          }}
           onWallet={() => {
             opener.current = document.activeElement as HTMLElement | null;
             setPanel({ kind: "wallet" });

@@ -79,6 +79,10 @@ test("the end of the line credits the timetable and its maker", async ({ page })
   const credits = page.getByRole("region", { name: "Credits" });
   await expect(credits).toContainText("END OF LINE");
   await expect(credits).toContainText("OpenClaw");
-  await expect(credits.getByRole("link", { name: "Hong Bing" })).toHaveAttribute("href", "https://hong.build");
+  for (const link of await credits.getByRole("link", { name: "Hong Bing" }).all()) {
+    await expect(link).toHaveAttribute("href", "https://www.linkedin.com/in/hong-bing");
+  }
+  await expect(credits.getByRole("link", { name: "Hong Bing" })).toHaveCount(3);
+  await expect(credits.getByRole("link", { name: "hong.build", exact: true })).toHaveAttribute("href", "https://hong.build");
   await expect(credits.getByRole("link", { name: "hi@hong.build" })).toHaveAttribute("href", /^mailto:hi@hong\.build/);
 });
