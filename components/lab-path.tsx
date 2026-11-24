@@ -93,7 +93,7 @@ const VERT = /* glsl */ `
   uniform float uReveal;
   uniform float uFlow;    // 0 under reduced motion — the track goes static
   uniform float uHover;   // 0..1 — pointer is over the track
-  uniform float uInk;     // 1 in the light scheme (lib/scheme.ts)
+  uniform float uWeight;  // 0..1 extra presence for the thread, per scheme (lib/scheme.ts)
 
   varying float vHot;
   varying float vFlow;
@@ -124,17 +124,18 @@ const VERT = /* glsl */ `
     float size = mix(0.66, 1.35, aNode) + near * 0.35 + uHover * ahead * local * 0.2;
     // Floored so the far stretch doesn't drop below a pixel and start to
     // sparkle; the fog below is what takes distance out, not point size.
-    // In ink the thread is drawn a size up: a pale mote glows on black, but
-    // on a bright sky it needs area to register at all.
-    size *= 1.0 + uInk * 0.4;
-    gl_PointSize = max(size * (140.0 / -mv.z), 0.8 + uInk * 0.6);
+    // The thread is drawn a size up so it reads as a line, not stray dust —
+    // less so at the head, where the beads already sit just under the
+    // artifact's own mote size and would out-render it.
+    size *= 1.0 + uWeight * 0.4 * (1.0 - hot * 0.6);
+    gl_PointSize = max(size * (140.0 / -mv.z), 0.8 + uWeight * 0.6);
 
     // The way back is quieter than the way forward, but it is still there —
     // the rooms you have walked through are the point of the piece.
     float a = mix(0.32, 0.75, ahead) + hot * 0.66 + flow * 0.26 + uHover * ahead * 0.18;
     a = min(a, 0.95);
     // ...and the walked stretch keeps more of its weight, for the same reason.
-    a = mix(a, min(a * 1.35 + 0.12, 1.0), uInk);
+    a = mix(a, min(a * 1.35 + 0.12, 1.0), uWeight);
     // Slower falloff than the cloud's: the track's whole job is to be legible
     // further out than the thing it leads to.
     a *= exp(-max(-mv.z - 60.0, 0.0) * 0.005);
@@ -349,6 +350,7 @@ export function LabPath({ walkTRef, dimRef, motionScaleRef }: LabPathProps) {
       uAccent: { value: new THREE.Color("#c8ff4d") },
       uSlate: { value: new THREE.Color("#4a5468") },
       uInk: { value: 0 },
+      uWeight: { value: 0 },
     }),
     [],
   );
