@@ -6,6 +6,7 @@ import { SITE } from "@/content/site";
 import { BEATS, BEAT_T, beatForRoute } from "@/lib/story";
 import { useStoryStore } from "@/lib/story-store";
 import { SoundToggle } from "@/components/sound-toggle";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 /**
  * Narrative chrome: identity top-left, sound + contact top-right, and a
@@ -46,7 +47,7 @@ export function Chrome() {
 
         {/* Whole chrome cluster stays behind entrance-hide so the cold start
             owns the frame — sound arrives with the rest of the app. */}
-        <div className="entrance-hide pointer-events-auto flex items-center gap-4">
+        <div className="entrance-hide pointer-events-auto flex items-center gap-3 sm:gap-4">
           <Link
             href="/humans"
             aria-current={pathname === "/humans" ? "page" : undefined}
@@ -78,6 +79,7 @@ export function Chrome() {
               ← Journey
             </Link>
           )}
+          <ThemeToggle />
           <SoundToggle />
         </div>
       </div>

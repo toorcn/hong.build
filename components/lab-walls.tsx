@@ -6,6 +6,7 @@ import * as THREE from "three";
 import { BEATS, BEAT_COUNT, BEAT_T, CLEAR_RADIUS, ROOMS, framingFor } from "@/lib/story";
 import { entranceSignal } from "@/lib/entrance";
 import { cursorSignal } from "@/lib/cursor-signal";
+import { sceneBlend, useSceneScheme } from "@/lib/scheme";
 
 /**
  * The rooms' walls.
@@ -361,6 +362,8 @@ const FRAG = /* glsl */ `
 
   uniform vec3 uAccent;
   uniform vec3 uSlate;
+  // 1 on paper: colours are premultiplied for the multiply blend (lib/scheme.ts).
+  uniform float uInk;
 
   varying float vAlpha;
   varying float vWarm;
@@ -372,7 +375,8 @@ const FRAG = /* glsl */ `
     float soft = smoothstep(0.5, 0.12, d);
 
     vec3 col = mix(uSlate, uAccent, vWarm);
-    gl_FragColor = vec4(col, soft * vAlpha);
+    float alpha = soft * vAlpha;
+    gl_FragColor = vec4(col * mix(1.0, min(alpha, 1.0), uInk), alpha);
   }
 `;
 
@@ -448,9 +452,11 @@ export function LabWalls({
       uConeSlope: { value: 0.3 },
       uAccent: { value: new THREE.Color("#c8ff4d") },
       uSlate: { value: new THREE.Color("#4a5468") },
+      uInk: { value: 0 },
     }),
     [],
   );
+  const scheme = useSceneScheme(materialRef);
 
   const scratch = useMemo(() => new THREE.Vector3(), []);
 
@@ -510,7 +516,7 @@ export function LabWalls({
         uniforms={uniforms}
         transparent
         depthWrite={false}
-        blending={THREE.AdditiveBlending}
+        {...sceneBlend(scheme)}
       />
     </points>
   );

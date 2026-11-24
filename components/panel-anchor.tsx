@@ -58,7 +58,7 @@ export function PanelAnchor({ beat: given }: { beat?: number } = {}) {
             key={beat.id}
             className={`block rounded-full transition-all duration-300 ${
               beat.id === held
-                ? "h-1.5 w-1.5 bg-accent shadow-[0_0_10px_rgba(200,255,77,0.6)]"
+                ? "h-1.5 w-1.5 bg-accent shadow-[0_0_10px_color-mix(in_srgb,var(--color-accent)_60%,transparent)]"
                 : "h-1 w-1 bg-type-faint"
             }`}
           />

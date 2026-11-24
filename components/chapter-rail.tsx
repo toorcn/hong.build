@@ -79,7 +79,7 @@ export function ChapterRail() {
               <span
                 className={`block h-px transition-all duration-300 ${
                   active
-                    ? "w-4 bg-accent shadow-[0_0_10px_rgba(200,255,77,0.7)]"
+                    ? "w-4 bg-accent shadow-[0_0_10px_color-mix(in_srgb,var(--color-accent)_70%,transparent)]"
                     : "w-2 bg-type-faint group-hover:w-3 group-hover:bg-type-dim"
                 }`}
               />

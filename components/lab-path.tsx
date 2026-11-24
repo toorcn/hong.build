@@ -17,6 +17,7 @@ import { entranceSignal } from "@/lib/entrance";
 import { useStoryStore } from "@/lib/story-store";
 import { sound } from "@/lib/sound";
 import { resetTrailSignal, setTrailHot, setTrailVector } from "@/lib/trail-signal";
+import { sceneBlend, useSceneScheme } from "@/lib/scheme";
 
 /**
  * The track — the journey made visible.
@@ -92,6 +93,7 @@ const VERT = /* glsl */ `
   uniform float uReveal;
   uniform float uFlow;    // 0 under reduced motion — the track goes static
   uniform float uHover;   // 0..1 — pointer is over the track
+  uniform float uInk;     // 1 in the light scheme (lib/scheme.ts)
 
   varying float vHot;
   varying float vFlow;
@@ -122,12 +124,17 @@ const VERT = /* glsl */ `
     float size = mix(0.66, 1.35, aNode) + near * 0.35 + uHover * ahead * local * 0.2;
     // Floored so the far stretch doesn't drop below a pixel and start to
     // sparkle; the fog below is what takes distance out, not point size.
-    gl_PointSize = max(size * (140.0 / -mv.z), 0.8);
+    // In ink the thread is drawn a size up: a pale mote glows on black, but
+    // on a bright sky it needs area to register at all.
+    size *= 1.0 + uInk * 0.4;
+    gl_PointSize = max(size * (140.0 / -mv.z), 0.8 + uInk * 0.6);
 
     // The way back is quieter than the way forward, but it is still there —
     // the rooms you have walked through are the point of the piece.
     float a = mix(0.32, 0.75, ahead) + hot * 0.66 + flow * 0.26 + uHover * ahead * 0.18;
     a = min(a, 0.95);
+    // ...and the walked stretch keeps more of its weight, for the same reason.
+    a = mix(a, min(a * 1.35 + 0.12, 1.0), uInk);
     // Slower falloff than the cloud's: the track's whole job is to be legible
     // further out than the thing it leads to.
     a *= exp(-max(-mv.z - 60.0, 0.0) * 0.005);
@@ -144,6 +151,8 @@ const FRAG = /* glsl */ `
 
   uniform vec3 uAccent;
   uniform vec3 uSlate;
+  // 1 on paper: colours are premultiplied for the multiply blend (lib/scheme.ts).
+  uniform float uInk;
 
   varying float vHot;
   varying float vFlow;
@@ -157,7 +166,8 @@ const FRAG = /* glsl */ `
 
     float warm = clamp(vHot * 0.85 + vFlow * 0.5, 0.0, 1.0);
     vec3 col = mix(uSlate, uAccent, warm);
-    gl_FragColor = vec4(col, soft * vAlpha);
+    float alpha = soft * vAlpha;
+    gl_FragColor = vec4(col * mix(1.0, min(alpha, 1.0), uInk), alpha);
   }
 `;
 
@@ -338,9 +348,11 @@ export function LabPath({ walkTRef, dimRef, motionScaleRef }: LabPathProps) {
       uHover: { value: 0 },
       uAccent: { value: new THREE.Color("#c8ff4d") },
       uSlate: { value: new THREE.Color("#4a5468") },
+      uInk: { value: 0 },
     }),
     [],
   );
+  const scheme = useSceneScheme(materialRef, "trail");
 
   const scratch = useMemo(
     () => ({
@@ -472,7 +484,7 @@ export function LabPath({ walkTRef, dimRef, motionScaleRef }: LabPathProps) {
           uniforms={uniforms}
           transparent
           depthWrite={false}
-          blending={THREE.AdditiveBlending}
+          {...sceneBlend(scheme)}
         />
       </points>
       {/* Invisible hit tube. Click travels to the chapter the arrow names. */}
