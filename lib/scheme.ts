@@ -28,8 +28,11 @@ interface Inks {
 interface ScenePalette extends Inks {
   /** Clear colour, and what shows before the sky has drawn. */
   ground: string;
-  /** The route between rooms. Its own inks where the shared ones lose it. */
-  trail?: Inks;
+  /**
+   * The route between rooms: its own inks, and `weight` (0..1) for how much
+   * bigger and more opaque its motes are drawn than the shaders' defaults.
+   */
+  trail?: Inks & { weight: number };
   /** A sky behind the scene instead of the flat ground (components/lab-sky.tsx). */
   sky?: SkyPalette;
 }
@@ -37,19 +40,26 @@ interface ScenePalette extends Inks {
 /**
  * Scene colours per scheme. Keep in step with the tokens in app/globals.css.
  *
- * Light is a dawn sky: indigo ink on blue falling to peach. The trail gets
- * heavier inks than the dust it runs through, because a thread of pale motes
- * is a glow on black but nearly nothing on a bright sky.
+ * Light is a dawn sky: indigo ink on blue falling to peach. In both schemes
+ * the trail gets its own inks and extra weight, so it reads as a thread
+ * through the dust rather than more dust. On black its resting colour is a
+ * dim lime rather than the dust's slate, so even the stretch behind you is
+ * recognisably the route.
  */
 export const SCENE: Record<Scheme, ScenePalette> = {
   light: {
     ground: "#dfe6f6",
     accent: "#27248f",
     slate: "#9aa6cf",
-    trail: { accent: "#1d1a7a", slate: "#5b60c4" },
+    trail: { accent: "#1d1a7a", slate: "#5b60c4", weight: 1 },
     sky: { top: "#9fbcee", mid: "#d3cff2", low: "#f8d6c4", glow: "#ffe9cc" },
   },
-  dark: { ground: "#0a0b0d", accent: "#c8ff4d", slate: "#4a5468" },
+  dark: {
+    ground: "#0a0b0d",
+    accent: "#c8ff4d",
+    slate: "#4a5468",
+    trail: { accent: "#d6ff70", slate: "#7d9a3e", weight: 0.75 },
+  },
 };
 
 /**
@@ -102,6 +112,7 @@ export function useSceneScheme(
       if (ink) c.setRGB(1 - c.r, 1 - c.g, 1 - c.b);
     }
     if (m.uniforms.uInk) m.uniforms.uInk.value = ink ? 1 : 0;
+    if (m.uniforms.uWeight) m.uniforms.uWeight.value = (layer === "trail" && palette.trail?.weight) || 0;
   }, -1);
   return scheme;
 }
