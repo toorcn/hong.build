@@ -1,3 +1,5 @@
+import ThemeToggle from './ThemeToggle'
+
 /** Mirrors the hong.build chrome: identity top-left, a way back to the journey top-right. */
 export default function Header() {
   return (
@@ -24,6 +26,7 @@ export default function Header() {
           >
             ← Journey
           </a>
+          <ThemeToggle />
         </nav>
       </div>
     </header>

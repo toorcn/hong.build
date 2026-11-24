@@ -1,16 +1,20 @@
 @import "tailwindcss";
 
-/* Same tokens as hong.build (app/globals.css) so the manual reads as part of the lab. */
+/*
+ * Light first, and the light is hong.build's dawn sky (app/globals.css): pale
+ * mist surfaces, navy type, indigo signal. Token names are unchanged, so
+ * "void" is simply the surface colour in whichever scheme is active.
+ */
 @theme {
-  --color-void: #0a0b0d;
-  --color-void-raised: #101216;
-  --color-panel: #14161b;
-  --color-line: #23262e;
-  --color-type: #edede8;
-  --color-type-dim: #9aa0ab;
-  --color-type-faint: #5b626e;
-  --color-accent: #c8ff4d;
-  --color-accent-dim: #8fb53a;
+  --color-void: #eef2fb;
+  --color-void-raised: #e3e9f8;
+  --color-panel: #d9e1f4;
+  --color-line: #b9c5e2;
+  --color-type: #151b3d;
+  --color-type-dim: #3a416a;
+  --color-type-faint: #4f567c;
+  --color-accent: #3730c4;
+  --color-accent-dim: #5a54d4;
 
   --font-display: "Archivo", "Arial Narrow", sans-serif;
   --font-mono: "JetBrains Mono", "SF Mono", Menlo, monospace;
@@ -20,7 +24,43 @@
 }
 
 :root {
+  color-scheme: light;
+  /*
+   * The same sky as the journey, a few shades paler because this page is for
+   * reading: blue falling to peach, held to the viewport, with two soft banks
+   * of cloud. Body copy scrolls over it.
+   */
+  --page-background:
+    radial-gradient(55% 22% at 18% 26%, rgb(255 255 255 / 0.7), transparent 70%),
+    radial-gradient(60% 20% at 82% 58%, rgb(255 255 255 / 0.6), transparent 70%),
+    linear-gradient(to bottom, #b9cdf3, #dedcf6 55%, #fbe3d3);
+}
+
+/* Dark: the same tokens as hong.build (app/globals.css), one turn of the sky
+   dial away, so it reads as part of the lab. */
+:root[data-theme="dark"] {
   color-scheme: dark;
+  --color-void: #0a0b0d;
+  --color-void-raised: #101216;
+  --color-panel: #14161b;
+  --color-line: #23262e;
+  --color-type: #edede8;
+  --color-type-dim: #9aa0ab;
+  --color-type-faint: #5b626e;
+  --color-accent: #c8ff4d;
+  --color-accent-dim: #8fb53a;
+  --page-background: var(--color-void);
+}
+
+/*
+ * The point-cloud banners are rendered on black. In light they are flipped to
+ * ink drawings: inverting turns the lines dark and the lime to indigo, the
+ * contrast push clips the ground to pure white, and multiply lets that white
+ * take the sky behind it so the plate has no visible edge.
+ */
+:root:not([data-theme="dark"]) .art-plate {
+  filter: invert(1) contrast(1.35);
+  mix-blend-mode: multiply;
 }
 
 html {
@@ -42,7 +82,9 @@ html {
 }
 
 body {
-  background: var(--color-void);
+  /* The sky in light; a flat page in dark (see --page-background above). */
+  background: var(--page-background);
+  background-attachment: fixed;
   color: var(--color-type);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
@@ -131,4 +173,181 @@ body {
 
 .no-scrollbar::-webkit-scrollbar {
   display: none;
+}
+/* ---------- Sky dial (theme toggle) ---------- */
+
+/*
+ * A round window onto a small sky. The sun and moon sit on opposite ends of
+ * one wheel pivoted below the horizon, so a half turn sets one and raises the
+ * other. Everything keys off data-theme on <html>, so it paints correctly
+ * before any script has run.
+ */
+.sky-dial {
+  background: none;
+  border: 0;
+  border-radius: 999px;
+  padding: 0;
+  display: inline-flex;
+  position: relative;
+  flex: none;
+  cursor: pointer;
+}
+.sky-dial::before {
+  content: "";
+  border-radius: inherit;
+  position: absolute;
+  inset: -6px;
+}
+.sky-dial-window {
+  border: 1px solid var(--color-line);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  box-shadow: 0 0 18px -8px color-mix(in srgb, var(--color-accent) 45%, transparent);
+  transition: border-color 0.32s var(--ease-signal), box-shadow 0.42s var(--ease-signal), transform 0.42s var(--ease-signal);
+}
+.sky-dial:hover .sky-dial-window,
+.sky-dial:focus-visible .sky-dial-window {
+  border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-line));
+  box-shadow: 0 0 26px -8px color-mix(in srgb, var(--color-accent) 60%, transparent);
+}
+.sky-dial:active .sky-dial-window {
+  transition-duration: 90ms;
+  transform: scale(0.94);
+}
+
+.sky-dial-day,
+.sky-dial-night {
+  position: absolute;
+  inset: 0;
+  transition: opacity 0.7s var(--ease-signal);
+}
+.sky-dial-day {
+  background: linear-gradient(to bottom, #8fb0ec, #cfc9f1 55%, #f9d2bb);
+}
+.sky-dial-night {
+  opacity: 0;
+  background:
+    radial-gradient(circle at 22% 30%, #edede8 0 0.6px, transparent 1px),
+    radial-gradient(circle at 72% 20%, #edede8 0 0.6px, transparent 1px),
+    radial-gradient(circle at 80% 48%, #9aa0ab 0 0.5px, transparent 0.9px),
+    radial-gradient(circle at 34% 54%, #9aa0ab 0 0.5px, transparent 0.9px),
+    radial-gradient(circle at 54% 12%, #c8ff4d 0 0.6px, transparent 1px),
+    radial-gradient(circle at 50% 120%, #1b2030, #0a0b0d 70%);
+}
+:root[data-theme="dark"] .sky-dial-night {
+  opacity: 1;
+}
+
+/* Zero-size pivot just under the horizon; the bodies hang off it. */
+.sky-dial-wheel {
+  position: absolute;
+  left: 50%;
+  top: 76%;
+  width: 0;
+  height: 0;
+  z-index: 1;
+  /* A touch of overshoot, so the wheel settles like a mechanism. */
+  transition: transform 0.95s cubic-bezier(0.34, 1.3, 0.64, 1);
+}
+:root[data-theme="dark"] .sky-dial-wheel {
+  transform: rotate(180deg);
+}
+.sky-dial-sun,
+.sky-dial-moon {
+  position: absolute;
+  left: -5.5px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+}
+.sky-dial-sun {
+  top: -18.5px;
+  background: #fff6e0;
+  box-shadow: 0 0 0 2px rgb(255 226 170 / 0.55), 0 0 10px 3px rgb(255 200 125 / 0.75);
+}
+/* A crescent: a clear disc with a slice of shadow drawn inside its rim.
+   Pre-turned half a rotation so it stands upright once the wheel has turned. */
+.sky-dial-moon {
+  top: 7.5px;
+  transform: rotate(180deg);
+  box-shadow: inset -3.5px -1.5px 0 0 #c8ff4d;
+  filter: drop-shadow(0 0 3px rgb(200 255 77 / 0.65));
+}
+
+.sky-dial-cloud {
+  position: absolute;
+  left: 4px;
+  top: 15px;
+  width: 12px;
+  height: 4.5px;
+  border-radius: 5px;
+  background: rgb(255 255 255 / 0.92);
+  box-shadow: 4px -2.5px 0 -0.5px rgb(255 255 255 / 0.92);
+  z-index: 2;
+  animation: sky-dial-drift 7s ease-in-out infinite alternate;
+  transition: opacity 0.5s var(--ease-signal);
+}
+:root[data-theme="dark"] .sky-dial-cloud {
+  opacity: 0;
+}
+@keyframes sky-dial-drift {
+  from {
+    translate: -1.5px 0;
+  }
+  to {
+    translate: 5px 0;
+  }
+}
+
+/* The horizon, which is also what the setting body disappears behind. */
+.sky-dial-ground {
+  position: absolute;
+  inset: 76% 0 0;
+  background: var(--color-void);
+  border-top: 1px solid var(--color-line);
+  z-index: 3;
+  transition: background-color 0.7s var(--ease-signal), border-color 0.7s var(--ease-signal);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sky-dial-wheel,
+  .sky-dial-day,
+  .sky-dial-night,
+  .sky-dial-cloud,
+  .sky-dial-ground {
+    transition: none;
+  }
+  .sky-dial-cloud {
+    animation: none;
+  }
+}
+
+/*
+ * Turning the dial turns the page: the new scheme opens in a circle from the
+ * dial (--reveal-* are set by the toggle). Scoped to data-theme-reveal so no
+ * other view transition inherits it.
+ */
+html[data-theme-reveal]::view-transition-old(root),
+html[data-theme-reveal]::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+html[data-theme-reveal]::view-transition-old(root) {
+  z-index: 1;
+}
+html[data-theme-reveal]::view-transition-new(root) {
+  z-index: 2;
+  animation: theme-reveal 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes theme-reveal {
+  from {
+    clip-path: circle(0 at var(--reveal-x) var(--reveal-y));
+  }
+  to {
+    clip-path: circle(var(--reveal-r) at var(--reveal-x) var(--reveal-y));
+  }
 }

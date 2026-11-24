@@ -12,6 +12,7 @@ import { cursorSignal } from "@/lib/cursor-signal";
 import { clearCloudHot, cloudSignal, setCloudHot } from "@/lib/cloud-signal";
 import { resetTrailSignal } from "@/lib/trail-signal";
 import type { HandoffPreview } from "@/lib/panel-handoff";
+import { sceneBlend, useSceneScheme } from "@/lib/scheme";
 
 /** What the cursor's preview card shows for each chapter that opens a route. */
 const PREVIEWS: (HandoffPreview | null)[] = BEATS.map((b) =>
@@ -268,6 +269,8 @@ const FRAG = /* glsl */ `
 
   uniform vec3 uAccent;
   uniform vec3 uSlate;
+  // 1 on paper: colours are premultiplied for the multiply blend (lib/scheme.ts).
+  uniform float uInk;
   uniform float uDim;
 
   varying float vResolve;
@@ -281,7 +284,8 @@ const FRAG = /* glsl */ `
     vec2 uv = gl_PointCoord - 0.5;
     float d = length(uv);
     if (d > 0.5) discard;
-    float soft = smoothstep(0.5, 0.28, d);
+    // On the sky the motes lose their hard rim and read as soft ink blots.
+    float soft = smoothstep(0.5, mix(0.28, 0.14, uInk), d);
 
     vec3 col = mix(uSlate, uAccent, vResolve);
     col *= 0.85 + vSeed * 0.3;
@@ -293,7 +297,7 @@ const FRAG = /* glsl */ `
     float alpha = soft * mix(0.45, 1.0, vResolve) * (1.0 - vGhost * 0.45);
     alpha *= (1.0 - uDim * 0.5) * vBirth * vFade;
     alpha += soft * vTouch * 0.3 * vBirth * vFade;
-    gl_FragColor = vec4(col, alpha);
+    gl_FragColor = vec4(col * mix(1.0, min(alpha, 1.0), uInk), alpha);
   }
 `;
 
@@ -409,9 +413,11 @@ export function LabCloud({
       uConeSlope: { value: 0.22 },
       uAccent: { value: new THREE.Color("#c8ff4d") },
       uSlate: { value: new THREE.Color("#4a5468") },
+      uInk: { value: 0 },
     }),
     [],
   );
+  const scheme = useSceneScheme(materialRef);
 
   /** Scratch for deriving the pointer ray; reused so the frame loop is allocation-free. */
   const scratch = useMemo(() => new THREE.Vector3(), []);
@@ -535,7 +541,7 @@ export function LabCloud({
         uniforms={uniforms}
         transparent
         depthWrite={false}
-        blending={THREE.AdditiveBlending}
+        {...sceneBlend(scheme)}
       />
     </points>
   );

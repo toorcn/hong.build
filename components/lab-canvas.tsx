@@ -13,6 +13,8 @@ import { LabWalls } from "@/components/lab-walls";
 import { LabRig } from "@/components/lab-rig";
 import { LabEffects } from "@/components/lab-effects";
 import { PanelSurface } from "@/components/panel-surface";
+import { LabSky } from "@/components/lab-sky";
+import { SCENE, useScheme } from "@/lib/scheme";
 
 function useIsMobile(): boolean {
   const [mobile, setMobile] = useState(false);
@@ -31,6 +33,7 @@ export function LabCanvas() {
   const setReducedMotion = useLabStore((s) => s.setReducedMotion);
   const reducedMotion = useLabStore((s) => s.reducedMotion);
   const mobile = useIsMobile();
+  const scheme = useScheme();
 
   const [webgl, setWebglOk] = useState<boolean | null>(null);
   const [data, setData] = useState<FragmentData | null>(null);
@@ -100,7 +103,8 @@ export function LabCanvas() {
       gl={{ antialias: false, alpha: true, powerPreference: "high-performance" }}
       frameloop="always"
     >
-      <color attach="background" args={["#0a0b0d"]} />
+      <color attach="background" args={[SCENE[scheme].ground]} />
+      {SCENE[scheme].sky ? <LabSky sky={SCENE[scheme].sky} /> : null}
       <Suspense fallback={null}>
         {data && data.beats === BEAT_TARGET_COUNT ? (
           <LabCloud

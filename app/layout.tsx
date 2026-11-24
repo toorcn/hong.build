@@ -3,6 +3,7 @@ import { Archivo, Inter, JetBrains_Mono } from "next/font/google";
 import type { ReactNode } from "react";
 import { SITE } from "@/content/site";
 import { ENTRANCE_BOOT_SCRIPT } from "@/lib/entrance-boot";
+import { THEME_BOOT_SCRIPT, THEME_COLOR } from "@/lib/theme-boot";
 import { LabScene } from "@/components/lab-scene";
 import { ColdStart } from "@/components/cold-start";
 import { Chrome } from "@/components/chrome";
@@ -46,7 +47,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0a0b0d",
+  themeColor: THEME_COLOR.light,
   width: "device-width",
   initialScale: 1,
 };
@@ -62,6 +63,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         {/* Hides the chrome before first paint so the entrance isn't preceded
             by a flash of the name it exists to reveal. See entrance-boot.ts. */}
         <script dangerouslySetInnerHTML={{ __html: ENTRANCE_BOOT_SCRIPT }} />
+        {/* Applies a remembered dark choice before first paint. See theme-boot.ts. */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
       </head>
       <body>
         {/* Persistent scene — fixed behind everything, never unmounts. */}

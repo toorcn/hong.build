@@ -13,7 +13,7 @@ export default function Art({ name, className = '' }: { name: string; className?
         alt=""
         loading={name === 'hall' ? 'eager' : 'lazy'}
         decoding="async"
-        className="h-full w-full object-cover [mask-image:linear-gradient(to_bottom,#000_70%,transparent)]"
+        className="art-plate h-full w-full object-cover [mask-image:linear-gradient(to_bottom,#000_70%,transparent)]"
       />
     </div>
   )
