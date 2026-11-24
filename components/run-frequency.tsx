@@ -23,7 +23,7 @@ type Outcome = "placed" | "mentored" | "nothing";
 const SEGMENTS: readonly {
   key: Outcome;
   label: string;
-  /** Tailwind text class for the inline label, matches glyphFor on /notes. */
+  /** Tailwind text class for the inline label, matches glyphFor on /hackathons. */
   text: string;
   /** Inline fill — accent for wins, dim for mentored, faint for blanks. */
   fill: string;

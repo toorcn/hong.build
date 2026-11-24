@@ -60,7 +60,7 @@ export const VANTAGES: readonly Vantage[] = [
     elevationDeg: 12,
     code: "V3",
     label: "SIGNALS",
-    route: "/notes",
+    route: "/hackathons",
   },
   {
     id: 4,

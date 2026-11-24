@@ -1,5 +1,7 @@
 "use client";
 
+import { FRAGMENT_VERSION } from "./generated/fragments-meta";
+
 /**
  * Loads public/fragments.bin (v3 walk layout).
  * Header: magic(4) version(4) count(4) beats(4), then
@@ -63,7 +65,7 @@ async function readWithProgress(res: Response, onProgress?: ProgressFn): Promise
 
 export function loadFragments(onProgress?: ProgressFn): Promise<FragmentData> {
   if (cache) return cache;
-  cache = fetch("/fragments.bin")
+  cache = fetch(`/fragments.bin?v=${FRAGMENT_VERSION}`)
     .then((r) => {
       if (!r.ok) throw new Error(`fragments.bin ${r.status}`);
       return readWithProgress(r, onProgress);

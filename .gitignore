@@ -25,7 +25,6 @@ next-env.d.ts
 # local ambient listen/select pack (not for commit)
 /public/audio/candidates/
 
-node_modules/
 .wrangler/
 
 # brainstorm companion mockups
@@ -33,3 +32,12 @@ node_modules/
 
 # local Worker secrets for `wrangler dev`
 .dev.vars
+
+# local env and Cloudflare
+.env
+.env.*
+!.env.example
+
+# editors
+.vscode/
+.idea/

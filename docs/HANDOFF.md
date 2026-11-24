@@ -1,4 +1,4 @@
-# Handoff — hongbing.dev narrative journey
+# Handoff — hong.build narrative journey
 
 For the next agent. Read this before touching the scene.
 
@@ -107,7 +107,7 @@ Still open:
   `executablePath` pointed at the cached binary and
   `--use-angle=swiftshader --enable-unsafe-swiftshader`. Arc does NOT work
   headless (hangs); don't try. Screenshots land in `public/preview/`.
-- CPU legibility proofs (no GPU): `scripts/render-morph-checks.ts` renders
+- CPU legibility proofs (no GPU): `scripts/render-walk-checks.ts` (`npm run check:walk`) renders
   each beat + a dissolve midpoint from `fragments.bin` — run this BEFORE
   browser testing when touching the generator.
 

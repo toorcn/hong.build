@@ -5,8 +5,7 @@
  *
  * Everything is drawn in a 1000 x 1000 viewBox centered on (500, 500).
  *
- * INDICES MATCH BEAT IDS — silhouettes[n] is beat n's artifact. Reorder a
- * beat and you reorder these.
+ * Each beat selects its artifact using its `silhouette` index.
  *
  * ── What these have to survive ──────────────────────────────────────────
  *
@@ -264,7 +263,7 @@ export const SILHOUETTES: readonly string[] = [
 
   // ── 09 · THE RUN ───────────────────────────────────────────────────────
   // Entries per year, to scale, with a tick under each year. Derived from
-  // BY_YEAR in content/awards.ts: 2022:2 2023:4 2024:8 2025:10 2026:9,
+  // BY_YEAR in content/awards.ts: 2022:2 2023:4 2024:8 2025:12 2026:12,
   // at 52 units per entry. If the log changes, redraw these bars and
   // re-run `npm run fragments`.
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">
@@ -272,8 +271,8 @@ export const SILHOUETTES: readonly string[] = [
       <rect x="145" y="656" width="110" height="104"/>
       <rect x="295" y="552" width="110" height="208"/>
       <rect x="445" y="344" width="110" height="416"/>
-      <rect x="595" y="240" width="110" height="520"/>
-      <rect x="745" y="292" width="110" height="468"/>
+      <rect x="595" y="136" width="110" height="624"/>
+      <rect x="745" y="136" width="110" height="624"/>
       <rect x="120" y="782" width="760" height="16"/>
       <rect x="192" y="812" width="16" height="40"/>
       <rect x="342" y="812" width="16" height="40"/>
@@ -291,5 +290,22 @@ export const SILHOUETTES: readonly string[] = [
       font-size="218" letter-spacing="2" fill="#fff">HONG</text>
     <text x="500" y="640" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900"
       font-size="218" letter-spacing="2" fill="#fff">BING</text>
+  </svg>`,
+  // HARE — based on the owner's HackMIT post photos: two luminous eyes on
+  // a screen mounted above a quadruped chassis. Outline-only face preserves
+  // the eye gaps in the alpha mask; four bent legs keep the hardware legible.
+  // Source: linkedin.com/feed/update/urn:li:activity:7513761391082729472/
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">
+    <g fill="none" stroke="#fff" stroke-width="28" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="310" y="185" width="380" height="240" rx="32"/>
+      <path d="M450 430 V490 M550 430 V490"/>
+      <path d="M260 520 L350 475 H680 L750 520 L670 585 H330 Z"/>
+      <path d="M350 495 L285 650 L330 750 M660 495 L725 650 L680 750"/>
+      <path d="M300 560 L210 690 L250 820 M700 560 L790 690 L750 820"/>
+    </g>
+    <g fill="#fff">
+      <rect x="385" y="270" width="65" height="65" rx="24"/>
+      <rect x="550" y="270" width="65" height="65" rx="24"/>
+    </g>
   </svg>`,
 ] as const;

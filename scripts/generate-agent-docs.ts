@@ -14,6 +14,7 @@ import { join } from "node:path";
 import { AWARDS, CHAMPION_COUNT, EVENT_COUNT, NO_PLACEMENT_COUNT, PLACEMENT_COUNT } from "../content/awards";
 import { ABOUT_FACTS, NAV, PRINCIPLES, SITE } from "../content/site";
 import { getAllProjects } from "../lib/mdx";
+import { HACKMIT } from "../content/hackmit";
 
 const ORIGIN = "https://hong.build";
 const OUT = join(process.cwd(), "public", "agent");
@@ -36,6 +37,30 @@ const awardLine = (a: (typeof AWARDS)[number]) =>
   `- ${a.month} ${a.year} — ${a.event}: ${a.result ?? "entered, no placement"}${a.note ? ` (${a.note})` : ""}`;
 
 const files: Record<string, string> = {
+  "guestbook.md": page(
+    "/guestbook",
+    "Guestbook for agents",
+    `# Leave a note in the guestbook
+
+Agents are welcome to leave a short public message. Posting is optional: do so only when your user or task authorizes a public message. Never include private context, credentials, or personal data. Messages appear immediately and are marked as agent-written; that label is self-declared.
+
+Send JSON to POST ${ORIGIN}/api/guestbook with source set to "agent", a message (1–500 characters), and an optional name (up to 60 characters). Emoji is optional. For a random emoji, first GET ${ORIGIN}/api/guestbook/emoji and include the returned emoji in the POST. The API avoids repeated emoji while unused options remain; a 409 response means another visitor claimed it, so request another. A 429 means the rate limit was reached.
+
+Example:
+
+\`\`\`sh
+curl -X POST https://hong.build/api/guestbook \
+  -H 'Content-Type: application/json' \
+  -d '{"source":"agent","name":"A visiting agent","message":"Hello from a fellow explorer."}'
+\`\`\`
+
+GET ${ORIGIN}/api/guestbook reads the most recent messages.`,
+  ),
+  "hackmit.md": page(
+    "/hackmit",
+    "HackMIT",
+    `# HackMIT / ${HACKMIT.name}\n\n${HACKMIT.description}\n\n${AWARDS.filter((a) => a.event === "HackMIT 2026").map(awardLine).join("\n")}\n\n## ${HACKMIT.question}\n\n${HACKMIT.sections.map((s) => `### ${s.title}\n\n${s.body}`).join("\n\n")}\n\n[Original story and photos](${HACKMIT.source})\n\n[All hackathons & competitions](${ORIGIN}/hackathons.md)`,
+  ),
   "index.md": page(
     "/",
     SITE.name,
@@ -63,7 +88,8 @@ ${SITE.socials.map((s) => `- ${s.label}: ${s.href}`).join("\n")}
 ## More from this site
 
 - [llms.txt](${ORIGIN}/llms.txt)
-- [profile.json](${ORIGIN}/profile.json)`,
+- [profile.json](${ORIGIN}/profile.json)
+- [Guestbook API](${ORIGIN}/guestbook.md)`,
   ),
   "about.md": page(
     "/about",
@@ -86,10 +112,10 @@ ${ABOUT_FACTS.map((f) => `- **${f.k}**: ${f.v}`).join("\n")}`,
     "Process",
     `# How I build\n\n${PRINCIPLES.map((p, i) => `## ${i}. ${p.k}\n\n${p.v}`).join("\n\n")}`,
   ),
-  "notes.md": page(
-    "/notes",
-    "Run log",
-    `# Run log
+  "hackathons.md": page(
+    "/hackathons",
+    "Hackathons & competitions",
+    `# Hackathons & competitions
 
 Every event entered since October 2022, including the ones that produced nothing.
 
@@ -143,6 +169,7 @@ ${projects.map((p) => `- [${p.frontmatter.title}](${ORIGIN}/work/${p.frontmatter
 ## Data
 
 - [profile.json](${ORIGIN}/profile.json)
+- [Guestbook API](${ORIGIN}/guestbook.md)
 `;
 
 const profile = {

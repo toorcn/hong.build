@@ -1,16 +1,19 @@
 ---
-title: Run log
-url: https://hong.build/notes
+title: Hackathons & competitions
+url: https://hong.build/hackathons
 ---
 
-# Run log
+# Hackathons & competitions
 
 Every event entered since October 2022, including the ones that produced nothing.
 
-33 entered · 18 placed · 7 no placement · 6 won outright
+38 entered · 20 placed · 9 no placement · 6 won outright
 
-- aug 2026 — TalentLabs DevLeague: Mentor
-- jul 2026 — Codex Community Hackathon 2026 (OpenAI Build Week): Mentor · Technical
+- oct 2026 — MIT Hacking Medicine Malaysia 2026: Mentor
+- sep 2026 — HackMIT 2026: #1 Hardware — Special Prize (HARE — a prototype robot learning companion for preschoolers.)
+- sep 2026 — CodeNection 2026: Mentor
+- aug 2026 — Devin KL Hackathon 2026: Finalist
+- jul 2026 — Codex Community Hackathon 2026 (OpenAI Build Week), Kuala Lumpur: Technical mentor
 - jun 2026 — 'Sup × OpenAI Hackathon, Singapore: Champion — Overall (AUNTIE — trust-first AI copilot for SEA live commerce. 550+ international sign-ups.)
 - may 2026 — Beyond Hack 2026, Macau: 2nd — Innovation & Creativity
 - may 2026 — Lovable Vibeathon KL: Mentor · Preliminary Judge
@@ -27,11 +30,13 @@ Every event entered since October 2022, including the ones that produced nothing
 - jul 2025 — Top Coders 2025, Taylor's University: Top 2 — 1st runner-up
 - jul 2025 — FutureHack! A.I. Battlefield: Semi-finalist & Speaker
 - jul 2025 — Turboline × IIMS International Hackathon: Special Recognition
-- apr–jul 2025 — ViTrox Tech 4 Good 2025: Grand Finalist
 - jun 2025 — ImagineHack 2025: Best Technical Implementation
-- — 2025 — Loophole Hackathon 2025: Judges' Favourite
+- jun 2025 — Loophole Hackathon 2025: Judges' Favourite
+- apr–jul 2025 — ViTrox Tech 4 Good 2025: Grand Finalist
 - dec 2024 — Top Coders 2024, Taylor's University: Champion — Top 1
 - nov 2024 — PayNet PayHack 2024: Semi-finalist
+- nov 2024 — Deriv AI Hackathon: entered, no placement
+- oct 2024 — IIUM I-Hax: entered, no placement
 - oct 2024 — UCSI Hackathon — Cybersecurity Beyond Thinkable: Champion — Top 1 (The first one he won himself, two years after the first entry.)
 - aug 2024 — Google Workspace Hackathon 2024: Finalist — Top 7 of 400 · Popularity Champion
 - may 2024 — UM Programming League National: entered, no placement

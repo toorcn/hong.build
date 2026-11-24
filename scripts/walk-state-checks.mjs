@@ -38,7 +38,7 @@ const browser = await puppeteer.launch({ headless: true });
   await page.close();
 }
 
-// 2. Panel hold: deep link to /notes — camera must fly to room 5 and hold.
+// 2. Panel hold: deep link to /hackathons — camera must fly to room 5 and hold.
 {
   const page = await browser.newPage();
   await page.setViewport({ width: 1440, height: 900 });
@@ -47,11 +47,11 @@ const browser = await puppeteer.launch({ headless: true });
       sessionStorage.setItem("lab.entrance.seen", "1");
     } catch {}
   });
-  await page.goto(`${BASE}/notes`, { waitUntil: "networkidle0", timeout: 60000 });
+  await page.goto(`${BASE}/hackathons`, { waitUntil: "networkidle0", timeout: 60000 });
   await page.waitForSelector("canvas", { timeout: 30000 });
   await new Promise((r) => setTimeout(r, 4500));
   await page.screenshot({ path: `${OUT}/state-panel-notes.png` });
-  console.log("shot state-panel-notes (/notes deep link)");
+  console.log("shot state-panel-notes (/hackathons deep link)");
   await page.close();
 }
 

@@ -21,7 +21,7 @@ export interface Award {
   org?: string;
   /** Competitive programming rather than a build event. */
   compCode?: boolean;
-  /** Placement earned by a team he mentored, not competed on. */
+  /** Mentored rather than competed; result records the role or team's placement. */
   mentored?: boolean;
   /** One-line note for the log. */
   note?: string;
@@ -29,21 +29,44 @@ export interface Award {
   linkedin?: string;
 }
 
-export const AWARDS: readonly Award[] = [
+const LOGGED: readonly Award[] = [
   // ── 2026 ──────────────────────────────────────────────────────────────
   {
     year: 2026,
-    month: "aug",
-    event: "TalentLabs DevLeague",
+    month: "oct",
+    event: "MIT Hacking Medicine Malaysia 2026",
     result: "Mentor",
-    org: "TalentLabs",
+    org: "MIT",
     mentored: true,
   },
   {
     year: 2026,
+    month: "sep",
+    event: "HackMIT 2026",
+    result: "#1 Hardware — Special Prize",
+    org: "HackMIT",
+    note: "HARE — a prototype robot learning companion for preschoolers.",
+    linkedin: "https://www.linkedin.com/feed/update/urn:li:activity:7513761391082729472/",
+  },
+  {
+    year: 2026,
+    month: "sep",
+    event: "CodeNection 2026",
+    result: "Mentor",
+    mentored: true,
+  },
+  {
+    year: 2026,
+    month: "aug",
+    event: "Devin KL Hackathon 2026",
+    result: "Finalist",
+    org: "Cognition",
+  },
+  {
+    year: 2026,
     month: "jul",
-    event: "Codex Community Hackathon 2026 (OpenAI Build Week)",
-    result: "Mentor · Technical",
+    event: "Codex Community Hackathon 2026 (OpenAI Build Week), Kuala Lumpur",
+    result: "Technical mentor",
     org: "OpenAI",
     mentored: true,
   },
@@ -202,7 +225,7 @@ export const AWARDS: readonly Award[] = [
   },
   {
     year: 2025,
-    month: "—",
+    month: "jun",
     event: "Loophole Hackathon 2025",
     result: "Judges' Favourite",
     org: "Build Club MY",
@@ -224,6 +247,8 @@ export const AWARDS: readonly Award[] = [
     result: "Semi-finalist",
     org: "PayNet",
   },
+  { year: 2024, month: "nov", event: "Deriv AI Hackathon", result: null },
+  { year: 2024, month: "oct", event: "IIUM I-Hax", result: null },
   {
     year: 2024,
     month: "oct",
@@ -298,6 +323,18 @@ export const AWARDS: readonly Award[] = [
   },
 ] as const;
 
+const MONTHS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+
+/** Spans sort by their starting month; undated entries follow dated ones. */
+function monthIndex(month: string): number {
+  return MONTHS.indexOf(month.slice(0, 3));
+}
+
+/** Shared by the run log and generated documents, consistently newest first. */
+export const AWARDS: readonly Award[] = [...LOGGED].sort(
+  (a, b) => b.year - a.year || monthIndex(b.month) - monthIndex(a.month),
+);
+
 /** Every event entered. */
 export const EVENT_COUNT = AWARDS.length;
 
@@ -329,7 +366,7 @@ export const BY_YEAR: readonly { year: number; count: number }[] = [
 
 /**
  * Entries per year broken down by outcome, oldest first. The frequency chart
- * on /notes and silhouette 9 both read this — one source of truth.
+ * on /hackathons and silhouette 9 both read this — one source of truth.
  *
  * `placed` is a self-won result, `mentored` is a team he coached across, and
  * `nothing` is entered-no-placement. `total === placed + mentored + nothing`.

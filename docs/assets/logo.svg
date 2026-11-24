@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="HB">
+  <rect width="256" height="256" rx="36" fill="#0a0b0d"/>
+  <rect x="1" y="1" width="254" height="254" rx="35" fill="none" stroke="#23262e" stroke-width="2"/>
+  <circle cx="207" cy="133" r="1.0" fill="#4a5468" opacity="0.5"/><circle cx="49" cy="187" r="1.7" fill="#4a5468" opacity="0.5"/><circle cx="163" cy="203" r="2.6" fill="#4a5468" opacity="0.5"/><circle cx="187" cy="216" r="2.5" fill="#c8ff4d" opacity="0.5"/><circle cx="94" cy="66" r="2.8" fill="#4a5468" opacity="0.5"/><circle cx="223" cy="74" r="2.0" fill="#4a5468" opacity="0.5"/><circle cx="149" cy="21" r="2.1" fill="#4a5468" opacity="0.5"/><circle cx="168" cy="14" r="1.8" fill="#4a5468" opacity="0.5"/><circle cx="139" cy="169" r="1.4" fill="#4a5468" opacity="0.5"/><circle cx="58" cy="145" r="1.5" fill="#4a5468" opacity="0.5"/><circle cx="74" cy="76" r="1.1" fill="#c8ff4d" opacity="0.5"/><circle cx="195" cy="44" r="2.5" fill="#4a5468" opacity="0.5"/><circle cx="45" cy="242" r="1.7" fill="#c8ff4d" opacity="0.5"/><circle cx="200" cy="120" r="1.8" fill="#c8ff4d" opacity="0.5"/><circle cx="73" cy="18" r="2.5" fill="#4a5468" opacity="0.5"/><circle cx="222" cy="27" r="2.9" fill="#c8ff4d" opacity="0.5"/><circle cx="165" cy="212" r="1.9" fill="#4a5468" opacity="0.5"/><circle cx="51" cy="25" r="2.0" fill="#4a5468" opacity="0.5"/><circle cx="133" cy="182" r="2.5" fill="#4a5468" opacity="0.5"/><circle cx="76" cy="244" r="2.5" fill="#c8ff4d" opacity="0.5"/><circle cx="10" cy="136" r="2.5" fill="#4a5468" opacity="0.5"/><circle cx="164" cy="200" r="1.6" fill="#c8ff4d" opacity="0.5"/><circle cx="194" cy="195" r="1.7" fill="#c8ff4d" opacity="0.5"/><circle cx="224" cy="48" r="1.1" fill="#4a5468" opacity="0.5"/><circle cx="50" cy="200" r="2.9" fill="#c8ff4d" opacity="0.5"/><circle cx="117" cy="159" r="1.8" fill="#4a5468" opacity="0.5"/>
+  <rect x="29" y="65" width="16" height="16" fill="#c8ff4d"/>
+  <rect x="101" y="65" width="16" height="16" fill="#edede8"/>
+  <rect x="29" y="83" width="16" height="16" fill="#edede8"/>
+  <rect x="101" y="83" width="16" height="16" fill="#c8ff4d"/>
+  <rect x="29" y="101" width="16" height="16" fill="#edede8"/>
+  <rect x="101" y="101" width="16" height="16" fill="#edede8"/>
+  <rect x="29" y="119" width="16" height="16" fill="#c8ff4d"/>
+  <rect x="47" y="119" width="16" height="16" fill="#c8ff4d"/>
+  <rect x="65" y="119" width="16" height="16" fill="#c8ff4d"/>
+  <rect x="83" y="119" width="16" height="16" fill="#c8ff4d"/>
+  <rect x="101" y="119" width="16" height="16" fill="#c8ff4d"/>
+  <rect x="29" y="137" width="16" height="16" fill="#c8ff4d"/>
+  <rect x="101" y="137" width="16" height="16" fill="#c8ff4d"/>
+  <rect x="29" y="155" width="16" height="16" fill="#c8ff4d"/>
+  <rect x="101" y="155" width="16" height="16" fill="#edede8"/>
+  <rect x="29" y="173" width="16" height="16" fill="#c8ff4d"/>
+  <rect x="101" y="173" width="16" height="16" fill="#edede8"/>
+  <rect x="137" y="65" width="16" height="16" fill="#c8ff4d"/>
+  <rect x="155" y="65" width="16" height="16" fill="#c8ff4d"/>
+  <rect x="173" y="65" width="16" height="16" fill="#c8ff4d"/>
+  <rect x="191" y="65" width="16" height="16" fill="#c8ff4d"/>
+  <rect x="137" y="83" width="16" height="16" fill="#c8ff4d"/>
+  <rect x="209" y="83" width="16" height="16" fill="#c8ff4d"/>
+  <rect x="137" y="101" width="16" height="16" fill="#c8ff4d"/>
+  <rect x="209" y="101" width="16" height="16" fill="#c8ff4d"/>
+  <rect x="137" y="119" width="16" height="16" fill="#edede8"/>
+  <rect x="155" y="119" width="16" height="16" fill="#c8ff4d"/>
+  <rect x="173" y="119" width="16" height="16" fill="#c8ff4d"/>
+  <rect x="191" y="119" width="16" height="16" fill="#c8ff4d"/>
+  <rect x="137" y="137" width="16" height="16" fill="#edede8"/>
+  <rect x="209" y="137" width="16" height="16" fill="#c8ff4d"/>
+  <rect x="137" y="155" width="16" height="16" fill="#edede8"/>
+  <rect x="209" y="155" width="16" height="16" fill="#c8ff4d"/>
+  <rect x="137" y="173" width="16" height="16" fill="#c8ff4d"/>
+  <rect x="155" y="173" width="16" height="16" fill="#edede8"/>
+  <rect x="173" y="173" width="16" height="16" fill="#c8ff4d"/>
+  <rect x="191" y="173" width="16" height="16" fill="#c8ff4d"/>
+</svg>

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { useLabStore } from "@/lib/store";
+import "./directory-transition.css";
 
 /**
  * Route-change transitions. A few authored fades with consistent easing —
@@ -40,7 +41,9 @@ export function PageTransition({ children }: { children: ReactNode }) {
       className="transition-opacity duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
       style={{ opacity: visible ? 1 : 0 }}
     >
-      {children}
+      {pathname === "/humans" || pathname === "/agents" ? (
+        <div key={pathname} className="directory-transition">{children}</div>
+      ) : children}
     </div>
   );
 }
