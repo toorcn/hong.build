@@ -1,3 +1,4 @@
+import { Icon } from "./Icon";
 import { useEffect, useState, type RefObject } from "react";
 
 interface Props {
@@ -17,7 +18,8 @@ export function BackToNow({ scrollRef, onBack }: Props) {
   }, [scrollRef]);
   return (
     <button type="button" className={`tx-now${show ? " show" : ""}`} onClick={onBack} tabIndex={show ? 0 : -1} aria-hidden={!show}>
-      ↑ Back to now
+      <Icon name="arrow-up" size={14} />
+      Back to now
     </button>
   );
 }

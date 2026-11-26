@@ -21,8 +21,8 @@ test("a station opens its ticket with sign-up and calendar links", async ({ page
   const ticket = page.getByTestId("ticket");
   await expect(ticket).toContainText("AI LINE");
   await expect(ticket.getByRole("heading", { name: "AI Tinker Night" })).toBeFocused();
-  await expect(ticket.getByRole("link", { name: "Sign up ↗" })).toHaveAttribute("href", "https://luma.com/tinker");
-  await expect(ticket.getByRole("link", { name: "+ Calendar" })).toHaveAttribute("href", "/e/a000000000000004.ics");
+  await expect(ticket.getByRole("link", { name: "Sign up" })).toHaveAttribute("href", "https://luma.com/tinker");
+  await expect(ticket.getByRole("link", { name: "Calendar" })).toHaveAttribute("href", "/e/a000000000000004.ics");
   await expect(page).toHaveURL(/#e=a000000000000004$/);
 });
 
@@ -42,7 +42,7 @@ test("kept tickets are stamped, counted, remembered and exportable", async ({ pa
   const stop = page.getByRole("button", { name: /AI Tinker Night/ });
   await centre(stop);
   await stop.click();
-  await page.getByRole("button", { name: "🎟 Keep" }).click();
+  await page.getByRole("button", { name: "Keep" }).click();
   await expect(page.getByTestId("ticket")).toHaveClass(/kept/);
   await expect(page.getByRole("button", { name: "My Journey, 1 kept" })).toBeVisible();
   await page.keyboard.press("Escape");
@@ -214,4 +214,16 @@ test.describe("an oversized wallet", () => {
     await expect(wallet).toContainText("Too many to export in one file");
     await expect(wallet.getByRole("link", { name: "Subscribe to the whole line" })).toBeVisible();
   });
+});
+
+test("the info button opens a guide that explains keeping and subscribing", async ({ page }) => {
+  await page.goto("./");
+  await page.getByRole("button", { name: "Guide: how Builder Line works" }).click();
+  const guide = page.getByTestId("guide");
+  await expect(guide.getByRole("heading", { name: "How to ride the Builder Line" })).toBeFocused();
+  await expect(guide).toContainText("Keep events, then add them all at once");
+  await expect(guide).toContainText("https://events.hong.build/events.ics");
+  await expect(guide.getByRole("img", { name: /event ticket/ })).toHaveAttribute("src", /\/events\/guide\/ticket\.jpg$/);
+  await page.keyboard.press("Escape");
+  await expect(page.getByTestId("guide")).toHaveCount(0);
 });

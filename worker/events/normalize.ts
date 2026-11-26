@@ -9,6 +9,27 @@ export type NormalizeResult =
   | { ok: false; reason: string };
 
 const fail = (reason: string): NormalizeResult => ({ ok: false, reason });
+
+const WEEKDAY = "(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)[a-z]*";
+const MONTH = "(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*";
+
+/** Scraped titles often carry the listing site's suffix or the date; the calendar shows those separately. */
+export function cleanName(name: string): string {
+  let s = name.replace(/\s+/g, " ").trim();
+  s = s.replace(/\s*[/|·-]\s*(?:Events?|Eventsize|Tickets?|Meetup|Luma)\s*$/i, "");
+  s = s.replace(new RegExp(`\\s*[,|·-]?\\s*${WEEKDAY},?\\s+${MONTH}\\s+\\d{1,2}(?:,\\s*\\d{4})?\\b.*$`, "i"), "");
+  s = s.replace(/\s*Tickets?,?\s*$/i, "").replace(/[\s,/|·-]+$/, "");
+  return s || name.trim();
+}
+
+/** "Bandar Sunway, Petaling Jaya, Petaling Jaya, Malaysia" → "Bandar Sunway, Petaling Jaya". */
+export function cleanLocation(location: string): string {
+  const parts = location.split(",").map((p) => p.trim()).filter(Boolean);
+  const out: string[] = [];
+  for (const p of parts) if (!out.some((q) => q.toLowerCase() === p.toLowerCase())) out.push(p);
+  if (out.length > 1 && /^malaysia$/i.test(out[out.length - 1]!)) out.pop();
+  return out.join(", ") || location.trim();
+}
 const str = (v: unknown): string | null => (typeof v === "string" && v.trim() ? v.trim() : null);
 const short = (v: unknown): string | null => str(v)?.slice(0, 200) ?? null;
 
@@ -17,10 +38,12 @@ export async function normalizeEvent(raw: unknown, nowS: number): Promise<Normal
   const r = raw as Record<string, unknown>;
   const warnings: string[] = [];
 
-  const name = str(r.name);
+  const rawName = str(r.name);
+  const name = rawName ? cleanName(rawName) : null;
   if (!name) return fail("missing name");
   if (name.length > 200) return fail("name is longer than 200 characters");
-  const location = str(r.location_text);
+  const rawLocation = str(r.location_text);
+  const location = rawLocation ? cleanLocation(rawLocation) : null;
   if (!location) return fail("missing location_text");
   const rawUrl = str(r.signup_url);
   if (!rawUrl) return fail("missing signup_url");

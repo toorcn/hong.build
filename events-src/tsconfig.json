@@ -15,5 +15,5 @@
     "isolatedModules": true,
     "verbatimModuleSyntax": true
   },
-  "include": ["src", "tests", "vite.config.ts", "playwright.config.ts", "../worker/events/types.ts"]
+  "include": ["src", "tests", "vite.config.ts", "playwright.config.ts", "playwright.guide.config.ts", "../worker/events/types.ts"]
 }

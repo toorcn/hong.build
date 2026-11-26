@@ -1,12 +1,18 @@
 import {
-  useCallback, useLayoutEffect, useRef, useState,
+  useCallback, useEffect, useLayoutEffect, useRef, useState,
   type KeyboardEvent, type PointerEvent, type ReactNode, type RefObject,
 } from "react";
 import { dayShort } from "../lib/time";
 import type { Day } from "../lib/timetable";
 import { DayStation } from "./DayStation";
 import { Spur } from "./Spur";
+import { Credits } from "./Credits";
 import { Stop } from "./Stop";
+
+/** Where the train rides while the line scrolls: just below the floating platform display. */
+const FOLLOW_OFFSET = 160;
+/** Scroll events count as the visitor's own only this soon after a wheel or touch. */
+const INTENT_MS = 400;
 
 export interface LineProps {
   days: Day[];
@@ -37,6 +43,10 @@ export function Line({
   const [dragY, setDragY] = useState<number | null>(null);
   const [used, setUsed] = useState(false);
   const [placed, setPlaced] = useState(false);
+  /** Train position while it follows the top of the visible line during a scroll. */
+  const [followY, setFollowY] = useState<number | null>(null);
+  const followIndex = useRef<number | null>(null);
+  const intent = useRef(0);
 
   /** Train top that lines up with a day's interchange circle. */
   const top = useCallback((i: number) => (stations.current[i]?.offsetTop ?? 0) - 3, []);
@@ -59,6 +69,40 @@ export function Line({
     return () => observer.disconnect();
   }, [top]);
 
+  // Anything other than scrolling (a tap, a key, a drag, Back to now) parks the train at its station again.
+  useEffect(() => {
+    if (current !== followIndex.current) {
+      followIndex.current = null;
+      setFollowY(null);
+    }
+  }, [current]);
+
+  // As the visitor scrolls, the train rides along the top of what they can see.
+  useEffect(() => {
+    const map = scrollRef.current;
+    if (!map || days.length === 0) return;
+    const mark = () => {
+      intent.current = Date.now();
+    };
+    const onScroll = () => {
+      if (dragY !== null || Date.now() - intent.current > INTENT_MS) return;
+      const y = Math.max(top(0), Math.min(top(days.length - 1), map.scrollTop + FOLLOW_OFFSET));
+      let i = 0;
+      for (let j = 0; j < days.length; j++) if (top(j) <= y + 6) i = j;
+      followIndex.current = i;
+      setFollowY(y);
+      if (i !== currentRef.current) onPassDay(i);
+    };
+    map.addEventListener("wheel", mark, { passive: true });
+    map.addEventListener("touchmove", mark, { passive: true });
+    map.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      map.removeEventListener("wheel", mark);
+      map.removeEventListener("touchmove", mark);
+      map.removeEventListener("scroll", onScroll);
+    };
+  }, [scrollRef, days, dragY, top, onPassDay]);
+
   const nearest = (y: number) => {
     let best = 0;
     let bestDistance = Infinity;
@@ -78,7 +122,7 @@ export function Line({
     grab.current = e.clientY - e.currentTarget.getBoundingClientRect().top;
     passing.current = current;
     setUsed(true);
-    setDragY(restY);
+    setDragY(followY ?? restY);
   };
 
   const onMove = (e: PointerEvent<HTMLDivElement>) => {
@@ -101,6 +145,8 @@ export function Line({
   const onUp = () => {
     if (dragY === null) return;
     setDragY(null);
+    followIndex.current = null;
+    setFollowY(null);
     onSelectDay(passing.current);
   };
 
@@ -110,6 +156,8 @@ export function Line({
     e.preventDefault();
     setUsed(true);
     const i = Math.max(0, Math.min(days.length - 1, current + step));
+    followIndex.current = null;
+    setFollowY(null);
     if (i === current) return;
     onSelectDay(i);
     stations.current[i]?.scrollIntoView({ block: "center", behavior: reduced ? "auto" : "smooth" });
@@ -120,8 +168,8 @@ export function Line({
       <div className="tx-inner" ref={innerRef}>
         <div className="tx-rail" aria-hidden="true" />
         <div
-          className={`tx-train${dragY !== null ? " drag" : ""}${used ? " used" : ""}`}
-          style={{ top: dragY ?? restY, ...(placed ? null : { transition: "none" }) }}
+          className={`tx-train${dragY !== null ? " drag" : ""}${followY !== null && dragY === null ? " follow" : ""}${used ? " used" : ""}`}
+          style={{ top: dragY ?? followY ?? restY, ...(placed ? null : { transition: "none" }) }}
           role="slider"
           aria-orientation="vertical"
           tabIndex={0}
@@ -146,7 +194,11 @@ export function Line({
                 day={day}
                 todayKey={todayKey}
                 at={i === current}
-                onSelect={() => onSelectDay(i)}
+                onSelect={() => {
+                  followIndex.current = null;
+                  setFollowY(null);
+                  onSelectDay(i);
+                }}
               />
               {day.branch.length > 0 && (
                 <Spur day={day} now={now} kept={kept} active={i === current} reduced={reduced} onOpen={onOpen} />
@@ -165,6 +217,7 @@ export function Line({
           ))}
         </ol>
       </div>
+      <Credits />
     </div>
   );
 }
