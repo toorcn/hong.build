@@ -27,11 +27,16 @@ next-env.d.ts
 
 .wrangler/
 
+# brainstorm companion mockups
+.superpowers/
+
+# local Worker secrets for `wrangler dev`
+.dev.vars
+
 # local env and Cloudflare
 .env
 .env.*
 !.env.example
-.dev.vars
 
 # editors
 .vscode/
