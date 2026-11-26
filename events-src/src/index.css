@@ -93,7 +93,8 @@ a { color: inherit; }
 .tx-stop:hover { background: var(--hover); }
 .tx-stop:hover::after { transform: scale(1.3); }
 .tx-stop b { font-size: 11.5px; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.tx-stop > span { font-size: 9.5px; color: var(--mut); }
+.tx-stop > span { font-size: 9.5px; color: var(--mut); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+.tx-stop b { overflow-wrap: anywhere; }
 .tx-stop .st { display: inline-block; font-style: normal; font-family: ui-monospace, Menlo, monospace; font-size: 8px; font-weight: 700; letter-spacing: .06em; padding: 1px 5px; border-radius: 4px; margin-left: 5px; background: #0b0c0e; color: #ffb627; vertical-align: 1px; }
 .tx-stop .st.live { color: #5dff9b; }
 .tx-stop .st.dep, .tx-stop .st.closed { color: #888; }
@@ -106,7 +107,7 @@ a { color: inherit; }
 .tx-stop.r-sg::after { border-radius: 4px; }
 .tx-stop.r-online::after { border-style: dashed; }
 .tx-stop.r-online::before { background: repeating-linear-gradient(90deg, var(--c) 0 5px, transparent 5px 8px); }
-.tx-stop.ov { align-items: flex-end; text-align: right; padding: 3px 64px 3px 0; }
+.tx-stop.ov { align-items: flex-end; text-align: right; padding: 3px 64px 3px 44px; }
 .tx-stop.ov::before { left: auto; right: 23px; }
 .tx-stop.ov::after { left: auto; right: 44px; }
 .tx-stop.ov .pulse { left: auto; right: 44px; }

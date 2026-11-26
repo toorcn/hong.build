@@ -1,13 +1,16 @@
-/** Builder Line mark: a main line with stations and one teal branch, like the map itself. */
+/** Builder Line mark: the twin towers standing on the line, with a station on the skybridge. */
 export function BrandMark({ size = 28 }: { size?: number }) {
   return (
-    <svg className="logo" width={size} height={size} viewBox="0 0 28 28" aria-hidden="true" focusable="false">
-      <rect width="28" height="28" rx="8" fill="var(--fg)" />
-      <path d="M10 5.5v17M10 13.5c0 2.8 1.8 4 4.5 4H19" fill="none" stroke="var(--bg)" strokeWidth="2.4" strokeLinecap="round" />
-      <circle cx="10" cy="8" r="2.4" fill="var(--fg)" stroke="var(--bg)" strokeWidth="1.8" />
-      <circle cx="10" cy="20" r="2.4" fill="var(--fg)" stroke="var(--bg)" strokeWidth="1.8" />
-      <circle cx="20" cy="17.5" r="2.4" fill="var(--fg)" stroke="#00a3a3" strokeWidth="1.8" />
-      <rect x="7.6" y="11" width="4.8" height="5.4" rx="2.2" fill="#e8453c" />
+    <svg className="logo" width={size} height={size} viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+      <rect width="32" height="32" rx="8.5" fill="#1c1c1e"/>
+        <rect x=".5" y=".5" width="31" height="31" rx="8" fill="none" stroke="#ffffff" strokeOpacity=".08"/>
+        <path d="M8.10 25.20 L8.10 16.60 L8.65 16.60 L8.65 11.60 L9.25 11.60 L9.25 8.20 L9.95 8.20 L9.95 6.20 L10.68 6.20 L10.68 3.40 L11.32 3.40 L11.32 6.20 L12.05 6.20 L12.05 8.20 L12.75 8.20 L12.75 11.60 L13.35 11.60 L13.35 16.60 L13.90 16.60 L13.90 25.20Z" fill="#00a3a3"/>
+        <path d="M18.10 25.20 L18.10 16.60 L18.65 16.60 L18.65 11.60 L19.25 11.60 L19.25 8.20 L19.95 8.20 L19.95 6.20 L20.68 6.20 L20.68 3.40 L21.32 3.40 L21.32 6.20 L22.05 6.20 L22.05 8.20 L22.75 8.20 L22.75 11.60 L23.35 11.60 L23.35 16.60 L23.90 16.60 L23.90 25.20Z" fill="#00a3a3"/>
+        <path d="M13.3 14.4h5.4v1.6h-5.4z" fill="#00a3a3"/>
+        <path d="M4.6 26.2h22.8" stroke="#e8453c" strokeWidth="2.4" strokeLinecap="round"/>
+        <circle cx="16" cy="15.2" r="2.1" fill="#f7f4ee" stroke="#1c1c1e" strokeWidth="1.1"/>
+        <circle cx="7" cy="26.2" r="1.9" fill="#f7f4ee" stroke="#1c1c1e" strokeWidth="1.1"/>
+        <circle cx="25" cy="26.2" r="1.9" fill="#f7f4ee" stroke="#1c1c1e" strokeWidth="1.1"/>
     </svg>
   );
 }
